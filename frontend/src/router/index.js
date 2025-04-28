@@ -20,6 +20,9 @@ import Patient from "../views/Pages/Patient.vue"
 import Inventory from "../views/Pages/Inventory.vue"
 import Appointment from "../views/Pages/Appointment.vue"
 import HospitalBilling from "../views/Pages/HospitalBilling.vue"
+import LaboratoryRequest from "../views/Pages/LaboratoryRequest.vue"
+import BillingData from "../views/Pages/BillingData.vue"
+import ReuestData from "../views/Pages/RequestData.vue"
 Vue.use(VueRouter);
 
 const routes = [
@@ -127,6 +130,21 @@ const routes = [
         component: HospitalBilling,
         meta: { title: "Hospital Billing", authRequired: true },
       },
+      {
+        path: "request",
+        component: LaboratoryRequest,
+        meta: { title: "Laboratory & Imaging Request", authRequired: true },
+      },
+      {
+        path: "billing-data",
+        component: BillingData,
+        meta: { title: "Billing Data Table", authRequired: true },
+      },
+      {
+        path: "request-data",
+        component: ReuestData,
+        meta: { title: "Request Data Table", authRequired: true },
+      },
 
       // {
       //   path: "404",
@@ -201,6 +219,22 @@ const routes = [
         component: HospitalBilling,
         meta: { title: "Hospital Billing", authRequired: true },
       },
+      {
+        path: "request",
+        component: LaboratoryRequest,
+        meta: { title: "Laboratory & Imaging Request", authRequired: true },
+      },
+      {
+        path: "billing-data",
+        component: BillingData,
+        meta: { title: "Billing Data Table", authRequired: true },
+      },
+      {
+        path: "request-data",
+        component: ReuestData,
+        meta: { title: "Request Data Table", authRequired: true },
+      },
+
       
 
 
@@ -244,6 +278,21 @@ const routes = [
         path: "billing",
         component: HospitalBilling,
         meta: { title: "Hospital Billing", authRequired: true },
+      },
+      {
+        path: "request",
+        component: LaboratoryRequest,
+        meta: { title: "Laboratory & Imaging Request", authRequired: true },
+      },
+      {
+        path: "billing-data",
+        component: BillingData,
+        meta: { title: "Billing Data Table", authRequired: true },
+      },
+      {
+        path: "request-data",
+        component: ReuestData,
+        meta: { title: "Request Data Table", authRequired: true },
       },
 
     ],

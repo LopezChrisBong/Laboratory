@@ -67,6 +67,9 @@
         </div>
       </v-card-text>
     </v-card>
+    <v-btn fab color="primary" dark fixed bottom right @click="handleClick">
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
   </v-container>
 </template>
 
@@ -89,15 +92,20 @@ export default {
     },
   },
   methods: {
+    handleClick() {
+      alert("Added successfully");
+      // You can open a form, navigate, etc.
+    },
     addBillingItem() {
-      if (this.form.service && this.form.amount > 0) {
-        this.billingItems.push({
-          service: this.form.service,
-          amount: this.form.amount,
-        });
-        this.form.service = "";
-        this.form.amount = 0;
-      }
+      alert("Added Item");
+      // if (this.form.service && this.form.amount > 0) {
+      //   this.billingItems.push({
+      //     service: this.form.service,
+      //     amount: this.form.amount,
+      //   });
+      //   this.form.service = "";
+      //   this.form.amount = 0;
+      // }
     },
     removeBillingItem(index) {
       this.billingItems.splice(index, 1);
