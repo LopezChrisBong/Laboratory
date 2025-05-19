@@ -77,7 +77,7 @@
 <script>
 export default {
     props: {
-        data: null
+        data: Object
     },
     data () {
       return {

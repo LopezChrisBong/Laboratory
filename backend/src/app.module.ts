@@ -17,6 +17,8 @@ import { MailModule } from './mail/mail.module';
 import { SysModulesModule } from './sys-modules/sys-modules.module';
 import { AssignedModulesModule } from './assigned-modules/assigned-modules.module';
 import { UserRoleModule } from './user-role/user-role.module';
+import { AppointmentModule } from './appointment/appointment.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { UserRoleModule } from './user-role/user-role.module';
     AssignedModulesModule,
     UserDetailsModule,
     UserRoleModule,
+    AppointmentModule,
+    ServicesModule,
   ],
 
   controllers: [AppController],

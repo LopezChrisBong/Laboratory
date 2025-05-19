@@ -1,0 +1,72 @@
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+
+@Entity()
+export class Patient {
+    @PrimaryGeneratedColumn({ type: 'int' })
+    id: number
+
+    @Column({ type: "varchar", nullable: true,})
+    patientID: string
+
+    @Column({ type: "varchar",unique: true, })
+    // @Column({ type: "varchar" })
+    f_name: string
+    
+    @Column({ type: "varchar",unique: true, })
+    // @Column({ type: "varchar" })
+    l_name: string
+
+    
+    @Column({ type: "varchar", nullable:true })
+    m_name: string
+
+    
+    @Column({ type: "int" })
+    age: number
+
+    
+    @Column({ type: "varchar" })
+    civil_status: string
+
+    
+    @Column({ type: "varchar" })
+    occupation: string
+
+    
+    @Column({ type: "varchar" })
+    gender: string
+
+    
+    @Column({ type: "bigint" })
+    contact_no: number
+
+    @Column({ type: "varchar" })
+    b_date: string
+
+    
+    @Column({ type: "varchar" })
+    address: string
+
+       
+    @Column({ type: "int", default:0 })
+    status: number
+
+
+
+
+    @CreateDateColumn({
+        nullable: false,
+        type: 'datetime',
+        name: 'created_at',
+        default: () => 'CURRENT_TIMESTAMP(6)',
+      })
+      createdAt: Date;
+    
+    @UpdateDateColumn({
+        default: () => 'CURRENT_TIMESTAMP(6)',
+        name: 'updated_at',
+        type: 'datetime',
+      })
+      updatedAt: Date;
+
+}
