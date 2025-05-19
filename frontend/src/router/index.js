@@ -23,22 +23,31 @@ import HospitalBilling from "../views/Pages/HospitalBilling.vue"
 import LaboratoryRequest from "../views/Pages/LaboratoryRequest.vue"
 import BillingData from "../views/Pages/BillingData.vue"
 import ReuestData from "../views/Pages/RequestData.vue"
+import PatientAppointment from "../views/Auth/PatientAppointment.vue"
+import LandingPage from "../views/Auth/LandingPage.vue"
+import Services from "../views/Pages/Services.vue"
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
     component: OuterLayout,
-    redirect: "/login",
+    redirect: "/landing-page",
     meta: { authRequired: false },
     children: [
-
+      {
+        path: "landing-page",
+        // alias: "/landing-page",
+        component: LandingPage,
+        meta: { authRequired: false },
+      },
       {
         path: "login",
-        alias: "/login",
+        // alias: "/login",
         component: Login,
         meta: { authRequired: false },
       },
+     
       {
         path: "register",
         component: Register,
@@ -47,6 +56,11 @@ const routes = [
       {
         path: "registration-success",
         component: RegisterSuccess,
+        meta: { authRequired: false },
+      },
+         {
+        path: "patient-appointment",
+        component: PatientAppointment,
         meta: { authRequired: false },
       },
  
@@ -144,6 +158,11 @@ const routes = [
         path: "request-data",
         component: ReuestData,
         meta: { title: "Request Data Table", authRequired: true },
+      },
+       {
+        path: "services",
+        component: Services,
+        meta: { title: "Services", authRequired: true },
       },
 
       // {
@@ -293,6 +312,11 @@ const routes = [
         path: "request-data",
         component: ReuestData,
         meta: { title: "Request Data Table", authRequired: true },
+      },
+      {
+        path: "services",
+        component: Services,
+        meta: { title: "Services", authRequired: true },
       },
 
     ],

@@ -45,6 +45,9 @@
         <template v-slot:[`item.fname`]="{ item }">
           {{ item.fname }} {{ item.mname }} {{ item.lname }}
         </template>
+        <template v-slot:[`item.status`]="{ item }">
+          {{ item.status == 0 ? "Pending" : "Done" }}
+        </template>
 
         <template v-slot:[`item.actions`]="{ item }">
           <div class="">
@@ -56,7 +59,7 @@
               @click="view(item)"
               block
             >
-              <v-icon size="14" class="mr-1">mdi-eye</v-icon> View Profile
+              <v-icon size="14" class="mr-1">mdi-eye</v-icon>Profile
             </v-btn>
 
             <v-btn
@@ -67,8 +70,18 @@
               @click="editMedicalInfo(item)"
               block
             >
-              <v-icon size="14" class="mr-1">mdi-note</v-icon>View Medical
+              <v-icon size="14" class="mr-1">mdi-note</v-icon>Medical
               Information
+            </v-btn>
+            <v-btn
+              class="ma-1 d-flex justify-start"
+              x-small
+              color="green"
+              outlined
+              @click="patientAppointment(item)"
+              block
+            >
+              <v-icon size="14" class="mr-1">mdi-calendar</v-icon>Appointment
             </v-btn>
 
             <v-btn
@@ -123,7 +136,8 @@
     </v-row>
 
     <AddPatientDialog :data="addPatient" :action="action" />
-    <MedicalInformation :data="medicalInfo" :action="action" />
+    <MedicalInformation :data="medicalInfo" />
+    <ViewPatientAppointmentDialog :data="patientAppointement" />
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -143,6 +157,10 @@ export default {
       import(
         "../../components/Dialogs/Forms/Patient/ViewMedicalInformationDialog.vue"
       ),
+    ViewPatientAppointmentDialog: () =>
+      import(
+        "../../components/Dialogs/Forms/Patient/ViewPatientAppointmentDialog.vue"
+      ),
   },
   filters: {
     highlight: function(value, query) {
@@ -156,25 +174,16 @@ export default {
     search: "",
     deadline_date: null,
     resetDeadlineDialog: false,
+    patientAppointement: null,
     medicalInfo: null,
     headers: [
-      { text: "Fullname", value: "fname", align: "start" },
-      {
-        text: "Age",
-        value: "age",
-        align: "center",
-      },
-      {
-        text: "Gender",
-        value: "gender",
-        align: "center",
-      },
-      {
-        text: "Number",
-        value: "number",
-        align: "center",
-      },
-
+      { text: "Name", value: "name" },
+      { text: "Identification No.", value: "patientID" },
+      { text: "Last Visit", value: "lastVisit" },
+      { text: "Status", value: "status" },
+      { text: "Next Visit", value: "nextVisit" },
+      { text: "Recent Topic", value: "recentTopic" },
+      { text: "Recent Doctor", value: "recentDoctor" },
       {
         text: "Action",
         value: "actions",
@@ -255,37 +264,13 @@ export default {
     },
 
     initialize() {
-      // this.loading = true;
-      // let patientData = JSON.parse(localStorage.getItem("patientData"));
-      // if (patientData == null) {
-      //   this.loading = true;
-      // } else {
-      //   console.log("patient ", patientData);
-      //   this.data = patientData.reverse();
-      //   this.loading = false;
-      // }
-
-      //   this.axiosCall(
-      //     "/performance-monitoring/getApprovedForm1/" + status,
-      //     "GET"
-      //   ).then((res) => {
-      //     if (res) {
-      //       let data = res.data;
-      //       this.data = data;
-      //       this.loading = false;
-      //     }
-      //   });
       this.loading = true;
-      let patientData = JSON.parse(localStorage.getItem("patientData"));
-
-      if (!patientData) {
-        this.data = [];
-        this.loading = false;
-      } else {
-        console.log("patientData:", patientData);
-        this.data = patientData.reverse();
-        this.loading = false;
-      }
+      this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
+        if (res) {
+          this.data = res.data;
+          this.loading = false;
+        }
+      });
     },
 
     editItem(item) {
@@ -306,7 +291,10 @@ export default {
     },
     editMedicalInfo(item) {
       this.medicalInfo = item;
-      this.action = "Update";
+    },
+
+    patientAppointment(item) {
+      this.patientAppointement = item;
     },
 
     printItem(item) {

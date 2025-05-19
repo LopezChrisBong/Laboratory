@@ -2,43 +2,16 @@
   <div>
     <v-container fluid fill-height class="content">
       <v-row align="center" justify="center">
-        <v-col
-          align="center"
-          cols="12"
-          md="6"
-          sm="12"
-          class="hidden-sm-and-down"
-          ><v-card
-            max-width="730"
-            height="600"
-            style="background: rgba(0,0,0,0.3);"
-            class="d-flex justify-center align-center"
-          >
-            <div align="center">
-              <div style="margin:0 auto; width:30%" class="pa-2">
-                <v-img src="../../assets/img/logolaboratory.jpg"></v-img>
-              </div>
-              <div>
-                <h2><strong> Welcome to PARAGON</strong></h2>
-              </div>
-              <div>
-                <v-card-text>
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                  Voluptatibus, nemo molestias. <br />Vel praesentium laborum
-                  architecto quia beatae sed, eaque quasi.
-                </v-card-text>
-              </div>
-            </div>
-          </v-card></v-col
-        >
         <v-col align="center" cols="12" md="6">
           <v-card
-            max-width="730"
+            max-width="500"
             class="rounded-card"
+            style=" border-left: #6ac5fe 1px solid; border-top: #6ac5fe 1px solid;"
             :class="['fadeIn', { show: show }]"
             align="start"
           >
-            <v-form ref="Formref">
+            <!--background: rgba(0,0,0,0.2);-->
+            <v-form ref="Formref" class="pa-12">
               <v-row class="mx-5 pt-6">
                 <v-col cols="12" class="pa-0 mb-2">
                   <div
@@ -60,12 +33,20 @@
                     <b> Loading and Enrollment System</b>
                   </div> -->
                   <div style="margin:0 auto; width:45%" class="pa-2">
-                    <v-img src="../../assets/img/Paragon Logo.png"></v-img>
+                    <v-img
+                      src="../../assets/img/Paragon Logo.png"
+                      style="border-radius: 20%;"
+                    ></v-img>
                   </div>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4 py-2">
+                  <label for=""
+                    ><b><h2>Login</h2></b></label
+                  >
                 </v-col>
                 <v-col cols="12" class="pa-0 px-4">
                   <v-text-field
-                    color="#93CB5B"
+                    color="green"
                     class="font-size-14 rounded-lg"
                     v-model="email"
                     :rules="[formRules.required, formRules.email]"
@@ -78,7 +59,7 @@
                 </v-col>
                 <v-col cols="12" class="pa-0 px-4 mt-n2">
                   <v-text-field
-                    color="#93CB5B"
+                    color="black"
                     class="font-size-14 rounded-lg "
                     v-model="password"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -102,6 +83,33 @@
                       :loading="isLoading"
                       @click="dologin()"
                       >Sign In</v-btn
+                    >
+                  </div>
+                </v-col>
+
+                <!-- <v-col cols="12" md="6" sm="12" class="pa-0 px-4 mt-3">
+                  <div class="d-flex justify-space-between ">
+                    <v-btn
+                      color="blue"
+                      outlined
+                      block
+                      class="white--text font-size-14 rounded-lg"
+                      :loading="isLoading"
+                      @click="doAppointment()"
+                      >Appointment</v-btn
+                    >
+                  </div>
+                </v-col> -->
+                <v-col cols="12" md="12" sm="12" class="pa-0 px-4 mt-3">
+                  <div class="d-flex justify-space-between ">
+                    <v-btn
+                      color="green"
+                      outlined
+                      block
+                      class="white--text font-size-14 rounded-lg"
+                      :loading="isLoading"
+                      @click="doHome()"
+                      >Go to Home</v-btn
                     >
                   </div>
                 </v-col>
@@ -196,6 +204,13 @@ export default {
         });
       }
     },
+
+    doAppointment() {
+      this.$router.push("/patient-appointment");
+    },
+    doHome() {
+      this.$router.push("/");
+    },
     doRegister() {
       this.$router.push("/register");
     },
@@ -241,7 +256,7 @@ export default {
   bottom: 0;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 100vw 100vh;
+  background-size: cover;
 }
 .title {
   color: #fff;

@@ -157,8 +157,8 @@
 import draggable from "vuedraggable";
 export default {
   props: {
-    data: null,
-    action: null,
+    data: Object,
+    action: String,
   },
   components: {
     draggable,

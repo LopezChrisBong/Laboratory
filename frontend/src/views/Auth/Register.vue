@@ -2,38 +2,9 @@
   <div>
     <v-container fluid fill-height class="content">
       <v-row align="center" justify="center">
-        <v-col
-          align="center"
-          cols="12"
-          md="6"
-          sm="12"
-          class="hidden-sm-and-down"
-          ><v-card
-            max-width="730"
-            height="600"
-            style="background: rgba(0,0,0,0.3);"
-            class="d-flex justify-center align-center"
-          >
-            <div align="center">
-              <div style="margin:0 auto; width:30%" class="pa-2">
-                <v-img src="../../assets/img/logolaboratory.jpg"></v-img>
-              </div>
-              <div>
-                <h2><strong> Welcome to COMPANY NAME</strong></h2>
-              </div>
-              <div>
-                <v-card-text>
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                  Voluptatibus, nemo molestias. <br />Vel praesentium laborum
-                  architecto quia beatae sed, eaque quasi.
-                </v-card-text>
-              </div>
-            </div>
-          </v-card></v-col
-        >
         <v-col align="center" cols="12" md="6">
           <v-card
-            max-width="800"
+            max-width="500"
             class="rounded-card"
             :class="['fadeIn', { showsFade: showsFade }]"
           >

@@ -27,7 +27,7 @@
                     label="Check if the patient is pregnant"
                   ></v-checkbox>
                 </v-col> -->
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="4">
                   <v-text-field
                     v-model="fname"
                     :rules="[formRules.required]"
@@ -39,7 +39,7 @@
                     color="blue"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="4">
                   <v-text-field
                     v-model="mname"
                     :rules="[formRules.required]"
@@ -51,7 +51,7 @@
                     color="blue"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="4">
                   <v-text-field
                     v-model="lname"
                     :rules="[formRules.required]"
@@ -124,18 +124,6 @@
                     outlined
                     required
                     label="Occupation"
-                    class="rounded-lg"
-                    color="blue"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-text-field
-                    v-model="physician"
-                    :rules="[formRules.required]"
-                    dense
-                    outlined
-                    required
-                    label="Attending Physician"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
@@ -242,8 +230,8 @@
 export default {
   components: {},
   props: {
-    data: null,
-    action: null,
+    data: Object,
+    action: String,
   },
   data() {
     return {
@@ -261,7 +249,6 @@ export default {
       cstatus: null,
       number: null,
       occupation: null,
-      physician: null,
       address: null,
       yearSelection: [],
       fadeAwayMessage: {
@@ -283,16 +270,16 @@ export default {
 
         if (data.id) {
           this.initialize();
-          this.fname = data.fname;
-          this.lname = data.lname;
-          this.mname = data.mname;
+          this.fname = data.f_name;
+          this.lname = data.l_name;
+          this.mname = data.m_name;
           this.gender = data.gender;
           this.address = data.address;
-          this.number = data.number;
+          this.number = data.contact_no;
           this.age = data.age;
+          this.cstatus = data.civil_status;
           this.occupation = data.occupation;
-          this.bdate = data.bdate;
-          this.physician = data.physician;
+          this.bdate = data.b_date;
         } else {
           this.$refs.AddPatient.reset();
           this.initialize();
@@ -305,7 +292,6 @@ export default {
           this.age = null;
           this.occupation = null;
           this.bdate = null;
-          this.physician = null;
         }
       },
       deep: true,
@@ -323,34 +309,34 @@ export default {
     add(type) {
       if (type == "ADD") {
         let data = {
-          id: this.generateUUID(),
-          fname: this.fname,
-          lname: this.lname,
-          mname: this.mname,
+          f_name: this.fname,
+          l_name: this.lname,
+          m_name: this.mname,
           age: this.age,
-          cstatus: this.cstatus,
+          civil_status: this.cstatus,
           gender: this.gender,
           address: this.address,
-          number: this.number,
+          contact_no: this.number,
           occupation: this.occupation,
-          physician: this.physician,
-          bdate: this.bdate,
-          //   pregnant: this.pregnant,
+          b_date: this.bdate,
         };
-        let existingData =
-          JSON.parse(localStorage.getItem("patientData")) || [];
-        existingData.push(data);
-        localStorage.setItem("patientData", JSON.stringify(existingData));
-        this.fadeAwayMessage.show = true;
-        this.fadeAwayMessage.type = "success";
-        this.fadeAwayMessage.header = "System Message";
-        this.fadeAwayMessage.message = "Successfully Added";
-        this.closeD();
+        this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
+          if (res.data.status == 200) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "Successfully Updated";
+            this.dialog = false;
+            this.close();
+          } else if (res.data.status == 400) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = res.data.msg;
+          }
+        });
       } else if (type == "UPDATE") {
         // alert("UPDATED");
 
         let data = {
-          id: this.generateUUID(),
           fname: this.fname,
           lname: this.lname,
           mname: this.mname,
@@ -360,7 +346,6 @@ export default {
           address: this.address,
           number: this.number,
           occupation: this.occupation,
-          physician: this.physician,
           bdate: this.bdate,
           //   pregnant: this.pregnant,
         };

@@ -93,8 +93,8 @@
 <script>
 export default {
   props: {
-    data: null,
-    action: null,
+    data: Object,
+    action: String,
   },
   data() {
     return {
