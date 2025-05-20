@@ -1,19 +1,21 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAppointmentDto {
-                // hahahahhaha
+
     @ApiProperty()
-    patientId: number;
+    patientID: string;
+
     @ApiProperty()
-    userId: number;
+    date: string;
+
     @ApiProperty()
-    date: Date;
+    time: string;
+
     @ApiProperty()
-    time: number;
+    service: string;
+
     @ApiProperty()
-    status: number;
-    @ApiProperty()
-    created_at: String;
-    @ApiProperty()
-    updated_at: String;
+    service_package: string;
+
+
 }

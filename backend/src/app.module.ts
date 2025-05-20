@@ -27,6 +27,7 @@ import { LabTestModule } from './lab-test/lab-test.module';
 import { PaymentModule } from './payment/payment.module';
 import { PatientModule } from './patient/patient.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { InventoryModule } from './inventory/inventory.module';
     PaymentModule,
     PatientModule,
     InventoryModule,
+    ServicesModule,
   ],
 
   controllers: [AppController],

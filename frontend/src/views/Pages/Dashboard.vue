@@ -1,177 +1,215 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12" sm="4">
-        <v-card class="pa-4" color="blue lighten-4">
-          <v-card-title>Total Tests</v-card-title>
-          <v-card-text><h2>120</h2></v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-card class="pa-4" color="green lighten-4">
-          <v-card-title>Patients</v-card-title>
-          <v-card-text><h2>87</h2></v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-card class="pa-4" color="red lighten-4">
-          <v-card-title>Pending Results</v-card-title>
-          <v-card-text><h2>33</h2></v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+  <v-app>
+    <v-container fluid>
+      <!-- Top Stats -->
+      <v-row>
+        <v-col v-for="stat in stats" :key="stat.title" cols="12" md="3">
+          <v-card>
+            <v-card-text
+              class="d-flex flex-column align-center justify-center text-center"
+            >
+              <v-icon size="40">{{ stat.icon }}</v-icon>
+              <h3>{{ stat.value }}</h3>
+              <p>{{ stat.title }}</p>
+              <span :class="stat.trend >= 0 ? 'green--text' : 'red--text'">
+                {{ stat.trend >= 0 ? "+" : "" }}{{ stat.trend }}%
+              </span>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
 
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-card class="pa-4">
-          <v-card-title>Monthly Test Volume</v-card-title>
-          <line-chart />
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-card class="pa-4">
-          <v-card-title>Test Type Distribution</v-card-title>
-          <doughnut-chart />
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+      <!-- Patients Overview + Calendar -->
+      <v-row>
+        <v-col cols="12" md="8">
+          <v-card>
+            <v-card-title>Patients overview</v-card-title>
+            <v-card-text>
+              <canvas id="patients-chart" height="300"></canvas>
+            </v-card-text>
+          </v-card>
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-card>
+            <v-card-title>Calendar</v-card-title>
+            <v-card-text>
+              <v-date-picker
+                v-model="selectedDate"
+                :min="minDate"
+                color="primary"
+              ></v-date-picker>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- Patients Table -->
+      <v-row>
+        <v-col cols="12">
+          <v-card>
+            <v-card-title>
+              <span>Patients</span>
+              <v-spacer></v-spacer>
+              <!-- <v-btn color="primary" @click="addPatient">Add patient</v-btn> -->
+            </v-card-title>
+            <v-data-table
+              :headers="headers"
+              :items="patients"
+              :loading="loading"
+              class="elevation-1"
+            >
+              <template v-slot:[`item.status`]="{ item }">
+                {{ item.status == 0 ? "Pending" : "Done" }}
+              </template>
+            </v-data-table>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>
 </template>
 
 <script>
-import LineChart from "../../components/Charts/LineChart.vue";
-import DoughnutChart from "../../components/Charts/PieChart.vue";
+// import LineChartVue from "../../components/Charts/LineChart.vue";
+import Chart from "chart.js";
+// import Chart from "vue-chartjs";
 export default {
-  components: {
-    LineChart,
-    DoughnutChart,
-  },
-  data: () => ({
-    mini: false,
-    upcoming_bdays: [],
-    hasUpcomingBday: false,
-    head_data: {},
-    dispatchWorks: null,
-    cancelledWorks: null,
-    completedWorks: null,
-    maleCnt: 0,
-    femaleCnt: 0,
-    maleFemale: {},
-    datas: {},
-    TeachingNonTeaching: {},
-    label: [],
-    top_clients: [],
-    enrollData: null,
-    verifyData: null,
-    today: null,
-    activeCalendar: null,
-    tracked: {},
-    teaching: null,
-    nonTeaching: null,
-    isCalendarFocus: false,
-    bdays: [],
-    colors: ["#1867c0", "#fb8c00", "#000000"],
-    category: ["Development", "Meetings", "Slacking"],
-    data: [30, 12, 58, 44, 12, 46, 89, 67],
-    categories: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ],
-    title: "Test chart",
-    sideText: "Some data",
-    color: ["#2D9CDB"],
-  }),
-  computed: {
-    // convert the list of events into a map of lists keyed by date
-    eventsMap() {
-      const map = {};
-      this.events.forEach((e) => (map[e.date] = map[e.date] || []).push(e));
-      return map;
-    },
-  },
-  methods: {
-    initialize() {
-      this.getTeachingNonTeachingCount();
-      this.getMaleFemaleCount();
-    },
-
-    getDayOnDate() {
-      if (this.selectedDay) {
-        let d = this.selectedDay.substr(8, 2);
-        return parseInt(d);
-      }
-    },
-
-    getBday(event, date) {
-      this.isCalendarFocus = true;
-      this.selectedDay = date;
-      this.bdays = event;
-      console.log(event, date);
-    },
-
-    open(event) {
-      alert(event.title);
-    },
-
-    getMaleFemaleCount() {
-      this.axiosCall("/user-details/getMaleFemaleCount", "GET").then(
-        (res) => {
-          console.log(res.data.female);
-          if (res.data) {
-            this.maleCnt = res.data.male;
-            this.femaleCnt = res.data.female;
-            this.maleFemale = {
-              label: ["Male", "Female"],
-              data: [res.data.male, res.data.female],
-            };
-          }
+  // components: {
+  //   LineChartVue,
+  // },
+  data() {
+    return {
+      selectedDate: new Date().toISOString().substr(0, 10),
+      minDate: "2023-01-01",
+      loading: false,
+      stats: [
+        {
+          title: "Total patients",
+          value: "123K",
+          trend: 23.5,
+          icon: "mdi-account-group",
         },
-        (error) => {
-          console.log(error);
-        }
-      );
-    },
-
-    getTeachingNonTeachingCount() {
-      this.axiosCall("/user-details/getTeachingNon", "GET").then(
-        (res) => {
-          if (res.data) {
-            this.nonTeaching = res.data.nonTeaching;
-            this.teaching = res.data.teaching;
-            this.TeachingNonTeaching = {
-              label: ["Non-Teaching", "Teaching"],
-              data: [res.data.nonTeaching, res.data.teaching],
-            };
-          }
+        {
+          title: "Last 30 days patients",
+          value: "2.53K",
+          trend: 4.5,
+          icon: "mdi-account-clock",
         },
-        (error) => {
-          console.log(error);
-        }
-      );
-    },
-  },
-  created() {
-    if (this.$store.state.expiryDate < Date.now()) {
-      this.$store.dispatch("setUser", null);
-      this.$store.dispatch("setIsAuthenticated", 0);
-      this.render = true;
-      this.$router.push("/");
-      // location.reload();
-    }
+        {
+          title: "Total doctors",
+          value: "88",
+          trend: -3.5,
+          icon: "mdi-doctor",
+        },
+        {
+          title: "Last month cost",
+          value: "$22.5K",
+          trend: 0.8,
+          icon: "mdi-currency-usd",
+        },
+      ],
+      headers: [
+        { text: "Name", value: "name" },
+        { text: "Identification No.", value: "id" },
+        { text: "Last Visit", value: "lastVisit" },
+        { text: "Status", value: "status" },
+        { text: "Next Visit", value: "nextVisit" },
+        { text: "Recent Topic", value: "recentTopic" },
+        { text: "Recent Doctor", value: "recentDoctor" },
+      ],
+      patients: [
+        {
+          name: "Courtney Henry",
+          id: "21789057",
+          lastVisit: "Jan 20, 2020",
+          status: "Active",
+          nextVisit: "Jan 24, 2020",
+          recentTopic: "Radiology",
+          recentDoctor: "Dr M. Wagner",
+        },
+        {
+          name: "Leslie Alexander",
+          id: "37890606",
+          lastVisit: "Jan 20, 2020",
+          status: "Active",
+          nextVisit: "Feb 1, 2020",
+          recentTopic: "Pediatrics",
+          recentDoctor: "Dr R. Green",
+        },
+      ],
+    };
   },
 
   mounted() {
-    this.initialize();
+    this.chartData();
+    this.getAllPatient();
+  },
+
+  methods: {
+    addPatient() {
+      // Implement patient addition logic
+      alert("Add patient clicked");
+    },
+    chartData() {
+      const ctx = document.getElementById("patients-chart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+          datasets: [
+            {
+              label: "Medical patients",
+              backgroundColor: "#1976d2",
+              data: [1000, 1700, 2500, 3200, 3000, 2200, 1500, 2300],
+            },
+            {
+              label: "Appointed patients",
+              backgroundColor: "#64b5f6",
+              data: [600, 1100, 1900, 2300, 1780, 1900, 1200, 1900],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            position: "top",
+          },
+          tooltips: {
+            mode: "index",
+            intersect: false,
+          },
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                  max: 4000,
+                },
+              },
+            ],
+          },
+        },
+      });
+    },
+    getAllPatient() {
+      this.loading = true;
+      this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
+        if (res) {
+          this.patients = res.data;
+          this.loading = false;
+        }
+      });
+    },
   },
 };
 </script>
+
+<style>
+.green--text {
+  color: green;
+}
+.red--text {
+  color: red;
+}
+</style>

@@ -7,9 +7,12 @@ import { DoctorSpecialization } from 'src/doctor-specialization/entities/doctor-
 import { Doctor } from 'src/doctor/entities/doctor.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { LabTest } from 'src/lab-test/entities/lab-test.entity';
-import { Patient } from 'src/patient/entities/patient.entity';
 import { Payment } from 'src/payment/entities/payment.entity';
 import { Role } from 'src/role/entities/role.entity';
+import { Patient } from 'src/appointment/entities/patient.entity';
+import { ServiceCategory } from 'src/services/entities/service-category.entity';
+import { ServicePackages } from 'src/services/entities/service-packages.entity';
+import { Service } from 'src/services/entities/service.entity';
 import { SysModule } from 'src/sys-modules/entities/sys-module.entity';
 import { TestType } from 'src/test-type/entities/test-type.entity';
 import { UserDetail } from 'src/user-details/entities/user-detail.entity';
@@ -34,6 +37,9 @@ const entities = [
   Role,
   TestType,
 
+  Service,
+  ServicePackages,
+  ServiceCategory
 
 ];
 
@@ -54,6 +60,9 @@ export {
   Payment,
   Role,
   TestType,
+  Service,
+  ServicePackages,
+  ServiceCategory
 
 };
 

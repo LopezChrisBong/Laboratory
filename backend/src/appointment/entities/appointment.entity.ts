@@ -1,29 +1,43 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Appointment {
+      @PrimaryGeneratedColumn({ type: 'int' })
+        id: number
 
-@PrimaryGeneratedColumn( 'increment', {type: 'bigint'} )
-  id: number;
-  @Column({ default: null })
-  patientId: number;
-  @Column({ default: null })
-  userId: number;
-  @Column({ type: "date", default: "2022-01-01" })
-  date: Date;
-  @Column({ type: 'time', default: null })
-  time: string;  // Will be stored as HH:MM:SS
-  @Column({ default: null })
-  status: string;
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP(6)',
+        @Column({ type: "varchar" })
+        patientID: string
 
-   })
-  created_at: Date;
-  @CreateDateColumn({ name: 'updated_at', type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP(6)',
+        @Column({ type: "varchar" })
+        date: string
 
-   })
-  updated_at: Date;
-  
+
+        @Column({ type: "varchar" })
+        time: string
+
+         @Column({ type: "longtext", nullable:true})
+        service: string
+
+         @Column({ type: "longtext", nullable:true})
+        service_package: string
+
+        @Column({ type: "int", default: 0}) //(0 = pending) (1 = done) (2 = working) 
+        status: number
+        
+
+        @CreateDateColumn({
+        nullable: false,
+        type: 'datetime',
+        name: 'created_at',
+        default: () => 'CURRENT_TIMESTAMP(6)',
+      })
+      createdAt: Date;
+    
+    @UpdateDateColumn({
+        default: () => 'CURRENT_TIMESTAMP(6)',
+        name: 'updated_at',
+        type: 'datetime',
+      })
+      updatedAt: Date;
+
 }
