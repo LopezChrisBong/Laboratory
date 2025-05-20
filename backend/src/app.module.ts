@@ -17,6 +17,17 @@ import { MailModule } from './mail/mail.module';
 import { SysModulesModule } from './sys-modules/sys-modules.module';
 import { AssignedModulesModule } from './assigned-modules/assigned-modules.module';
 import { UserRoleModule } from './user-role/user-role.module';
+import { DoctorSpecializationModule } from './doctor-specialization/doctor-specialization.module';
+import { CategoryModule } from './category/category.module';
+import { DoctorModule } from './doctor/doctor.module';
+import { TestTypeModule } from './test-type/test-type.module';
+import { AppointmentModule } from './appointment/appointment.module';
+import { RoleModule } from './role/role.module';
+import { LabTestModule } from './lab-test/lab-test.module';
+import { PaymentModule } from './payment/payment.module';
+import { PatientModule } from './patient/patient.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -47,6 +58,17 @@ import { UserRoleModule } from './user-role/user-role.module';
     AssignedModulesModule,
     UserDetailsModule,
     UserRoleModule,
+    DoctorSpecializationModule,
+    CategoryModule,
+    DoctorModule,
+    TestTypeModule,
+    AppointmentModule,
+    RoleModule,
+    LabTestModule,
+    PaymentModule,
+    PatientModule,
+    InventoryModule,
+    ServicesModule,
   ],
 
   controllers: [AppController],

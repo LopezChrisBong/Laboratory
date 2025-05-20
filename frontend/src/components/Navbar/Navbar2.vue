@@ -537,9 +537,9 @@ export default {
     // this.getMyDesignation();
     this.loadMenu(userType, userrole);
 
-    this.interval = setInterval(() => {
-      this.getMyNotifs();
-    }, 180000);
+    // this.interval = setInterval(() => {
+    //   this.getMyNotifs();
+    // }, 180000);
   },
 };
 </script>

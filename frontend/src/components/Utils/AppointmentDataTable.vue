@@ -16,12 +16,16 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="12" md="6" class="d-flex justify-space-between">
-        <v-select
+        <v-autocomplete
           v-model="selectedDoctor"
-          :items="doctors"
+          class="rounded-lg"
+          item-text="name"
+          item-value="id"
           label="Select Doctor"
-          @change="changeSelected()"
-        />
+          color="#6DB249"
+          :items="doctors"
+        >
+        </v-autocomplete>
         <v-btn
           class="white--text ml-2 mt-3 rounded-lg"
           color="#2196F3"
@@ -98,17 +102,30 @@
         </v-card-title>
         <v-card-text>
           <v-form ref="form">
-            <v-select
+            <v-autocomplete
               v-model="form.doctorId"
-              :items="doctors"
-              item-title="name"
+              class="rounded-lg"
+              item-text="name"
               item-value="id"
-              label="Doctor"
-              required
-            />
+              label="Select Doctor"
+              color="#6DB249"
+              :items="doctors"
+            >
+            </v-autocomplete>
+            <v-autocomplete
+              v-model="form.patientName"
+              class="rounded-lg"
+              item-text="name"
+              item-value="patientID"
+              label="Patient Name"
+              color="#6DB249"
+              :items="patientList"
+            >
+            </v-autocomplete>
             <v-text-field
               v-model="form.patientName"
-              label="Patient Name"
+              label="Patient ID"
+              readonly
               required
             />
             <v-text-field
@@ -117,12 +134,22 @@
               type="date"
               required
             />
-            <v-text-field
+            <v-select
+              v-model="form.time"
+              :items="hourOptions"
+              label="Time"
+              required
+            ></v-select>
+            <!-- <v-text-field
               v-model="form.time"
               label="Time"
+              :items="hourOptions"
               type="time"
+              min="05:00"
+              max="23:00"
+              step="3600"
               required
-            />
+            /> -->
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -152,8 +179,8 @@ export default {
     return {
       dialog: false,
       update: false,
-      selectedDoctor: "Doctor 1",
-      doctors: ["Doctor 1", "Doctor 2", "Doctor 3"],
+      selectedDoctor: null,
+      doctors: [],
       appointments: [],
       form: {
         id: null,
@@ -170,6 +197,28 @@ export default {
         { text: "Actions", value: "actions", sortable: false, align: "end" },
       ],
       options: {},
+      patientList: [],
+      hourOptions: [
+        "05:00",
+        "06:00",
+        "07:00",
+        "08:00",
+        "09:00",
+        "10:00",
+        "11:00",
+        "12:00",
+        "13:00",
+        "14:00",
+        "15:00",
+        "16:00",
+        "17:00",
+        "18:00",
+        "19:00",
+        "20:00",
+        "21:00",
+        "22:00",
+        "23:00",
+      ],
       search: "",
       loading: false,
       paginationData: {},
@@ -192,13 +241,33 @@ export default {
       },
     };
   },
+  mounted() {
+    this.initialize(this.selectedDoctor);
+    this.getAllDoctors();
+    this.getAllPatient();
+  },
   watch: {
     options: {
       handler() {
         this.initialize(this.selectedDoctor);
+        console.log("Selected 2", this.selectedDoctor);
       },
       deep: true,
     },
+    // "form.time": {
+    //   handler(val) {
+    //     if (val) {
+    //       const [hour, minute] = val.split(":").map(Number);
+    //       if (hour < 5 || hour > 23 || minute !== 0) {
+    //         this.form.time = ""; // reset or show error
+    //         alert(
+    //           "Please select a time on the hour between 5:00 AM and 11:00 PM."
+    //         );
+    //       }
+    //     }
+    //   },
+    //   immediate: false, // set to true if you want it to run on load
+    // },
   },
   computed: {
     // filteredAppointments() {
@@ -224,20 +293,38 @@ export default {
     initialize(doctorData) {
       this.loading = true;
 
-      let appointmentData = JSON.parse(localStorage.getItem("appointmentData"));
-      console.log("Selected doctor:", appointmentData);
-
-      if (!appointmentData) {
-        this.itemData = [];
-        this.loading = false;
-      } else {
-        console.log("appointmentData:", appointmentData);
-        this.itemData = appointmentData
-          .filter((entry) => entry.doctorId === doctorData)
-          .reverse();
-        this.loading = false;
-      }
+      console.log("Selectedss", doctorData);
+      // this.axiosCall(
+      //   "/appointment/getBookedAppintment/" + doctorData,
+      //   "GET"
+      // ).then((res) => {
+      //   if (res) {
+      //     this.itemData = res.data;
+      //     this.loading = true;
+      //   }
+      // });
     },
+    getAllDoctors() {
+      this.axiosCall("/appointment/findAllDoctors", "GET").then((res) => {
+        let data = res.data;
+
+        for (let i = 0; i < data.length; i++) {
+          data[i].name = this.toTitleCase(data[i].name);
+        }
+        console.log("Doctors", data);
+        this.selectedDoctor = data[0];
+        this.doctors = data;
+      });
+    },
+
+    getAllPatient() {
+      this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
+        if (res) {
+          this.patientList = res.data;
+        }
+      });
+    },
+
     changeSelected() {
       this.initialize(this.selectedDoctor);
     },
@@ -280,33 +367,29 @@ export default {
         this.fadeAwayMessage.message = "Please fill-up all field!";
         return;
       }
-
-      // if (this.form.id) {
-      //   const index = this.appointments.findIndex((a) => a.id === this.form.id);
-      //   if (index !== -1) this.appointments[index] = { ...this.form };
-      // } else {
-      //   this.form.id = Date.now();
-      //   this.appointments.push({ ...this.form });
-      // }
       let data = {
-        id: this.generateUUID(),
-        doctorId: this.form.doctorId,
-        patientName: this.form.patientName,
+        doctorID: JSON.parse(this.form.doctorId.id),
+        patientID: this.form.patientName,
         date: this.form.date,
         time: this.form.time,
       };
-      let existingData =
-        JSON.parse(localStorage.getItem("appointmentData")) || [];
-      existingData.push(data);
-      localStorage.setItem("appointmentData", JSON.stringify(existingData));
-      //   this.items.push({ ...this.form, section: this.selectedSection });
-      this.fadeAwayMessage.show = true;
-      this.fadeAwayMessage.type = "success";
-      this.fadeAwayMessage.header = "System Message";
-      this.fadeAwayMessage.message = "Successfully Added";
-      this.initialize(this.selectedDoctor);
-      this.dialog = false;
-      this.refresh();
+      console.log(data);
+      this.axiosCall("/appointment/bookAppointment", "POST", data).then(
+        (res) => {
+          if (res.data.status == 200) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "Successfully Updated";
+            this.dialog = false;
+            this.refresh();
+            this.close();
+          } else if (res.data.status == 400) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = res.data.msg;
+          }
+        }
+      );
     },
     cancelAppointment(id) {
       // this.appointments = this.appointments.filter((a) => a.id !== id);
