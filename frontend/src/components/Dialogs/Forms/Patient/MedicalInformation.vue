@@ -283,8 +283,8 @@ export default {
     VueEditor,
   },
   props: {
-    data: Object,
-    action: String,
+    data: null,
+    action: null,
   },
   data() {
     return {
@@ -345,7 +345,9 @@ export default {
           this.remarks = data.remarks;
           this.date = data.date;
         } else {
-          this.$refs.MedicalInformation.reset();
+          if (this.$refs.MedicalInformation) {
+            this.$refs.MedicalInformation.reset();
+          }
           this.initialize();
           this.finding = null;
           this.treatment = null;
@@ -382,8 +384,10 @@ export default {
 
     add() {
       let data = {
-        id: this.generateUUID(),
-        patientId: this.data.data.id,
+        patientID: this.data.userIDd,
+        doctorID:
+          this.data.data.doctorID != null ? this.data.data.doctorID : null,
+        appointmentID: this.data.data.id != null ? this.data.data.id : null,
         finding: this.finding,
         treatment: this.treatment,
         menstrual: this.menstrual,
@@ -399,15 +403,24 @@ export default {
         date: this.date,
         pregnant: this.pregnant,
       };
-      let existingData =
-        JSON.parse(localStorage.getItem("patientMedicalInfo")) || [];
-      existingData.push(data);
-      localStorage.setItem("patientMedicalInfo", JSON.stringify(existingData));
-      this.fadeAwayMessage.show = true;
-      this.fadeAwayMessage.type = "success";
-      this.fadeAwayMessage.header = "System Message";
-      this.fadeAwayMessage.message = "Successfully Updated";
-      this.closeD();
+
+      console.log(data, this.data.data.doctorID);
+
+      this.axiosCall("/medical-info/addMedicalInfo", "POST", data).then(
+        (res) => {
+          if (res.data.status == 200) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "Successfully Updated";
+            this.dialog = false;
+            this.closeD();
+          } else if (res.data.status == 400) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = res.data.msg;
+          }
+        }
+      );
     },
 
     update() {
@@ -428,31 +441,32 @@ export default {
         date: this.date,
         pregnant: this.pregnant,
       };
-      let existingData =
-        JSON.parse(localStorage.getItem("patientMedicalInfo")) || [];
+      console.log(data);
+      // let existingData =
+      //   JSON.parse(localStorage.getItem("patientMedicalInfo")) || [];
 
-      let index = existingData.findIndex((item) => item.id === data.id);
-      console.log(index);
-      if (index !== -1) {
-        Object.assign(existingData[index], data);
-      } else {
-        existingData.push(data);
-      }
-      localStorage.setItem("patientMedicalInfo", JSON.stringify(existingData));
-      this.fadeAwayMessage.show = true;
-      this.fadeAwayMessage.type = "success";
-      this.fadeAwayMessage.header = "System Message";
-      this.fadeAwayMessage.message = "Successfully Updated";
-      this.closeD();
+      // let index = existingData.findIndex((item) => item.id === data.id);
+      // console.log(index);
+      // if (index !== -1) {
+      //   Object.assign(existingData[index], data);
+      // } else {
+      //   existingData.push(data);
+      // }
+      // localStorage.setItem("patientMedicalInfo", JSON.stringify(existingData));
+      // this.fadeAwayMessage.show = true;
+      // this.fadeAwayMessage.type = "success";
+      // this.fadeAwayMessage.header = "System Message";
+      // this.fadeAwayMessage.message = "Successfully Updated";
+      // this.closeD();
     },
 
-    generateUUID() {
-      return "xxxx-4xxx-yxxx-xxxx".replace(/[xy]/g, function(c) {
-        const r = (Math.random() * 16) | 0;
-        const v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      });
-    },
+    // generateUUID() {
+    //   return "xxxx-4xxx-yxxx-xxxx".replace(/[xy]/g, function(c) {
+    //     const r = (Math.random() * 16) | 0;
+    //     const v = c === "x" ? r : (r & 0x3) | 0x8;
+    //     return v.toString(16);
+    //   });
+    // },
     closeD() {
       this.eventHub.$emit("closeMedicalInformation", false);
       this.dialog = false;

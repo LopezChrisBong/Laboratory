@@ -42,4 +42,8 @@ export class UpdateVerifiedUser {
 
   @ApiProperty()
   update_type: number;
+
+  
+  @ApiProperty()
+  liscence_no:string
 }

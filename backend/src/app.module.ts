@@ -19,6 +19,7 @@ import { AssignedModulesModule } from './assigned-modules/assigned-modules.modul
 import { UserRoleModule } from './user-role/user-role.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { ServicesModule } from './services/services.module';
+import { MedicalInfoModule } from './medical-info/medical-info.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { ServicesModule } from './services/services.module';
     UserRoleModule,
     AppointmentModule,
     ServicesModule,
+    MedicalInfoModule,
   ],
 
   controllers: [AppController],

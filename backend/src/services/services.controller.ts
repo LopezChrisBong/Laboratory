@@ -40,7 +40,12 @@ export class ServicesController {
     return this.servicesService.getRemainingModules(+id);
   }
 
-      @Get('getCategoryServiceType/:id')
+  @Get('getSpecificPackages/:id')
+  getSpecificPackages(@Param('id') id: string) {
+    return this.servicesService.getSpecificPackages(+id);
+  }
+
+        @Get('getCategoryServiceType/:id')
   getCategoryServiceType(@Param('id') id: string) {
     return this.servicesService.getCategoryServiceType(+id);
   }

@@ -42,10 +42,8 @@
                 <v-col cols="12" md="4">
                   <v-text-field
                     v-model="mname"
-                    :rules="[formRules.required]"
                     dense
                     outlined
-                    required
                     label="Middle Name"
                     class="rounded-lg"
                     color="blue"
@@ -63,10 +61,51 @@
                     color="blue"
                   ></v-text-field>
                 </v-col>
+                <v-col cols="6">
+                  <v-menu
+                    ref="menu"
+                    :close-on-content-click="false"
+                    :return-value.sync="bdate"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        dense
+                        v-model="bdate"
+                        :rules="[formRules.required]"
+                        chips
+                        color="blue"
+                        small-chips
+                        label="Date of Birth"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        @input="calculateAge(bdate)"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      color="blue"
+                      v-model="bdate"
+                      no-title
+                      scrollable
+                      @input="calculateAge"
+                    >
+                      <v-spacer></v-spacer>
+
+                      <v-btn text color="blue" @click="$refs.menu.save(bdate)">
+                        OK
+                      </v-btn>
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
 
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="age"
+                    type="number"
                     :rules="[formRules.required]"
                     dense
                     outlined
@@ -110,6 +149,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    type="number"
                     required
                     label="Contanct Number"
                     class="rounded-lg"
@@ -127,45 +167,6 @@
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
-                </v-col>
-
-                <v-col cols="6">
-                  <v-menu
-                    ref="menu"
-                    :close-on-content-click="false"
-                    :return-value.sync="bdate"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        outlined
-                        dense
-                        v-model="bdate"
-                        :rules="[formRules.required]"
-                        chips
-                        color="blue"
-                        small-chips
-                        label="Date of Birth"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      color="blue"
-                      v-model="bdate"
-                      no-title
-                      scrollable
-                    >
-                      <v-spacer></v-spacer>
-
-                      <v-btn text color="blue" @click="$refs.menu.save(bdate)">
-                        OK
-                      </v-btn>
-                    </v-date-picker>
-                  </v-menu>
                 </v-col>
 
                 <v-col cols="12" md="12">
@@ -305,7 +306,23 @@ export default {
         { id: 2, description: "Female" },
       ];
     },
+    calculateAge(birthDate) {
+      if (!birthDate) return;
 
+      const currentDate = new Date();
+      const date = new Date(birthDate);
+
+      if (date > currentDate) {
+        this.bdate = null;
+        this.age = null;
+        alert("Invalid Date of Birth");
+        return; // <-- You missed this
+      }
+
+      const diffTime = currentDate - date;
+      const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      this.age = Math.floor(totalDays / 365.25);
+    },
     add(type) {
       if (type == "ADD") {
         let data = {
@@ -321,16 +338,23 @@ export default {
           b_date: this.bdate,
         };
         this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
-          if (res.data.status == 200) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "Successfully Updated";
-            this.dialog = false;
-            this.close();
-          } else if (res.data.status == 400) {
+          let errorCode = res.data.errorCode;
+          if (errorCode == "ER_DUP_ENTRY") {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.header = res.data.msg;
+            this.fadeAwayMessage.header = "Patient Already Exist!";
+          } else {
+            if (res.data.status == 200) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "Successfully Updated";
+              this.dialog = false;
+              this.closeD();
+            } else if (res.data.status == 400) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "error";
+              this.fadeAwayMessage.header = res.data.msg;
+            }
           }
         });
       } else if (type == "UPDATE") {

@@ -19,14 +19,14 @@
             </v-card-title>
             <v-form v-model="valid" @submit.prevent="submitForm">
               <v-col cols="12" md="5" class="pa-0" v-if="info == 2">
-                <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
+                <!-- <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
                   <v-tab
                     v-for="tab in tabList"
                     :key="tab.id"
                     @click="changeTab(tab)"
                     >{{ tab.name }}</v-tab
                   >
-                </v-tabs>
+                </v-tabs> -->
               </v-col>
               <v-card outlined class="scrollable-card pa-4" max-height="90vh">
                 <v-row class="">
@@ -61,10 +61,22 @@
                   </v-col>
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-text-field
+                      label="Birth Date"
+                      v-model="form.b_date"
+                      :rules="[formRules.required]"
+                      required
+                      type="date"
+                      class="text-uppercase"
+                      @input="calculateAge(form.b_date)"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                    <v-text-field
                       label="Age"
                       v-model="form.age"
                       :rules="[formRules.required]"
                       required
+                      readonly
                       type="number"
                       class="text-uppercase"
                     />
@@ -110,16 +122,7 @@
                       class="text-uppercase"
                     />
                   </v-col>
-                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
-                    <v-text-field
-                      label="Birth Date"
-                      v-model="form.b_date"
-                      :rules="[formRules.required]"
-                      required
-                      type="date"
-                      class="text-uppercase"
-                    />
-                  </v-col>
+
                   <v-col cols="12" md="12" sm="12" v-show="info == 1">
                     <v-text-field
                       label="Address"
@@ -131,7 +134,7 @@
                     />
                   </v-col>
                   <!--Laboratory Services Area-->
-                  <v-col cols="12" v-if="tab == 1">
+                  <!-- <v-col cols="12" v-if="tab == 1">
                     <v-row>
                       <v-col
                         cols="12"
@@ -179,11 +182,11 @@
                         </div>
                       </v-col>
                     </v-row>
-                  </v-col>
+                  </v-col> -->
                   <!-- :rules="[(v) => !!v || 'Service is required']" -->
                   <!--Imaging Services Area-->
 
-                  <v-col cols="12" v-if="tab == 2">
+                  <!-- <v-col cols="12" v-if="tab == 2">
                     <v-row>
                       <v-col
                         cols="12"
@@ -231,11 +234,11 @@
                         </div>
                       </v-col>
                     </v-row>
-                  </v-col>
+                  </v-col> -->
 
                   <!--Package Services Area-->
 
-                  <v-col cols="12" v-if="tab == 3">
+                  <!-- <v-col cols="12" v-if="tab == 3">
                     <v-row>
                       <v-col
                         cols="12"
@@ -284,15 +287,57 @@
                         </v-row>
                       </v-col>
                     </v-row>
+                  </v-col> -->
+                  <v-col cols="12" v-show="info == 2">
+                    <div>
+                      <p style="font-size: 24px;">
+                        Please select the Clinic to Visit
+                      </p>
+                    </div>
                   </v-col>
 
                   <v-col cols="12" v-show="info == 2">
+                    <v-row>
+                      <v-col cols="12" md="5">
+                        <ul style="list-style-type: none; padding: 0;">
+                          <li
+                            v-for="(item, index) in clinicList"
+                            :key="item.id || index"
+                            style="margin-bottom: 8px;"
+                            :class="{ selected: selectedIndex === index }"
+                          >
+                            <v-btn
+                              class="clinicButtons"
+                              block
+                              :class="{ selected: selectedIndex === index }"
+                              @click="
+                                selectButton(index);
+                                clinicData(item);
+                              "
+                            >
+                              {{ item.name }}
+                            </v-btn>
+                          </li>
+                        </ul>
+                      </v-col>
+                      <v-col cols="12" md="7">
+                        <div
+                          class="d-flex justify-center align-center"
+                          style="text-align: justify;"
+                        >
+                          <p>{{ clinicDecription.description }}</p>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+
+                  <v-col cols="12" v-show="info == 3">
                     <div class="mt-8">
                       Select date and time:
                     </div></v-col
                   >
 
-                  <v-col cols="12" md="6" sm="12" v-show="info == 2">
+                  <v-col cols="12" md="6" sm="12" v-show="info == 3">
                     <v-menu
                       ref="menu"
                       v-model="menu"
@@ -320,7 +365,7 @@
                       />
                     </v-menu>
                   </v-col>
-                  <v-col cols="12" md="6" sm="12" v-show="info == 2">
+                  <v-col cols="12" md="6" sm="12" v-show="info == 3">
                     <!-- <v-select
                       label="Select Time"
                       :items="availableTimes"
@@ -344,16 +389,16 @@
                 <v-card-actions>
                   <v-spacer />
                   <v-btn
-                    v-if="info == 2"
+                    v-if="info != 1"
                     :disabled="valid"
                     color="primary"
                     class="mt-4"
-                    @click="info = 1"
+                    @click="info == 2 ? (info = 1) : (info = 2)"
                   >
                     Return
                   </v-btn>
                   <v-btn
-                    v-if="info == 2"
+                    v-if="info == 3"
                     :disabled="!valid"
                     color="primary"
                     class="mt-4"
@@ -362,7 +407,7 @@
                     Submit
                   </v-btn>
                   <v-btn
-                    v-if="info == 1"
+                    v-if="info != 3"
                     color="primary"
                     class="mt-4"
                     @click="
@@ -375,11 +420,11 @@
                       form.contact_no &&
                       form.b_date &&
                       form.address != null
-                        ? (info = 2)
+                        ? next()
                         : alerts()
                     "
                   >
-                    Book Appointment
+                    Next
                   </v-btn>
                 </v-card-actions>
               </v-card>
@@ -388,17 +433,66 @@
         </v-col>
       </v-row>
 
-      <v-dialog v-model="confirmationDialog" max-width="400">
+      <v-dialog v-model="confirmationDialog" max-width="600">
         <v-card>
           <v-card-title>Confirm Booking</v-card-title>
           <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <p>
+                  <strong>Name:</strong>
+                  {{
+                    form.m_name != null
+                      ? form.f_name + " " + form.m_name + " " + form.l_name
+                      : form.f_name + " " + " " + form.l_name
+                  }}
+                </p>
+              </v-col>
+              <v-col cols="12">
+                <label for="">Schedule:</label>
+                <br />
+                <p style="font-size: 24px;">
+                  {{ formatDate(form.date) + " " + formatTime(form.time) }}
+                </p>
+              </v-col>
+            </v-row>
             <p>
-              <strong>Name:</strong>
-              {{ form.f_name + " " + form.m_name + " " + form.l_name }}
+              <strong>Clinic to Visit:</strong><br />
+              <span style="font-size: 24px;"> {{ clinicDecription.name }}</span>
             </p>
-            <p><strong>Appointment Date:</strong> {{ form.date }}</p>
-            <p><strong>Appointment Time:</strong> {{ form.time }}</p>
-            <label> <strong>Services Availed: </strong></label>
+            <v-row style="background-color: #eff1f3; border-radius: 20px;">
+              <v-col cols="12" class="mb-1">
+                <div style="border: 1px solid black; border-radius: 20px;">
+                  <p style="text-align: justify; font-size: 12px;" class="pa-2">
+                    <strong>Note:</strong>
+                    <!-- <span style=" color: blue;">
+                Kindly take a screenshot or photo before confirming, to serve as
+                proof of your appointment.</span
+              > -->
+                    <span style=" color: blue;">
+                      Please take a screenshot of this confirmation receipt. You
+                      will need to present it when you arrive at the clinic for
+                      verification.
+                    </span>
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="12" class="mb-1">
+                <div style="border: 1px solid black; border-radius: 20px;">
+                  <p style="text-align: justify; font-size: 12px;" class="pa-2">
+                    <strong>Info:</strong>
+                    <span style=" color: blue;">
+                      For any questions or concerns, feel free to message us on
+                      our official Facebook page,
+                      <a href="https://www.facebook.com/paragondiagnostics"
+                        >Paragon Diagnostics and Multi-Specialty Clinic</a
+                      >
+                    </span>
+                  </p>
+                </div>
+              </v-col>
+            </v-row>
+            <!-- <label> <strong>Services Availed: </strong></label>
             <ul>
               <li v-for="item in selected" :key="item.id">
                 <div class="d-flex justify-space-between">
@@ -406,13 +500,13 @@
                     {{ item.description }}
                   </div>
                   <div>
-                    {{ "  ₱" + item.price }}
+                    {{ "₱" + item.price }}
                   </div>
                 </div>
               </li>
             </ul>
-            <br />
-            <label> <strong>Package Availed: </strong></label>
+            <br /> -->
+            <!-- <label> <strong>Package Availed: </strong></label>
             <ul>
               <li v-for="item in selectedPackage" :key="item.id">
                 <div class="d-flex justify-space-between">
@@ -433,7 +527,7 @@
               <div>
                 <strong> ₱{{ totalPrice }}</strong>
               </div>
-            </div>
+            </div> -->
           </v-card-text>
           <v-card-actions>
             <v-spacer />
@@ -460,6 +554,7 @@
 export default {
   data() {
     return {
+      clinicDecription: [],
       allTotalServices: null,
       serviceTotalPrice: null,
       packageTotalPrice: null,
@@ -490,6 +585,33 @@ export default {
         date: null,
         time: null,
       },
+      clinicList: [
+        { id: 1, name: "Pediatrician ", description: "1Sample description" },
+        {
+          id: 2,
+          name: "Obstetrician-Gynecologist ",
+          description: "2Sample description",
+        },
+        { id: 3, name: "General Surgery ", description: "3Sample description" },
+        { id: 4, name: "Family Medicine ", description: "4Sample description" },
+        {
+          id: 5,
+          name: "Internal Medicine ",
+          description: "5Sample description",
+        },
+        { id: 6, name: "Ent-Head/Neck  ", description: "6Sample description" },
+        { id: 7, name: "Surgeon ", description: "7Sample description" },
+        { id: 8, name: "General  ", description: "8Sample description" },
+        {
+          id: 9,
+          name: "Physician/Occupation ",
+          description: "9Sample description",
+        },
+        { id: 10, name: "al Medicine ", description: "10Sample description" },
+        { id: 11, name: "Pathologist ", description: "11Sample description" },
+        { id: 12, name: "Radiologist ", description: "12Sample description" },
+      ],
+      selectedIndex: null,
       dataPackages: [],
       genderList: ["Male", "Female"],
       Laboratory_services: [],
@@ -548,6 +670,7 @@ export default {
       // this.serviceTotalPrice = data;
       return newData;
     },
+
     // totalPricePackage() {
     //   let data = this.selectedPackage
     //     .reduce((sum, item) => sum + parseFloat(item.price || 0), 0)
@@ -570,6 +693,19 @@ export default {
     this.getAllPackages();
   },
   methods: {
+    selectButton(index) {
+      this.selectedIndex = index;
+    },
+    clinicData(item) {
+      this.clinicDecription = item;
+    },
+    next() {
+      if (this.info == 1) {
+        this.info = 2;
+      } else if (this.info == 2) {
+        this.info = 3;
+      }
+    },
     toUppercase(field, value) {
       this.form[field] = value.toUpperCase();
     },
@@ -674,6 +810,7 @@ export default {
                 time: this.form.time,
                 service: JSON.stringify(selected_services),
                 service_package: JSON.stringify(selected_packages),
+                clinic: JSON.stringify(this.clinicDecription),
               };
 
               this.axiosCall(
@@ -704,6 +841,7 @@ export default {
               time: this.form.time,
               service: JSON.stringify(selected_services),
               service_package: JSON.stringify(selected_packages),
+              clinic: JSON.stringify(this.clinicDecription),
             };
 
             this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
@@ -734,6 +872,22 @@ export default {
           }
         }
       });
+    },
+    calculateAge(birthDate) {
+      if (!birthDate) return;
+
+      const currentDate = new Date();
+      if (new Date(birthDate) > currentDate) {
+        this.birthDate = null;
+        this.form.age = null;
+        alert("Invalid Date of Birth");
+      }
+
+      const diffTime = currentDate - new Date(birthDate);
+      const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      this.form.age = Math.floor(totalDays / 365.25);
+      // this.months = Math.floor((totalDays % 365.25) / 30.4375);
+      // this.days = Math.floor((totalDays % 365.25) % 30.4375);
     },
 
     changeTab(tab) {
@@ -772,5 +926,18 @@ export default {
 }
 .text-uppercase input {
   text-transform: uppercase;
+}
+:hover.clinicButtons {
+  background-color: green;
+  color: white;
+}
+.clinicButtons:focus {
+  background-color: green;
+  color: white;
+}
+
+.selected {
+  background-color: #0d6933 !important;
+  color: white !important;
 }
 </style>

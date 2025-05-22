@@ -26,9 +26,21 @@ export class CreatePatientDto {
   contact_no: number;
 
   @ApiProperty()
+  status: number;
+
+  @ApiProperty()
   b_date: string;
 
   @ApiProperty()
   address: string;
+
+  @ApiProperty()
+    doctorID: number;
+
+   @ApiProperty()
+    medtechID: number;
+
+     @ApiProperty()
+    updateID: number;
 
 }

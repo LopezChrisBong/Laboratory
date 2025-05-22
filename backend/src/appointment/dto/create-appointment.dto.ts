@@ -17,5 +17,14 @@ export class CreateAppointmentDto {
     @ApiProperty()
     service_package: string;
 
+    @ApiProperty()
+    clinic: string;
+
+    @ApiProperty()
+    status: number;
+
+    @ApiProperty()
+    userID: number;
+
 
 }
