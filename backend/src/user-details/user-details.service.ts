@@ -284,9 +284,8 @@ export class UserDetailsService {
 
         await queryRunner.manager.update(UserDetail, updateVU.id, {
           status: updateVU.status,
+          liscence_no: updateVU.liscence_no,
         });
-
-
 
         await queryRunner.commitTransaction();
         return {
@@ -337,8 +336,6 @@ export class UserDetailsService {
         'ud.mname as mname',
         'ud.lname as lname',
         'ud.suffix as suffix',
-        'ud.hired as hired',
-        'ud.education as education',
         'ud.sex as sex',
         'ud.mobile_no as mobile_no',
         'ud.profile_img as profile_img',
@@ -386,8 +383,6 @@ export class UserDetailsService {
         suffix: updateUserDetailDto.suffix,
         sex: updateUserDetailDto.sex,
         mobile_no: updateUserDetailDto.mobile_no,
-        hired: updateUserDetailDto.hired,
-        education: updateUserDetailDto.education,
       });
 
       if (upd.affected == 1) {

@@ -28,11 +28,11 @@
       > -->
       <v-btn text @click="mainData = 2"> <b>Appointment</b></v-btn>
 
-      <v-btn text
+      <!-- <v-btn text
         ><RouterLink to="/login" style="text-decoration: none;">
           <b style="color: black;">Login</b></RouterLink
         ></v-btn
-      >
+      > -->
     </v-app-bar>
 
     <v-main>

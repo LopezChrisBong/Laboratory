@@ -1,5 +1,8 @@
 
 import { Appointment } from 'src/appointment/entities/appointment.entity';
+import { PatientDoctor } from 'src/appointment/entities/patient-doctor.entity';
+import { PatientMedtech } from 'src/appointment/entities/patient-medtech.entity';
+import { MedicalInfo } from 'src/medical-info/entities/medical-info.entity';
 import { AssignedModule } from 'src/assigned-modules/entities/assigned-module.entity';
 import { Users } from 'src/auth/entities/auth.entity';
 import { Category } from 'src/category/entities/category.entity';
@@ -39,7 +42,10 @@ const entities = [
 
   Service,
   ServicePackages,
-  ServiceCategory
+  ServiceCategory,
+  PatientDoctor,
+  PatientMedtech,
+  MedicalInfo
 
 ];
 
@@ -62,7 +68,10 @@ export {
   TestType,
   Service,
   ServicePackages,
-  ServiceCategory
+  ServiceCategory,
+  PatientDoctor,
+  PatientMedtech,
+  MedicalInfo
 
 };
 

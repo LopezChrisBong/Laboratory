@@ -27,13 +27,13 @@
               </v-col>
               <v-spacer></v-spacer>
               <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
-                <v-btn
+                <!-- <v-btn
                   @click="AddFunction()"
                   class="white--text rounded-lg"
                   color="blue"
                 >
                   Add
-                </v-btn>
+                </v-btn> -->
               </v-col>
               <v-col cols="12" class=" pt-2 px-4">
                 <v-data-table
@@ -46,11 +46,20 @@
                   </template>
                   <template v-slot:[`item.pregnant`]="{ item }">
                     {{
-                      item.pregnant == true
+                      item.pregnant != "0"
                         ? " PREGNANCY MEDICATION"
                         : "NORMAL/USUAL MEDICATION"
                     }}.
                   </template>
+
+                  <template v-slot:[`item.finding`]="{ item }">
+                    <div v-html="item.finding"></div>
+                  </template>
+
+                  <template v-slot:[`item.treatment`]="{ item }">
+                    <div v-html="item.treatment"></div>
+                  </template>
+
                   <template v-slot:[`item.action`]="{ item }">
                     <v-btn
                       x-small
@@ -161,7 +170,9 @@ export default {
         message: "",
         top: 10,
       },
+
       dialog: false,
+      loading: false,
 
       medicalData: null,
       id: null,
@@ -177,10 +188,26 @@ export default {
           sortable: false,
         },
         {
-          text: "Medical Information ",
+          text: "Pregnant",
           value: "pregnant",
           align: "start",
           valign: "start",
+          sortable: false,
+        },
+
+        {
+          text: "Finding",
+          value: "finding",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+
+        {
+          text: "Treatment",
+          value: "treatment",
+          align: "start",
+          valign: "center",
           sortable: false,
         },
 
@@ -201,7 +228,6 @@ export default {
         this.dialog = true;
         console.log("STRAT", data);
         this.id = data.id;
-        this.tab = 1;
         this.initialize();
       },
       deep: true,
@@ -225,25 +251,19 @@ export default {
 
   methods: {
     initialize() {
-      this.loading = true;
-      let patientData = JSON.parse(localStorage.getItem("patientMedicalInfo"));
-
-      this.dataItem = patientData
-        .filter((item) => item.patientId === this.data.id)
-        .reverse();
-
-      this.loading = false;
-
-      //   this.axiosCall("/strategic-planning-goal/" + this.id, "GET").then(
-      //     (res) => {
-      //       if (res) {
-      //         this.dataItem = res.data;
-      //         this.loading = false;
-      //       }
-      //     }
-      //   );
+      // this.dataItem = [{ pregnant: "0" }];
+      this.getAllPatientMedicalInfo();
     },
-
+    getAllPatientMedicalInfo() {
+      this.loading = true;
+      this.axiosCall("/medical-info/" + this.id, "GET").then((res) => {
+        if (res) {
+          console.log("Get Data", res.data);
+          this.dataItem = res.data;
+        }
+        this.loading = false;
+      });
+    },
     closeD() {
       this.eventHub.$emit("closeViewMedicalInformationDialog", false);
       this.dialog = false;
@@ -260,10 +280,10 @@ export default {
       this.action = "View";
     },
 
-    AddFunction() {
-      this.medicalData = { id: null, data: this.data };
-      this.action = "Add";
-    },
+    // AddFunction() {
+    //   this.medicalData = { id: null, data: this.data };
+    //   this.action = "Add";
+    // },
   },
 };
 </script>

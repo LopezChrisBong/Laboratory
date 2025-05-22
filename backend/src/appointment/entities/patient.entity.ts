@@ -50,7 +50,12 @@ export class Patient {
        
     @Column({ type: "int", default:0 })
     status: number
+    
+    @Column({ type: "int", nullable:true })
+    doctorID:number
 
+    @Column({ type: "int", nullable:true })
+    medtechID:number
 
 
 

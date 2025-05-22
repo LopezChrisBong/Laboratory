@@ -199,6 +199,12 @@ export class ServicesService {
     return this.servicesPackagesRepository.find();
   }
 
+ async getSpecificPackages(id:number){
+  console.log(id)
+    const isExist = await this.servicesPackagesRepository.findOneBy({ id});
+    return isExist
+  }
+
   async  getAllServices() {
       let data = await this.servicesRepository
       .createQueryBuilder('sp')

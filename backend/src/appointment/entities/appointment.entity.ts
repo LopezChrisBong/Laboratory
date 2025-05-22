@@ -21,6 +21,9 @@ export class Appointment {
          @Column({ type: "longtext", nullable:true})
         service_package: string
 
+        @Column({ type: "longtext", nullable:true})
+        clinic: string
+
         @Column({ type: "int", default: 0}) //(0 = pending) (1 = done) (2 = working) 
         status: number
         

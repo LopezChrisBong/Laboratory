@@ -22,6 +22,7 @@
           dense
         ></v-text-field>
         <v-btn
+          v-if="assignedModuleID == 3"
           class="white--text ml-2 rounded-lg"
           color="#2196F3"
           @click="add()"
@@ -33,7 +34,7 @@
     </v-row>
     <v-card class="ma-5 dt-container" elevation="0" outlined>
       <v-data-table
-        :headers="headers"
+        :headers="assignedModuleID == 3 ? headers : headers1"
         :items="data"
         :items-per-page="10"
         :search="search"
@@ -46,7 +47,25 @@
           {{ item.fname }} {{ item.mname }} {{ item.lname }}
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          {{ item.status == 0 ? "Pending" : "Done" }}
+          <v-chip
+            :color="
+              item.status == 0 ? 'orange' : item.status == 1 ? 'blue' : 'green'
+            "
+            dark
+            small
+          >
+            <span>
+              {{
+                item.status == 0
+                  ? "Pending"
+                  : item.status == 1
+                  ? "On-Going"
+                  : item.status == 2
+                  ? "Lab-Result Done"
+                  : "Done"
+              }}
+            </span>
+          </v-chip>
         </template>
 
         <template v-slot:[`item.actions`]="{ item }">
@@ -58,6 +77,7 @@
               outlined
               @click="view(item)"
               block
+              v-if="assignedModuleID == 3"
             >
               <v-icon size="14" class="mr-1">mdi-eye</v-icon>Profile
             </v-btn>
@@ -69,6 +89,20 @@
               outlined
               @click="editMedicalInfo(item)"
               block
+              v-if="userRoleID == 3"
+            >
+              <v-icon size="14" class="mr-1">mdi-note</v-icon>Medical
+              Information
+            </v-btn>
+
+            <v-btn
+              class="ma-1 d-flex justify-start"
+              x-small
+              color="green"
+              outlined
+              @click="editMedicalInfo(item)"
+              block
+              v-if="item.status == 3"
             >
               <v-icon size="14" class="mr-1">mdi-note</v-icon>Medical
               Information
@@ -80,6 +114,7 @@
               outlined
               @click="patientAppointment(item)"
               block
+              v-if="assignedModuleID == 3"
             >
               <v-icon size="14" class="mr-1">mdi-calendar</v-icon>Appointment
             </v-btn>
@@ -89,11 +124,41 @@
               x-small
               color="green"
               outlined
+              @click="examinePatient(item)"
+              block
+              v-if="assignedModuleID == 2"
+            >
+              <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon
+              >Examine
+            </v-btn>
+
+            <v-btn
+              class="ma-1 d-flex justify-start"
+              x-small
+              color="green"
+              outlined
+              @click="examinePatient(item)"
+              block
+              v-if="
+                assignedModuleID == 5 || item.status == 2 || item.status == 3
+              "
+            >
+              <v-icon size="14" class="mr-1">mdi-mortar-pestle-plus</v-icon>Lab
+              Result
+            </v-btn>
+
+            <!-- 
+            <v-btn
+              class="ma-1 d-flex justify-start"
+              x-small
+              color="green"
+              outlined
               @click="printItem(item)"
               block
+              v-if="assignedModuleID == 3"
             >
               <v-icon size="14" class="mr-1">mdi-printer</v-icon> Print
-            </v-btn>
+            </v-btn> -->
           </div>
         </template>
       </v-data-table>
@@ -138,6 +203,7 @@
     <AddPatientDialog :data="addPatient" :action="action" />
     <MedicalInformation :data="medicalInfo" />
     <ViewPatientAppointmentDialog :data="patientAppointement" />
+    <ExaminePatientDialog :data="patientExamine" />
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -161,6 +227,8 @@ export default {
       import(
         "../../components/Dialogs/Forms/Patient/ViewPatientAppointmentDialog.vue"
       ),
+    ExaminePatientDialog: () =>
+      import("../../components/Dialogs/Forms/Patient/ExaminePatientDialog.vue"),
   },
   filters: {
     highlight: function(value, query) {
@@ -175,6 +243,7 @@ export default {
     deadline_date: null,
     resetDeadlineDialog: false,
     patientAppointement: null,
+    patientExamine: null,
     medicalInfo: null,
     headers: [
       { text: "Name", value: "name" },
@@ -184,6 +253,23 @@ export default {
       { text: "Next Visit", value: "nextVisit" },
       { text: "Recent Topic", value: "recentTopic" },
       { text: "Recent Doctor", value: "recentDoctor" },
+      {
+        text: "Action",
+        value: "actions",
+        align: "end",
+        sortable: false,
+        width: 60,
+      },
+    ],
+
+    headers1: [
+      { text: "Name", value: "name" },
+      { text: "Identification No.", value: "patientID" },
+      // { text: "Last Visit", value: "lastVisit" },
+      // { text: "Status", value: "status" },
+      // { text: "Next Visit", value: "nextVisit" },
+      // { text: "Recent Topic", value: "recentTopic" },
+      // { text: "Recent Doctor", value: "recentDoctor" },
       {
         text: "Action",
         value: "actions",
@@ -214,6 +300,8 @@ export default {
     deleteData: null,
     updateData: null,
     viewData: null,
+    userRoleID: null,
+    assignedModuleID: null,
     loading: false,
     options: {},
     action: null,
@@ -237,10 +325,23 @@ export default {
     this.eventHub.$on("closeViewMedicalInformationDialog", () => {
       this.initialize();
     });
+    this.eventHub.$on("closePatientLaboratoryDialog", () => {
+      this.initialize();
+    });
+    this.eventHub.$on("closepatientAppointmentDialog", () => {
+      this.initialize();
+    });
+
+    this.eventHub.$on("closeExamineDataDialog", () => {
+      this.initialize();
+    });
   },
   beforeDestroy() {
     this.eventHub.$off("closeAddPatient");
     this.eventHub.$off("closeViewMedicalInformationDialog");
+    this.eventHub.$off("closePatientLaboratoryDialog");
+    this.eventHub.$off("closepatientAppointmentDialog");
+    this.eventHub.$off("closeExamineDataDialog");
   },
 
   watch: {
@@ -257,20 +358,38 @@ export default {
       this.paginationData = data;
     },
 
-    changeTab(tab) {
-      this.activeTab = tab;
-      this.initialize();
-      this.tab = tab.id;
-    },
+    // changeTab(tab) {
+    //   this.activeTab = tab;
+    //   this.initialize();
+    //   this.tab = tab.id;
+    // },
 
     initialize() {
       this.loading = true;
-      this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
-        if (res) {
-          this.data = res.data;
-          this.loading = false;
-        }
-      });
+      this.userRoleID = this.$store.state.user.user.user_roleID;
+      this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
+      if (
+        this.assignedModuleID != 3 &&
+        this.assignedModuleID != 1 &&
+        this.assignedModuleID != 4
+      ) {
+        this.axiosCall(
+          "/appointment/getAllPatientByRole/" + this.$store.state.user.id,
+          "GET"
+        ).then((res) => {
+          if (res) {
+            this.data = res.data;
+            this.loading = false;
+          }
+        });
+      } else {
+        this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
+          if (res) {
+            this.data = res.data;
+            this.loading = false;
+          }
+        });
+      }
     },
 
     editItem(item) {
@@ -294,7 +413,11 @@ export default {
     },
 
     patientAppointment(item) {
+      console.log(item);
       this.patientAppointement = item;
+    },
+    examinePatient(item) {
+      this.patientExamine = item;
     },
 
     printItem(item) {

@@ -28,6 +28,7 @@ import { PaymentModule } from './payment/payment.module';
 import { PatientModule } from './patient/patient.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ServicesModule } from './services/services.module';
+import { MedicalInfoModule } from './medical-info/medical-info.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ServicesModule } from './services/services.module';
     PatientModule,
     InventoryModule,
     ServicesModule,
+    MedicalInfoModule,
   ],
 
   controllers: [AppController],
