@@ -218,6 +218,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -328,37 +330,49 @@ export default {
     saveItem() {
       if (!this.$refs.form.validate()) return;
       let data = {
-        id: this.generateUUID(),
+        // id: this.generateUUID(),
         itemName: this.form.itemName,
         quantity: this.form.quantity,
         brand: this.form.brand,
         unit: this.form.unit,
-        usage: this.form.usage,
+        usageType: this.form.usage,
         lotNumber: this.form.lotNumber,
         expiry: this.form.expiry,
-        startingQty: this.form.startingQty,
-        usedQty: this.form.usedQty,
-        addedQty: this.form.addedQty,
-        supplyDate: this.form.supplyDate,
-        endingQty: this.form.endingQty,
+        starting_quantity: this.form.startingQty,
+        used_quantity: this.form.usedQty,
+        added_quantity: this.form.addedQty,
+        supply_date: this.form.supplyDate,
+        totalend_quantity: this.form.endingQty,
         supplier: this.form.supplier,
         reorderStatus: this.form.reorderStatus,
-        section: this.form.section,
-        selectedSection: this.selectedSection,
+        // uncomment if confirmed
+        // section: this.form.section,
+        // selectedSection: this.selectedSection,
       };
-      console.log(data);
-      let existingData =
-        JSON.parse(localStorage.getItem("inventoryData")) || [];
-      existingData.push(data);
-      localStorage.setItem("inventoryData", JSON.stringify(existingData));
-      //   this.items.push({ ...this.form, section: this.selectedSection });
-      this.fadeAwayMessage.show = true;
-      this.fadeAwayMessage.type = "success";
-      this.fadeAwayMessage.header = "System Message";
-      this.fadeAwayMessage.message = "Successfully Added";
-      this.initialize(this.selectedSection);
-      this.dialog = false;
-      this.resetForm();
+      axios
+      .post(
+        process.env.VUE_APP_SERVER + "/inventory", data  
+      )
+      .then((res) => {
+        console.log(res.data);
+        // console.log("succesfull");
+      
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "success";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Successfully Added";
+        this.initialize(this.selectedSection);
+        this.dialog = false;
+        this.resetForm();
+      });      
+      
+      // console.log(data);
+      // let existingData =
+      //   JSON.parse(localStorage.getItem("inventoryData")) || [];
+      // existingData.push(data);
+      // localStorage.setItem("inventoryData", JSON.stringify(existingData));
+      // //   this.items.push({ ...this.form, section: this.selectedSection });
+      
     },
     add() {
       this.dialog = true;
@@ -454,7 +468,16 @@ export default {
         this.loading = false;
       }
     },
-
+    getData(){
+      axios
+      .get(
+        process.env.VUE_APP_SERVER + "/inventory"  
+      )
+      .then((res) => {
+        // console.log(res.data);
+        this.itemData = res.data;
+      });
+    },
     resetForm() {
       this.form = {
         itemName: "",
@@ -491,6 +514,9 @@ export default {
       }
     },
   },
+  mounted() {
+      this.getData();
+  }
 };
 </script>
 
