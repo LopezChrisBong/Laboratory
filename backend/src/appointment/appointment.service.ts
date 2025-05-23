@@ -48,7 +48,7 @@ export class AppointmentService {
         });
 
        const savedCategory = await queryRunner.manager.save(data);
-        console.log(savedCategory.id);
+        // console.log(savedCategory.id);
       await queryRunner.commitTransaction();
       return {
         
@@ -78,13 +78,15 @@ export class AppointmentService {
   }
 
   async bookAppointment(createAppointmentDto:CreateAppointmentDto){
-    console.log(createAppointmentDto)
+    // console.log(createAppointmentDto)
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       let appointment = createAppointmentDto;
+      const isExist = await this.appointmentRepository.findOneBy({patientID: appointment.patientID, status:0});
 
+      if(!isExist){
         const data = queryRunner.manager.create(Appointment, {
           patientID: appointment.patientID,
           date: appointment.date,
@@ -95,12 +97,24 @@ export class AppointmentService {
         });
 
         await queryRunner.manager.save(data);
-      
-      await queryRunner.commitTransaction();
+        
+      await queryRunner.manager.update(Patient, { id: appointment.patientID}, {
+      status:0,
+      });
+       await queryRunner.commitTransaction();
       return {
         msg: 'Saved successfully!',
         status: HttpStatus.OK,
       };
+
+      }else{
+      await queryRunner.rollbackTransaction();
+      return {
+        msg: 'Theres is another appointment that is pending!',
+        status: HttpStatus.BAD_REQUEST,
+      };
+      }
+
     } catch (error) {
       await queryRunner.rollbackTransaction();
       return {
@@ -118,7 +132,7 @@ export class AppointmentService {
     await queryRunner.startTransaction();
     try {
       let infoID = createPatientDoctorDto;
-      console.log(infoID)
+      // console.log('Info',infoID)
        const isExist = await this.patientDoctorRepository.findOneBy({appointmentID: infoID.appointmentID, patientID:infoID.patientID});
       
        if(!isExist){
@@ -130,10 +144,18 @@ export class AppointmentService {
         await queryRunner.manager.save(data);
       }
 
-    
-         this.dataSource.manager.update(Patient, infoID.patientID,{
-        doctorID:infoID.doctorID,
-     })
+      await queryRunner.manager.update(PatientDoctor, { appointmentID: infoID.appointmentID }, {
+       doctorID: infoID.doctorID,
+        });
+
+
+      await queryRunner.manager.update(Patient, { id: infoID.patientID }, {
+      doctorID: infoID.doctorID,
+      });
+
+      await queryRunner.manager.update(Appointment, { id: infoID.appointmentID }, {
+        doctorID: infoID.doctorID,
+        });
       
       await queryRunner.commitTransaction();
       return {
@@ -168,9 +190,11 @@ export class AppointmentService {
     await queryRunner.startTransaction();
     try {
       let infoID = createPatientMedtechDto
-       const isExist = await this.patientDoctorRepository.findOneBy({appointmentID: infoID.appointmentID, patientID:infoID.patientID});
-      console.log(infoID)
+       const isExist = await this.patientMedtechRepository.findOneBy({appointmentID: infoID.appointmentID, patientID:infoID.patientID});
+      // console.log('INFFFOOOO',infoID)
+      // console.log('INFFFOOOO',isExist)
       if(!isExist){
+        // console.log('Added')
         const data = queryRunner.manager.create(PatientMedtech, {
           patientID: infoID.patientID,
           medtechID: infoID.medtechID,
@@ -180,9 +204,21 @@ export class AppointmentService {
        await queryRunner.manager.save(data);
       }
 
-       this.dataSource.manager.update(Patient, infoID.patientID,{
+
+       await queryRunner.manager.update(PatientMedtech, { appointmentID: infoID.appointmentID }, {
+       medtechID:infoID.medtechID,
+        });
+
+
+      await queryRunner.manager.update(Patient, { id: infoID.patientID }, {
+      medtechID:infoID.medtechID,
+      });
+
+      await queryRunner.manager.update(Appointment, { id: infoID.appointmentID }, {
         medtechID:infoID.medtechID,
-     })
+        });
+
+      
       await queryRunner.commitTransaction();
       return {
         
@@ -225,7 +261,7 @@ export class AppointmentService {
       .where('us.isAdminApproved = 1')
       .andWhere('us.user_roleID = 3')
       .getRawMany();
-      // console.log(data)
+      console.log(data)
       return data
   }
 
@@ -240,7 +276,7 @@ export class AppointmentService {
       .where('us.isAdminApproved = 1')
       .andWhere('us.assignedModuleID = 2')
       .getRawMany();
-      // console.log(data)
+      console.log(data)
       return data
   }
 
@@ -252,26 +288,28 @@ export class AppointmentService {
         " pt.*",
       ])
       .getRawMany()
-      console.log(data)
+      // console.log(data)
       return data
   }
 
-  //   async getAllPatientByRole(doctorID:number){
-  //     let data = await this.patientRepository
-  //     .createQueryBuilder('pt')
-  //     .select([
-  //       "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-  //       " pt.*",
-  //     ])
-  //     .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-  //     .andWhere('pt.status = 2 OR pt.status = 1')
-  //     // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-  //     .getRawMany()
-  //     console.log(data)
-  //     return data
-  // }
+    async getAllPatientForDoctor(doctorID:number){
+      let data = await this.patientRepository
+      .createQueryBuilder('pt')
+      .select([
+        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+        " pt.*",
+      ])
+      .leftJoin(PatientDoctor, 'pd', 'pt.patientID = pt.id')
+      .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
+      // .andWhere('pt.status = 2 OR pt.status = 1')
+      // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
+      .getRawMany()
+      // console.log(data)
+      return data
+  }
+
   async getAllPatientByRole(doctorID: number, user:any) {
-    console.log(user.userdetail.user.assignedModuleID)
+    // console.log(user.userdetail.user.assignedModuleID)
     let role = user.userdetail.user.assignedModuleID
   const query = this.patientRepository
     .createQueryBuilder('pt')
@@ -283,18 +321,19 @@ export class AppointmentService {
 
   if (role === 2) {
     query.andWhere('pt.status = 1');
-  } else if (role === 5) {
+  } 
+  else if (role === 5) {
     query.andWhere('pt.status IN (1, 2)');
   }
 
   const data = await query.getRawMany();
-  console.log(data);
+  // console.log(data);
   return data;
 }
 
 
     async getBookedAppointment(id:number){
-      console.log(id)
+      // console.log(id)
       let data = await this.appointmentRepository
       .createQueryBuilder('ap')
       .select([
@@ -302,13 +341,62 @@ export class AppointmentService {
          "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as Doc_name",
          "IF (!ISNULL(us.mname), concat(us.fname, ' ',SUBSTRING(us.mname, 1, 1) ,'. ',us.lname) ,concat(us.fname, ' ', us.lname)) as Med_name",
          "us.liscence_no as liscence_no",
-         "pt.medtechID as medtechID",
-         "pt.doctorID as doctorID",
+         "pm.medtechID as medtechID",
+         "pd.doctorID as doctorID",
       ])
       .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
-      .leftJoin(UserDetail, 'ud', 'ud.id = pt.doctorID')
-      .leftJoin(UserDetail, 'us', 'us.id = pt.medtechID')
+      .leftJoin(PatientDoctor, 'pd', 'pd.appointmentID = ap.id')
+      .leftJoin(PatientMedtech, 'pm', 'pm.appointmentID = ap.id')
+      .leftJoin(UserDetail, 'ud', 'ud.id = pd.doctorID')
+      .leftJoin(UserDetail, 'us', 'us.id = pm.medtechID')
+     
       .where('ap.patientID = :id',{id})
+      .andWhere('ap.date != "null" ')
+      .andWhere('ap.date != "null" ')
+      .getRawMany()
+      // console.log(data)
+      return data
+  }
+
+      async getAssignedBookedAppointment(id:number){
+      // console.log(id)
+      let data = await this.appointmentRepository
+      .createQueryBuilder('ap')
+      .select([
+        " ap.*",
+         "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as Doc_name",
+         "IF (!ISNULL(us.mname), concat(us.fname, ' ',SUBSTRING(us.mname, 1, 1) ,'. ',us.lname) ,concat(us.fname, ' ', us.lname)) as Med_name",
+         "us.liscence_no as liscence_no",
+         "pm.medtechID as medtechID",
+         "pd.doctorID as doctorID",
+      ])
+      .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
+      .leftJoin(PatientDoctor, 'pd', 'pd.appointmentID = ap.id')
+      .leftJoin(PatientMedtech, 'pm', 'pm.appointmentID = ap.id')
+      .leftJoin(UserDetail, 'ud', 'ud.id = pd.doctorID')
+      .leftJoin(UserDetail, 'us', 'us.id = pm.medtechID')
+      // .where('(pd.doctorID = :doctorID OR pd.medtechID = :id)', { id })
+      .where('pd.doctorID = :id',{id})
+      .andWhere('ap.service != "null"')
+      .andWhere('ap.service_package != "null"')
+      .getRawMany()
+      console.log(data)
+      return data
+  }
+
+      async getAssignedBookedAppointmentReceptionist(){
+     
+      let data = await this.appointmentRepository
+      .createQueryBuilder('ap')
+      .select([
+        " ap.*",
+         "IF (!ISNULL(us.mname), concat(us.fname, ' ',SUBSTRING(us.mname, 1, 1) ,'. ',us.lname) ,concat(us.fname, ' ', us.lname)) as Med_name",
+         "us.liscence_no as liscence_no",
+      ])
+      .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
+      .leftJoin(UserDetail, 'us', 'us.id = pm.medtechID')
+      .where('ap.service IS NOT NULL')
+      .andWhere('ap.service_package IS NOT NULL')
       .getRawMany()
       console.log(data)
       return data
@@ -328,14 +416,14 @@ let data = await this.appointmentRepository
 //   { date: "2025-05-18", time: "09:00 AM" },
   // { date: "2025-05-19", time: "10:00 AM" }
 // ] 
-console.log('Appointment',data);
+// console.log('Appointment',data);
       return data
   }
 
   async checkPatient(f_name: string, l_name:string) {
-    console.log(f_name)
+    // console.log(f_name)
     const isExist = await this.patientRepository.findOneBy({ f_name, l_name});
-    console.log(isExist)
+    // console.log(isExist)
     return isExist;
   }
 
@@ -365,11 +453,11 @@ console.log('Appointment',data);
      
       let service_result = JSON.parse(updateServiceResultsDto.service_result)
       let package_result = JSON.parse(updateServiceResultsDto.package_result)
-      console.log(service_result, package_result)
+      // console.log(service_result, package_result)
         const isExist = await this.appointmentRepository.findOneBy({id});
       let service_data= JSON.parse(isExist.service)
       let package_data= JSON.parse(isExist.service_package)
-      console.log(service_data,package_data)
+      // console.log(service_data,package_data)
 
 
   //      try {
@@ -389,8 +477,8 @@ console.log('Appointment',data);
 
 
     async updateServices(id: number, updateAppointmentDto: UpdateAppointmentDto) {
-      console.log('Data ID',id)
-      console.log('Data',updateAppointmentDto)
+      // console.log('Data ID',id)
+      // console.log('Data',updateAppointmentDto)
       let serviceArr = JSON.parse(updateAppointmentDto.service)
       let packageArr = JSON.parse(updateAppointmentDto.service_package)
       let newArr = []
@@ -421,7 +509,7 @@ console.log('Appointment',data);
         });
       }
 
-      console.log('Service',JSON.stringify(selectedData))
+      // console.log('Service',JSON.stringify(selectedData))
     
       
        try {
@@ -440,8 +528,8 @@ console.log('Appointment',data);
   }
 
       async updateAppointmentStatus(id: number, updateAppointmentDto: UpdateAppointmentDto) {
-      console.log('Data ID',id)
-      console.log('Data',updateAppointmentDto)
+      // console.log('Data ID',id)
+      // console.log('Data',updateAppointmentDto)
       
        try {
        this.dataSource.manager.update(Appointment, id,{
@@ -463,8 +551,8 @@ console.log('Appointment',data);
   }
 
  async updatePatientStatus(id: number, updatePatientDto: UpdatePatientDto) {
-      console.log('Data ID',id)
-      console.log('Data',updatePatientDto)
+      // console.log('Data ID',id)
+      // console.log('Data',updatePatientDto)
       
        try {
 

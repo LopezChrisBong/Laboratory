@@ -56,7 +56,13 @@ export class AppointmentController {
   getAllPatient() {
     return this.appointmentService.getAllPatient();
   }
-     @Get('getAllPatientByRole/:doctorID')
+     @Get('getAllPatientForDoctor/:doctorID')
+  getAllPatientForDoctor(@Param('doctorID') doctorID: string) {
+    return this.appointmentService.getAllPatientForDoctor(+doctorID);
+  }
+
+
+       @Get('getAllPatientByRole/:doctorID')
   getAllPatientByRole(@Headers() headers,@Param('doctorID') doctorID: string) {
        var head_str = headers.authorization;
     const curr_user = currentUser(head_str);
@@ -75,6 +81,16 @@ export class AppointmentController {
   @Get('getBookedAppointment/:id')
   getBookedAppointment(@Param('id') id: string) {
     return this.appointmentService.getBookedAppointment(+id);
+  }
+
+    @Get('getAssignedBookedAppointment/:id')
+  getAssignedBookedAppointment(@Param('id') id: string) {
+    return this.appointmentService.getAssignedBookedAppointment(+id);
+  }
+
+      @Get('getAssignedBookedAppointment/Receptionist')
+  getAssignedBookedAppointmentReceptionist() {
+    return this.appointmentService.getAssignedBookedAppointmentReceptionist();
   }
 
     @Get('checkPatient/dataExist/:f_name/:l_name')

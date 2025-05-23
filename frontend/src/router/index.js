@@ -26,6 +26,7 @@ import ReuestData from "../views/Pages/RequestData.vue"
 import PatientAppointment from "../views/Auth/PatientAppointment.vue"
 import LandingPage from "../views/Auth/LandingPage.vue"
 import Services from "../views/Pages/Services.vue"
+import PatientDoctor from "../views/Pages/PatientDoctor.vue"
 Vue.use(VueRouter);
 
 const routes = [
@@ -317,6 +318,12 @@ const routes = [
         path: "services",
         component: Services,
         meta: { title: "Services", authRequired: true },
+      },
+
+       {
+        path: "patient-doctor",
+        component: PatientDoctor,
+        meta: { title: "Patient Doctor List", authRequired: true },
       },
 
     ],

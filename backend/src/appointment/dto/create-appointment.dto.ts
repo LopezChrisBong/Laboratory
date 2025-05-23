@@ -26,5 +26,11 @@ export class CreateAppointmentDto {
     @ApiProperty()
     userID: number;
 
+    @ApiProperty()
+    doctorID: number;
+
+    @ApiProperty()
+    medtechID: number;
+
 
 }
