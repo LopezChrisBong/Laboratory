@@ -33,8 +33,9 @@ export class AppointmentService {
     await queryRunner.startTransaction();
     try {
       let patient = createPatientDto;
-        
-        const data = queryRunner.manager.create(Patient, {
+            const isExist = await this.patientRepository.findOneBy({ f_name: patient.f_name, l_name:patient.l_name});
+            if(!isExist){
+          const data = queryRunner.manager.create(Patient, {
           f_name: patient.f_name,
           l_name: patient.l_name,
           m_name: patient.m_name,
@@ -47,14 +48,17 @@ export class AppointmentService {
           address: patient.address,
         });
 
-       const savedCategory = await queryRunner.manager.save(data);
+        await queryRunner.manager.save(data);
+      }
+
         // console.log(savedCategory.id);
       await queryRunner.commitTransaction();
       return {
         
         msg: 'Saved successfully!',
         status: HttpStatus.OK,
-        id:savedCategory.id,
+        id:isExist.id,
+        duplicate:true,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -323,7 +327,7 @@ export class AppointmentService {
     query.andWhere('pt.status = 1');
   } 
   else if (role === 5) {
-    query.andWhere('pt.status IN (1, 2)');
+    query.andWhere('pt.status IN (0 ,1, 2)');
   }
 
   const data = await query.getRawMany();
@@ -358,7 +362,7 @@ export class AppointmentService {
       return data
   }
 
-      async getAssignedBookedAppointmentDoctor(id:number){
+      async getAssignedBookedAppointmentDoctor(id:number,patientID:number){
       // console.log(id)
       let data = await this.appointmentRepository
       .createQueryBuilder('ap')
@@ -377,6 +381,7 @@ export class AppointmentService {
       .leftJoin(UserDetail, 'us', 'us.id = pm.medtechID')
       // .where('(pd.doctorID = :doctorID OR pd.medtechID = :id)', { id })
       .where('pd.doctorID = :id',{id})
+      .andWhere('pt.id = :patientID',{patientID})
       .andWhere('ap.service != "null"')
       .andWhere('ap.service_package != "null"')
       .getRawMany()
@@ -384,7 +389,7 @@ export class AppointmentService {
       return data
   }
 
-        async getAssignedBookedAppointmentMedtech(id:number){
+        async getAssignedBookedAppointmentMedtech(id:number, patientID: number){
       // console.log(id)
       let data = await this.appointmentRepository
       .createQueryBuilder('ap')
@@ -403,6 +408,7 @@ export class AppointmentService {
       .leftJoin(UserDetail, 'us', 'us.id = pm.medtechID')
       // .where('(pd.doctorID = :doctorID OR pd.medtechID = :id)', { id })
       .where('pm.medtechID = :id',{id})
+      .andWhere('pt.id = :patientID',{patientID})
       .andWhere('ap.service != "null"')
       .andWhere('ap.service_package != "null"')
       .getRawMany()

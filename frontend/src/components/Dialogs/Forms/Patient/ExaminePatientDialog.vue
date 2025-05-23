@@ -368,7 +368,10 @@ export default {
       // alert(this.assignedModuleID);
       if (this.assignedModuleID == 2) {
         this.axiosCall(
-          "/appointment/getAssignedBookedAppointment/Medtech/" + userID,
+          "/appointment/getAssignedBookedAppointment/Medtech/" +
+            userID +
+            "/" +
+            this.data.id,
           "GET"
         ).then((res) => {
           if (res) {
@@ -379,7 +382,10 @@ export default {
         });
       } else if (this.assignedModuleID == 5) {
         this.axiosCall(
-          "/appointment/getAssignedBookedAppointment/Doctor/" + userID,
+          "/appointment/getAssignedBookedAppointment/Doctor/" +
+            userID +
+            "/" +
+            this.data.id,
           "GET"
         ).then((res) => {
           if (res) {
