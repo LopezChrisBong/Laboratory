@@ -50,17 +50,19 @@ export class MedicalInfoService {
           });
   
          const savedCategory = await queryRunner.manager.save(data);
-         if(medicalInfo.patientID != null){
+         
         this.dataSource.manager.update(Patient, medicalInfo.patientID,{
         status:3,
      })
-         }
+         
 
-         if(medicalInfo.appointmentID != null){
+        if(medicalInfo.appointmentID != null){
               this.dataSource.manager.update(Appointment, medicalInfo.appointmentID,{
         status:3,
      })
-         }
+        }
+
+         
     
 
   

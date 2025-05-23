@@ -7,7 +7,7 @@ export class MedicalInfo {
     id: number
 
 
-    @Column({ type: "int"})
+    @Column({ type: "int", nullable:true})
     patientID:number
 
     @Column({ type: "int", nullable:true})

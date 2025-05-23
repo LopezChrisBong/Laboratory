@@ -364,16 +364,31 @@ export default {
     initialize() {
       this.loading = true;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
-      this.axiosCall(
-        "/appointment/getBookedAppointment/" + this.id,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          console.log(res.data);
-          this.dataItem = res.data;
-          this.loading = false;
-        }
-      });
+      let userID = this.$store.state.user.id;
+      // alert(this.assignedModuleID);
+      if (this.assignedModuleID == 3) {
+        this.axiosCall(
+          "/appointment/getAssignedBookedAppointment/Receptionist",
+          "GET"
+        ).then((res) => {
+          if (res) {
+            console.log(res.data);
+            this.dataItem = res.data;
+            this.loading = false;
+          }
+        });
+      } else {
+        this.axiosCall(
+          "/appointment/getAssignedBookedAppointment/" + userID,
+          "GET"
+        ).then((res) => {
+          if (res) {
+            console.log(res.data);
+            this.dataItem = res.data;
+            this.loading = false;
+          }
+        });
+      }
     },
     submitResult() {
       console.log(this.input, this.input1, this.updateID);

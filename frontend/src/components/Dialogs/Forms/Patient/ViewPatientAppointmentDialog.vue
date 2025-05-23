@@ -1086,10 +1086,14 @@ export default {
     },
     payLabTest(item) {
       console.log(item);
-      this.updateID = item.id;
-      this.oldSelected = JSON.parse(item.service);
-      this.oldSelectedPackage = JSON.parse(item.service_package);
-      this.confirmationDialog = true;
+      if (item.service == null || item.service_package == null) {
+        alert("Please select Lab-Request first!");
+      } else {
+        this.updateID = item.id;
+        this.oldSelected = JSON.parse(item.service);
+        this.oldSelectedPackage = JSON.parse(item.service_package);
+        this.confirmationDialog = true;
+      }
 
       // if (item.service != null) {
       //   this.selected = JSON.parse(item.service).map((service) => service.id);

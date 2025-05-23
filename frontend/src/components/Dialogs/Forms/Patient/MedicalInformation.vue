@@ -384,7 +384,8 @@ export default {
 
     add() {
       let data = {
-        patientID: this.data.userIDd,
+        patientID:
+          this.data.userIDd == null ? this.data.data.id : this.data.userIDd,
         doctorID:
           this.data.data.doctorID != null ? this.data.data.doctorID : null,
         appointmentID: this.data.data.id != null ? this.data.data.id : null,

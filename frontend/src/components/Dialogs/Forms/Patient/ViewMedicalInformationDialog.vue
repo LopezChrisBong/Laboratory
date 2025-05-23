@@ -27,17 +27,18 @@
               </v-col>
               <v-spacer></v-spacer>
               <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
-                <!-- <v-btn
+                <v-btn
                   @click="AddFunction()"
                   class="white--text rounded-lg"
                   color="blue"
+                  v-if="userRoleID == 3"
                 >
                   Add
-                </v-btn> -->
+                </v-btn>
               </v-col>
               <v-col cols="12" class=" pt-2 px-4">
                 <v-data-table
-                  :headers="headers"
+                  :headers="userRoleID == 3 ? headers : headers1"
                   :items="dataItem"
                   :items-per-page="10"
                 >
@@ -173,6 +174,7 @@ export default {
 
       dialog: false,
       loading: false,
+      userRoleID: null,
 
       medicalData: null,
       id: null,
@@ -219,6 +221,40 @@ export default {
           width: 200,
         },
       ],
+
+      headers1: [
+        {
+          text: "No.",
+          value: "index",
+          align: "start",
+          valign: "start",
+          width: 50,
+          sortable: false,
+        },
+        {
+          text: "Pregnant",
+          value: "pregnant",
+          align: "start",
+          valign: "start",
+          sortable: false,
+        },
+
+        {
+          text: "Finding",
+          value: "finding",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+
+        {
+          text: "Treatment",
+          value: "treatment",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+      ],
     };
   },
 
@@ -252,6 +288,7 @@ export default {
   methods: {
     initialize() {
       // this.dataItem = [{ pregnant: "0" }];
+      this.userRoleID = this.$store.state.user.user.user_roleID;
       this.getAllPatientMedicalInfo();
     },
     getAllPatientMedicalInfo() {
@@ -280,10 +317,10 @@ export default {
       this.action = "View";
     },
 
-    // AddFunction() {
-    //   this.medicalData = { id: null, data: this.data };
-    //   this.action = "Add";
-    // },
+    AddFunction() {
+      this.medicalData = { id: null, data: this.data };
+      this.action = "Add";
+    },
   },
 };
 </script>
