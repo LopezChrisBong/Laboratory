@@ -366,9 +366,9 @@ export default {
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       let userID = this.$store.state.user.id;
       // alert(this.assignedModuleID);
-      if (this.assignedModuleID == 3) {
+      if (this.assignedModuleID == 2) {
         this.axiosCall(
-          "/appointment/getAssignedBookedAppointment/Receptionist",
+          "/appointment/getAssignedBookedAppointment/Medtech/" + userID,
           "GET"
         ).then((res) => {
           if (res) {
@@ -377,9 +377,9 @@ export default {
             this.loading = false;
           }
         });
-      } else {
+      } else if (this.assignedModuleID == 5) {
         this.axiosCall(
-          "/appointment/getAssignedBookedAppointment/" + userID,
+          "/appointment/getAssignedBookedAppointment/Doctor/" + userID,
           "GET"
         ).then((res) => {
           if (res) {
