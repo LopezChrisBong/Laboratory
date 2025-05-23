@@ -83,9 +83,14 @@ export class AppointmentController {
     return this.appointmentService.getBookedAppointment(+id);
   }
 
-    @Get('getAssignedBookedAppointment/:id')
-  getAssignedBookedAppointment(@Param('id') id: string) {
-    return this.appointmentService.getAssignedBookedAppointment(+id);
+    @Get('getAssignedBookedAppointment/Doctor/:id')
+  getAssignedBookedAppointmentDoctor(@Param('id') id: string) {
+    return this.appointmentService.getAssignedBookedAppointmentDoctor(+id);
+  }
+
+      @Get('getAssignedBookedAppointment/Medtech/:id')
+  getAssignedBookedAppointmentMedtech(@Param('id') id: string) {
+    return this.appointmentService.getAssignedBookedAppointmentMedtech(+id);
   }
 
       @Get('getAssignedBookedAppointment/Receptionist')

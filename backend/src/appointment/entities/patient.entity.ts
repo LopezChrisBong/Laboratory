@@ -8,11 +8,11 @@ export class Patient {
     @Column({ type: "varchar", nullable: true,})
     patientID: string
 
-    @Column({ type: "varchar",unique: true, })
+    @Column({ type: "varchar"})
     // @Column({ type: "varchar" })
     f_name: string
     
-    @Column({ type: "varchar",unique: true, })
+    @Column({ type: "varchar"})
     // @Column({ type: "varchar" })
     l_name: string
 

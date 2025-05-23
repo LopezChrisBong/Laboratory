@@ -33,7 +33,7 @@ export class AppointmentService {
     await queryRunner.startTransaction();
     try {
       let patient = createPatientDto;
-
+        
         const data = queryRunner.manager.create(Patient, {
           f_name: patient.f_name,
           l_name: patient.l_name,
@@ -358,7 +358,7 @@ export class AppointmentService {
       return data
   }
 
-      async getAssignedBookedAppointment(id:number){
+      async getAssignedBookedAppointmentDoctor(id:number){
       // console.log(id)
       let data = await this.appointmentRepository
       .createQueryBuilder('ap')
@@ -377,6 +377,32 @@ export class AppointmentService {
       .leftJoin(UserDetail, 'us', 'us.id = pm.medtechID')
       // .where('(pd.doctorID = :doctorID OR pd.medtechID = :id)', { id })
       .where('pd.doctorID = :id',{id})
+      .andWhere('ap.service != "null"')
+      .andWhere('ap.service_package != "null"')
+      .getRawMany()
+      console.log(data)
+      return data
+  }
+
+        async getAssignedBookedAppointmentMedtech(id:number){
+      // console.log(id)
+      let data = await this.appointmentRepository
+      .createQueryBuilder('ap')
+      .select([
+        " ap.*",
+         "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as Doc_name",
+         "IF (!ISNULL(us.mname), concat(us.fname, ' ',SUBSTRING(us.mname, 1, 1) ,'. ',us.lname) ,concat(us.fname, ' ', us.lname)) as Med_name",
+         "us.liscence_no as liscence_no",
+         "pm.medtechID as medtechID",
+         "pd.doctorID as doctorID",
+      ])
+      .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
+      .leftJoin(PatientDoctor, 'pd', 'pd.appointmentID = ap.id')
+      .leftJoin(PatientMedtech, 'pm', 'pm.appointmentID = ap.id')
+      .leftJoin(UserDetail, 'ud', 'ud.id = pd.doctorID')
+      .leftJoin(UserDetail, 'us', 'us.id = pm.medtechID')
+      // .where('(pd.doctorID = :doctorID OR pd.medtechID = :id)', { id })
+      .where('pm.medtechID = :id',{id})
       .andWhere('ap.service != "null"')
       .andWhere('ap.service_package != "null"')
       .getRawMany()
