@@ -33,8 +33,8 @@ export class AppointmentService {
     await queryRunner.startTransaction();
     try {
       let patient = createPatientDto;
-            const isExist = await this.patientRepository.findOneBy({ f_name: patient.f_name, l_name:patient.l_name});
-            if(!isExist){
+            // const isExist = await this.patientRepository.findOneBy({ f_name: patient.f_name, l_name:patient.l_name});
+            // if(!isExist){
           const data = queryRunner.manager.create(Patient, {
           f_name: patient.f_name,
           l_name: patient.l_name,
@@ -48,8 +48,8 @@ export class AppointmentService {
           address: patient.address,
         });
 
-        await queryRunner.manager.save(data);
-      }
+        let saveData = await queryRunner.manager.save(data);
+      // }
 
         // console.log(savedCategory.id);
       await queryRunner.commitTransaction();
@@ -57,8 +57,8 @@ export class AppointmentService {
         
         msg: 'Saved successfully!',
         status: HttpStatus.OK,
-        id:isExist.id,
-        duplicate:true,
+        id:saveData.id,
+        // duplicate:true,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
