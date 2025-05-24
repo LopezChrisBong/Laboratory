@@ -114,10 +114,7 @@ export class AppointmentController {
   }
 
 
-    @Patch('updateServices/:id')
-  updateServices(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
-    return this.appointmentService.updateServices(+id, updateAppointmentDto);
-  }
+
   
 
       @Patch('updateAppointmentStatus/:id')

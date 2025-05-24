@@ -12,4 +12,7 @@ export class CreatePatientDoctorDto {
   @ApiProperty()
     doctorID: number;
 
+    @ApiProperty()
+    labID: number;
+
 }

@@ -160,8 +160,8 @@
             </v-avatar>
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title class="text-uppercase"
-              >{{ $store.state.user.fname }}
+            <v-list-item-title class="text-uppercase">
+              <!-- {{ $store.state.user.fname }} -->
               {{ $store.state.user.lname }}</v-list-item-title
             >
           </v-list-item-content>
@@ -231,8 +231,8 @@
                   </v-avatar>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="text-uppercase"
-                    >{{ $store.state.user.fname }}
+                  <v-list-item-title class="text-uppercase">
+                    <!-- {{ $store.state.user.fname }} -->
                     {{ $store.state.user.lname }}</v-list-item-title
                   >
                 </v-list-item-content>
@@ -306,6 +306,7 @@
         </v-row>
       </v-container>
     </v-main>
+
     <v-dialog v-model="showAllNotifDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">All Notifications</v-card-title>

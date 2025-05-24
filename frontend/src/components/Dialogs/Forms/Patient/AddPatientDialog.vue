@@ -195,7 +195,7 @@
             <v-btn
               color="blue"
               class="white--text"
-              v-if="action == 'Add'"
+              v-if="action == 'Add' && assignedModuleID == 3"
               @click="add('ADD')"
             >
               <v-icon>mdi-check-circle</v-icon>
@@ -204,7 +204,7 @@
             <v-btn
               color="blue"
               class="white--text"
-              v-if="action == 'View'"
+              v-if="action == 'View' && assignedModuleID == 3"
               @click="add('UPDATE')"
             >
               <v-icon>mdi-check-circle</v-icon>
@@ -238,6 +238,7 @@ export default {
     return {
       updateID: null,
       //   pregnant: false,
+      assignedModuleID: null,
       dialog: false,
       bdate: null,
       medicalDate: null,
@@ -301,6 +302,7 @@ export default {
 
   methods: {
     initialize() {
+      this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       this.genderList = [
         { id: 1, description: "Male" },
         { id: 2, description: "Female" },
@@ -338,8 +340,8 @@ export default {
           b_date: this.bdate,
         };
         this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
-          let errorCode = res.data.errorCode;
-          if (errorCode == "ER_DUP_ENTRY") {
+          let errorCode = res.data.duplicate;
+          if (errorCode == true) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "error";
             this.fadeAwayMessage.header = "Patient Already Exist!";

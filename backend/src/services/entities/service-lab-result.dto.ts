@@ -1,24 +1,30 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
-export class PatientDoctor {
-      @PrimaryGeneratedColumn({ type: 'int' })
+export class ServiceLabResult {
+
+     @PrimaryGeneratedColumn({ type: 'int' })
         id: number
 
         @Column({ type: "int" })
+        labID: number 
+
+         @Column({ type: "int" })
         patientID: number
 
-         @Column({ type: "int" , nullable:true})
-        appointmentID: number
+          @Column({ type: "int" })
+        serviceID: number
 
-        @Column({ type: "int", nullable:true })
-        doctorID: number
+         @Column({ type: "longtext"})
+        service_description: string
 
          @Column({ type: "int", nullable:true })
-        labID: number
-        
+        service_price: number
 
-        @CreateDateColumn({
+          @Column({ type: "longtext", nullable:true })
+        service_result: string
+
+         @CreateDateColumn({
         nullable: false,
         type: 'datetime',
         name: 'created_at',
@@ -32,5 +38,4 @@ export class PatientDoctor {
         type: 'datetime',
       })
       updatedAt: Date;
-
 }

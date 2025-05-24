@@ -11,11 +11,11 @@ export class CreateAppointmentDto {
     @ApiProperty()
     time: string;
 
-    @ApiProperty()
-    service: string;
+    // @ApiProperty()
+    // service: string;
 
-    @ApiProperty()
-    service_package: string;
+    // @ApiProperty()
+    // service_package: string;
 
     @ApiProperty()
     clinic: string;
@@ -31,6 +31,9 @@ export class CreateAppointmentDto {
 
     @ApiProperty()
     medtechID: number;
+
+     @ApiProperty()
+    labID: number;
 
 
 }

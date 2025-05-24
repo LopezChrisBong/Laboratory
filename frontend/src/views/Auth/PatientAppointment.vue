@@ -325,7 +325,9 @@
                           class="d-flex justify-center align-center"
                           style="text-align: justify;"
                         >
-                          <p>{{ clinicDecription.description }}</p>
+                          <p>
+                            {{ clinicDecription.description }}
+                          </p>
                         </div>
                       </v-col>
                     </v-row>
@@ -472,7 +474,7 @@
                     <span style=" color: blue;">
                       Please take a screenshot of this confirmation receipt. You
                       will need to present it when you arrive at the clinic for
-                      verification.
+                      verification. Present a valid ID uppon arrival.
                     </span>
                   </p>
                 </div>
@@ -756,25 +758,6 @@ export default {
       });
     },
     confirmBooking() {
-      let selected_services = [];
-      let selected_packages = [];
-      for (let i = 0; i < this.selected.length; i++) {
-        selected_services.push({
-          id: this.selected[i].id,
-          description: this.selected[i].description,
-          price: this.selected[i].price,
-          category: this.selected[i].category_id,
-        });
-      }
-
-      for (let i = 0; i < this.selectedPackage.length; i++) {
-        selected_packages.push({
-          id: this.selectedPackage[i].id,
-          description: this.selectedPackage[i].description,
-          price: this.selectedPackage[i].price,
-          category: this.selectedPackage[i].category_id,
-        });
-      }
       let data = {
         f_name: this.form.f_name,
         l_name: this.form.l_name,
@@ -791,8 +774,10 @@ export default {
       console.log("Data Passed", data);
 
       this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
-        let errorCode = res.data.errorCode;
-        if (errorCode == "ER_DUP_ENTRY") {
+        console.log(res.data.status, res.data.duplicate);
+        let errorCode = res.data.duplicate;
+
+        if (errorCode == true) {
           alert("Duplicate Patient");
           this.axiosCall(
             "/appointment/checkPatient/dataExist/" +
@@ -808,9 +793,7 @@ export default {
                 patientID: res.data.id,
                 date: this.form.date,
                 time: this.form.time,
-                service: JSON.stringify(selected_services),
-                service_package: JSON.stringify(selected_packages),
-                clinic: JSON.stringify(this.clinicDecription),
+                clinic: JSON.stringify(this.clinicDecription.id),
               };
 
               this.axiosCall(
@@ -834,42 +817,34 @@ export default {
             }
           });
         } else {
-          if (res.data.status == 200) {
-            let data2 = {
-              patientID: res.data.id,
-              date: this.form.date,
-              time: this.form.time,
-              service: JSON.stringify(selected_services),
-              service_package: JSON.stringify(selected_packages),
-              clinic: JSON.stringify(this.clinicDecription),
-            };
+          let data2 = {
+            patientID: res.data.id,
+            date: this.form.date,
+            time: this.form.time,
+            clinic: JSON.stringify(this.clinicDecription.id),
+          };
 
-            this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
-              (res) => {
-                if (res.data.status == 200) {
-                  this.fadeAwayMessage.show = true;
-                  this.fadeAwayMessage.type = "success";
-                  this.fadeAwayMessage.header = "Successfully Saved";
-                  this.info = 1;
-                  this.confirmationDialog = false;
-                  this.resetForm();
-                } else if (res.data.status == 400) {
-                  this.fadeAwayMessage.show = true;
-                  this.fadeAwayMessage.type = "error";
-                  this.fadeAwayMessage.header = res.data.msg;
-                }
+          this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
+            (res) => {
+              if (res.data.status == 200) {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "success";
+                this.fadeAwayMessage.header = "Successfully Saved";
+                this.info = 1;
+                this.confirmationDialog = false;
+                this.resetForm();
+              } else if (res.data.status == 400) {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "error";
+                this.fadeAwayMessage.header = res.data.msg;
               }
-            );
+            }
+          );
 
-            // this.fadeAwayMessage.show = true;
-            // this.fadeAwayMessage.type = "success";
-            // this.fadeAwayMessage.header = "Successfully Saved!";
-            // this.dialog = false;
-          } else if (res.data.status == 400) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.header = res.data.msg;
-          }
+          // this.fadeAwayMessage.show = true;
+          // this.fadeAwayMessage.type = "success";
+          // this.fadeAwayMessage.header = "Successfully Saved!";
+          // this.dialog = false;
         }
       });
     },

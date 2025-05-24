@@ -10,7 +10,7 @@
     >
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span>Apointment</span>
+          <span>Lab Request</span>
           <v-spacer></v-spacer>
           <v-btn icon dark @click="closeD()">
             <v-icon>mdi-close</v-icon>
@@ -28,11 +28,11 @@
               <v-spacer></v-spacer>
               <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
                 <v-btn
-                  @click="AddAppointment()"
+                  @click="labRequest()"
                   class="white--text rounded-lg"
                   color="blue"
                 >
-                  Add
+                  Add Request
                 </v-btn>
               </v-col>
               <v-col cols="12" class=" pt-2 px-4">
@@ -44,10 +44,6 @@
                   <template v-slot:[`item.index`]="{ index }">
                     {{ index + 1 }}.
                   </template>
-                  <template v-slot:[`item.date`]="{ item }">
-                    {{ formatDate(item.date) }}
-                  </template>
-
                   <template v-slot:[`item.status`]="{ item }">
                     <v-chip
                       :color="item.status == 0 ? 'orange' : 'blue'"
@@ -59,6 +55,14 @@
                       }}</span>
                     </v-chip>
                   </template>
+                  <template v-slot:[`item.medtech_name`]="{ item }">
+                    <span> {{ item.medtech_name }}</span> <br />
+                    <span v-if="item.medtech_name">
+                      Liscence No.
+                      <u>{{ item.liscence_no }}</u></span
+                    >
+                  </template>
+
                   <template v-slot:[`item.action`]="{ item }">
                     <v-btn
                       x-small
@@ -71,27 +75,17 @@
                     >
                     <v-btn
                       x-small
+                      v-if="item.status == 0"
                       class="mt-1"
                       @click="edit(item)"
                       outlined
                       color="blue"
                       block
-                      v-if="item.status == 0"
                       >Update</v-btn
                     >
-
                     <v-btn
                       x-small
-                      class="mt-1"
-                      @click="labRequest(item)"
-                      outlined
-                      color="blue"
-                      block
-                      >Lab Request</v-btn
-                    >
-                    <v-btn
                       v-if="item.status == 0"
-                      x-small
                       class="mt-1"
                       @click="payLabTest(1, item)"
                       outlined
@@ -117,7 +111,6 @@
                       block
                       >Assign Med-Tech</v-btn
                     >
-
                     <v-btn
                       x-small
                       class="mt-1"
@@ -125,7 +118,7 @@
                       outlined
                       color="red"
                       block
-                      >Print</v-btn
+                      >print</v-btn
                     >
 
                     <v-btn
@@ -161,101 +154,6 @@
     </v-dialog>
 
     <!-- <MedicalInformation :data="medicalData" :action="action" /> -->
-    <v-dialog v-model="addAppointmentDialog" max-width="400" persistent>
-      <v-card>
-        <v-card-title>Appointment</v-card-title>
-        <v-card-text>
-          <div>
-            <v-row>
-              <v-col cols="12">
-                <v-menu
-                  ref="menu"
-                  v-model="menu"
-                  :close-on-content-click="false"
-                  transition="scale-transition"
-                  :nudge-right="40"
-                  offset-y
-                  min-width="auto"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
-                      v-model="date"
-                      label="Pick a date"
-                      prepend-icon="mdi-calendar"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                    />
-                  </template>
-                  <v-date-picker
-                    v-model="date"
-                    :readonly="action == 'View' ? true : false"
-                    :min="minDate"
-                    :max="maxDate"
-                    @change="menu = false"
-                  />
-                </v-menu>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  v-if="action == 'View'"
-                  v-model="time"
-                  required
-                  readonly
-                  label="Time"
-                  class="rounded-lg"
-                  color="#6DB249"
-                ></v-text-field>
-                <v-autocomplete
-                  v-else
-                  v-model="time"
-                  small-chips
-                  :rules="[(v) => !!v || 'Time is required']"
-                  label="Select Time"
-                  :items="availableTimes"
-                  class="rounded-lg"
-                  color="#6DB249"
-                ></v-autocomplete>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  v-if="action == 'View'"
-                  :value="selectedClinicName"
-                  required
-                  readonly
-                  label="Clinic"
-                  class="rounded-lg"
-                  color="#6DB249"
-                ></v-text-field>
-                <v-autocomplete
-                  v-else
-                  v-model="clinic"
-                  small-chips
-                  item-text="name"
-                  item-value="id"
-                  :rules="[(v) => !!v || 'Time is required']"
-                  label="Select Clinic"
-                  :items="clinicList"
-                  class="rounded-lg"
-                  color="#6DB249"
-                ></v-autocomplete>
-              </v-col>
-            </v-row>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="resetForm()">Cancel</v-btn>
-          <v-btn
-            v-if="action != 'View'"
-            color="green darken-1"
-            text
-            @click="action == 'Update' ? updateAppointment() : confirmBooking()"
-            >{{ action == "Update" ? "Update" : "Confirm" }}</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 
     <v-dialog v-model="laboratoryDialog" max-width="800" persistent>
       <v-card>
@@ -304,19 +202,19 @@
                       <v-row>
                         <v-col
                           cols="3"
-                          v-for="item in item.data"
-                          :key="item.id"
+                          v-for="items in item.data"
+                          :key="items.id"
                         >
                           <div class="d-flex justify-center align-center">
                             <div>
                               <v-checkbox
                                 v-model="selected"
-                                :label="item.description"
-                                :value="item.id"
+                                :label="items.description"
+                                :value="items.id"
                                 :disabled="action == 'Pay' ? true : false"
                               ></v-checkbox>
                             </div>
-                            <div class="mx-2">&#8369;{{ item.price }}</div>
+                            <div class="mx-2">&#8369;{{ items.price }}</div>
                           </div>
                         </v-col>
                       </v-row>
@@ -357,19 +255,19 @@
                       <v-row>
                         <v-col
                           cols="3"
-                          v-for="item in item.data"
-                          :key="item.id"
+                          v-for="items in item.data"
+                          :key="items.id"
                         >
                           <div class="d-flex justify-center align-center">
                             <div>
                               <v-checkbox
                                 v-model="selected"
-                                :label="item.description"
-                                :value="item.id"
+                                :label="items.description"
+                                :value="items.id"
                                 :disabled="action == 'Pay' ? true : false"
                               ></v-checkbox>
                             </div>
-                            <div class="mx-2">&#8369;{{ item.price }}</div>
+                            <div class="mx-2">&#8369;{{ items.price }}</div>
                           </div>
                         </v-col>
                       </v-row>
@@ -387,7 +285,7 @@
                     md="6"
                     sm="12"
                     v-for="item in dataPackages"
-                    :key="item"
+                    :key="item.id"
                     style="border: 1px solid black; border-radius: 10px;"
                   >
                     <div class="d-flex justify-center align-center">
@@ -434,22 +332,12 @@
         <v-card-actions>
           <v-spacer />
           <v-btn text @click="resetForm()">Cancel</v-btn>
-          <v-btn
-            v-if="action == 'Update'"
-            text
-            @click="
-              action == 'Update' ? confirmSubmitService() : confirmPayment()
-            "
-          >
-            {{ action == "Update" ? "Update" : "Pay" }}
+          <v-btn v-if="action == 'Update'" text @click="updateLabRequest()">
+            Update
           </v-btn>
-          <!-- <v-btn
-            v-if="action == 'Update'"
-            color="green darken-1"
-            text
-            @click="action == 'Update' ? updateAppointment() : confirmBooking()"
-            >{{ action == "Update" ? "Update" : "Confirm" }}</v-btn
-          > -->
+          <v-btn v-if="action == 'Add'" text @click="addLabRequest()">
+            Add
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -483,9 +371,9 @@
 
     <v-dialog v-model="confirmationDialog" max-width="600">
       <v-card>
-        <v-card-title
-          >{{ action == "Pay" ? "Confirm Payment" : "Print Receipt" }}
-        </v-card-title>
+        <v-card-title>{{
+          action == "Pay" ? "Confirm Payment" : "Print Receipt"
+        }}</v-card-title>
         <v-card-text>
           <label> <strong>Services Availed:</strong></label>
           <ul>
@@ -544,58 +432,6 @@
         <v-card-text>
           <div>
             <v-row>
-              <!-- <v-col cols="12">
-                <v-menu
-                  ref="menu"
-                  v-model="menu"
-                  :close-on-content-click="false"
-                  transition="scale-transition"
-                  :nudge-right="40"
-                  offset-y
-                  min-width="auto"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
-                      v-model="date"
-                      label="Pick a date"
-                      prepend-icon="mdi-calendar"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                    />
-                  </template>
-                  <v-date-picker
-                    v-model="date"
-                    :readonly="action == 'View' ? true : false"
-                    :min="minDate"
-                    :max="maxDate"
-                    @change="menu = false"
-                  />
-                </v-menu>
-              </v-col> -->
-              <!-- <v-col cols="12">
-                <v-text-field
-                  v-if="action == 'View'"
-                  v-model="medtech"
-                  required
-                  readonly
-                  label="Time"
-                  class="rounded-lg"
-                  color="#6DB249"
-                ></v-text-field>
-                <v-autocomplete
-                  v-else
-                  v-model="medtech"
-                  small-chips
-                  deletable-chips
-                  :rules="[(v) => !!v || 'Med Tech is required']"
-                  label="Select Time"
-                  :items="availableTimes"
-                  class="rounded-lg"
-                  color="#6DB249"
-                ></v-autocomplete>
-              </v-col> -->
-
               <v-col cols="12">
                 <v-text-field
                   v-if="action == 'View'"
@@ -681,32 +517,6 @@ export default {
         { id: 2, name: "Imaging" },
         { id: 3, name: "Packages" },
       ],
-      clinicList: [
-        { id: 1, name: "Pediatrician ", description: "1Sample description" },
-        {
-          id: 2,
-          name: "Obstetrician-Gynecologist ",
-          description: "2Sample description",
-        },
-        { id: 3, name: "General Surgery ", description: "3Sample description" },
-        { id: 4, name: "Family Medicine ", description: "4Sample description" },
-        {
-          id: 5,
-          name: "Internal Medicine ",
-          description: "5Sample description",
-        },
-        { id: 6, name: "Ent-Head/Neck  ", description: "6Sample description" },
-        { id: 7, name: "Surgeon ", description: "7Sample description" },
-        { id: 8, name: "General  ", description: "8Sample description" },
-        {
-          id: 9,
-          name: "Physician/Occupation ",
-          description: "9Sample description",
-        },
-        { id: 10, name: "al Medicine ", description: "10Sample description" },
-        { id: 11, name: "Pathologist ", description: "11Sample description" },
-        { id: 12, name: "Radiologist ", description: "12Sample description" },
-      ],
       assignPerson: null,
       options: {},
       oldSelected: [],
@@ -717,12 +527,10 @@ export default {
       strategicData: null,
       action: null,
       menu: false,
-      labID: null,
       date: null,
       time: null,
       desc: null,
       itemToDelete: null,
-      addAppointmentDialog: false,
       laboratoryDialog: false,
       confirmDialog: false,
       confirmationDialog: false,
@@ -744,6 +552,7 @@ export default {
       dataServices: [],
       dataPackages: [],
       medtech: null,
+      doctor: null,
       medtechList: [],
       allTimes: [
         "07:00 AM",
@@ -766,22 +575,6 @@ export default {
           sortable: false,
         },
         {
-          text: "Date Scheduled",
-          value: "date",
-          align: "start",
-          valign: "start",
-          sortable: false,
-        },
-
-        {
-          text: "Time",
-          value: "time",
-          align: "center",
-          valign: "center",
-          sortable: false,
-        },
-
-        {
           text: "Status",
           value: "status",
           align: "center",
@@ -791,7 +584,7 @@ export default {
 
         {
           text: "Doctor",
-          value: "Doc_name",
+          value: "doctor_name",
           align: "center",
           valign: "center",
           sortable: false,
@@ -799,7 +592,7 @@ export default {
 
         {
           text: "Med-Tech",
-          value: "Med_name",
+          value: "medtech_name",
           align: "center",
           valign: "center",
           sortable: false,
@@ -817,10 +610,6 @@ export default {
   },
 
   computed: {
-    selectedClinicName() {
-      const selected = this.clinicList.find((c) => c.id === this.clinic);
-      return selected ? selected.name : "";
-    },
     // availableTimes() {
     //   if (!this.date) return this.allTimes;
     //   const bookedTimes = this.bookings
@@ -828,36 +617,18 @@ export default {
     //     .map((b) => b.time);
     //   return this.allTimes.filter((time) => !bookedTimes.includes(time));
     // },
-    availableTimes() {
-      if (!this.date) return this.allTimes;
-
-      const bookedTimes = this.bookings
-        .filter((b) => b.date === this.date)
-        .map((b) => b.time);
-
-      const filtered = this.allTimes.filter(
-        (time) => !bookedTimes.includes(time)
-      );
-
-      // ✅ Add current selected time if it's not in the list
-      if (this.time && !filtered.includes(this.time)) {
-        filtered.push(this.time);
-      }
-
-      return filtered;
-    },
-    minDate() {
-      const today = new Date();
-      today.setMonth(today.getMonth());
-      return today.toISOString().substr(0, 10);
-    },
-    maxDate() {
-      const today = new Date();
-      today.setMonth(today.getMonth() + 1);
-      return today.toISOString().substr(0, 10);
-    },
+    // minDate() {
+    //   const today = new Date();
+    //   today.setMonth(today.getMonth());
+    //   return today.toISOString().substr(0, 10);
+    // },
+    // maxDate() {
+    //   const today = new Date();
+    //   today.setMonth(today.getMonth() + 1);
+    //   return today.toISOString().substr(0, 10);
+    // },
     totalPrice() {
-      if (this.selected) {
+      if (this.oldSelected) {
         let data = this.selected
           .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
           .toFixed(2);
@@ -889,7 +660,6 @@ export default {
         } else {
           this.medtech = null;
         }
-
         this.id = data.id;
         this.initialize();
         // alert(data.id);
@@ -917,21 +687,21 @@ export default {
   methods: {
     initialize() {
       this.loading = true;
-      this.getAllSchedule();
+      //   this.getAllSchedule();
       this.getAllServices();
       this.getAllPackages();
       this.getAllDoctors();
       this.getAllMedtech();
-      this.axiosCall(
-        "/appointment/getBookedAppointment/" + this.id,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          console.log("Data", res.data);
-          this.dataItem = res.data;
-          this.loading = false;
+      this.axiosCall("/services/getAllLabRequest/List/" + this.id, "GET").then(
+        (res) => {
+          if (res) {
+            // alert(res.data.data);
+            console.log("Data", res.data.data);
+            this.dataItem = res.data;
+            this.loading = false;
+          }
         }
-      });
+      );
     },
     getAllDoctors() {
       this.axiosCall("/appointment/findAllDoctors", "GET").then((res) => {
@@ -973,16 +743,7 @@ export default {
         }
       });
     },
-    getAllSchedule() {
-      this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
-        (res) => {
-          if (res) {
-            console.log("scheduled", res.data);
-            this.bookings = res.data;
-          }
-        }
-      );
-    },
+
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
@@ -991,123 +752,15 @@ export default {
         }
       });
     },
-    updateAppointment() {
-      let data = {
-        clinic: this.clinic,
-        date: this.date,
-        time: this.time,
-      };
-      this.axiosCall("/appointment/" + this.updateID, "PATCH", data).then(
-        (res) => {
-          if (res.data.status == 201) {
-            // alert("updated");
-            this.initialize();
-            this.updateID = null;
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "System Message";
-            this.fadeAwayMessage.message = res.data.msg;
 
-            this.addAppointmentDialog = false;
-            this.resetForm();
-          } else if (res.data.status == 400) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.header = "System Message";
-            this.fadeAwayMessage.message = res.data.msg;
-          }
-        }
-      );
-    },
-
-    confirmBooking() {
-      let data = {
-        patientID: this.id,
-        clinic: this.clinic,
-        date: this.date,
-        time: this.time,
-      };
-
-      this.axiosCall("/appointment/bookAppointment", "POST", data).then(
-        (res) => {
-          if (res.data.status == 200) {
-            alert("updated");
-            this.initialize();
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "Successfully Saved";
-            this.addAppointmentDialog = false;
-            this.resetForm();
-          } else if (res.data.status == 400) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.header = res.data.msg;
-          }
-        }
-      );
-    },
     changeTab(tab) {
       this.activeTab = tab;
       this.tab = tab.id;
       this.getAllServices();
       this.getAllPackages();
     },
-    confirmSubmitService() {
-      this.confirmDialog = true;
-    },
-    confirmUpdateService() {
-      let data = {
-        patientID: this.id,
-        appointmentID: this.updateID,
-        service_list: JSON.stringify(this.selected),
-        package_list: JSON.stringify(this.selectedPackage),
-      };
-      console.log(data);
-      this.axiosCall(
-        "/services/updateServiceAppointment/" + this.updateID,
-        "PATCH",
-        data
-      ).then((res) => {
-        if (res.data.status == 201 && res.data.status == 200) {
-          // alert("updated");
-          this.initialize();
-          this.updateID = null;
-          this.oldSelected = [];
-          this.selected = [];
-          this.oldSelectedPackage = [];
-          this.selectedPackage = [];
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-          this.addAppointmentDialog = false;
-          this.confirmDialog = false;
-          this.resetForm();
-        } else if (res.data.status == 400) {
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "error";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-        } else {
-          this.initialize();
-          this.updateID = null;
-          this.oldSelected = [];
-          this.selected = [];
-          this.oldSelectedPackage = [];
-          this.selectedPackage = [];
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-          this.addAppointmentDialog = false;
-          this.confirmDialog = false;
-          this.resetForm();
-        }
-      });
-    },
 
     resetForm() {
-      this.addAppointmentDialog = false;
       this.laboratoryDialog = false;
       this.date = null;
       this.time = null;
@@ -1115,95 +768,49 @@ export default {
 
     closeD() {
       this.eventHub.$emit("closepatientAppointmentDialog", false);
-      this.activeTab = { id: 1, name: "Laboratory" };
-      this.tab = 1;
       this.dataItem = [];
+      this.assignPerson = null;
       this.dialog = false;
     },
 
     edit(item) {
-      console.log(item);
-      this.addAppointmentDialog = true;
-      this.clinic = parseInt(item.clinic);
-      this.date = item.date;
-      this.time = item.time;
       this.updateID = item.id;
+      console.log(item);
+      this.laboratoryDialog = true;
+      this.selected = JSON.parse(item.service_list);
+      this.selectedPackage = JSON.parse(item.package_list);
       this.action = "Update";
     },
     view(item) {
       console.log(item);
-      this.addAppointmentDialog = true;
-      this.clinic = parseInt(item.clinic);
-      this.date = item.date;
-      this.time = item.time;
+      this.laboratoryDialog = true;
+      this.selected = JSON.parse(item.service_list);
+      this.selectedPackage = JSON.parse(item.package_list);
       this.action = "View";
     },
     confirmPayment() {
       this.confirmationDialog = true;
     },
-    labRequest(item) {
-      console.log(item);
-
-      this.updateID = item.id;
-      this.updateID = item.id;
-      if (item.service != null) {
-        // this.selected = JSON.parse(item.service).map((service) => service.id);
-        this.selected = JSON.parse(item.service);
-      } else {
-        this.selected = [];
-      }
-      if (item.service_package != null) {
-        // this.selectedPackage = JSON.parse(item.service_package).map(
-        //   (service_package) => service_package.id
-        // );
-
-        this.selectedPackage = JSON.parse(item.service_package);
-      } else {
-        this.selectedPackage = [];
-      }
-      if (item.status != 0) {
-        this.action = "Pay";
-      } else {
-        this.action = "Update";
-      }
+    labRequest() {
       this.laboratoryDialog = true;
-
-      //   const serviceList = JSON.parse(item.service); // [{ id: 1, ... }]
-      //   const matchedItems = [];
-
-      //   this.dataServices.forEach((service) => {
-      //     if (service.data.length > 0) {
-      //       service.data.forEach((child) => {
-      //         if (serviceList.some((s) => s.id === child.id)) {
-      //           matchedItems.push(child);
-      //         }
-      //       });
-      //     } else {
-      //       if (serviceList.some((s) => s.id === service.id)) {
-      //         matchedItems.push(service);
-      //       }
-      //     }
-      //   });
-
-      //   this.selected = matchedItems;
+      this.action = "Add";
     },
     payLabTest(num, item) {
-      this.labID = item.labID;
-      console.log(item);
       if (num == 1) {
         this.action = "Pay";
       } else if (num == 2) {
         this.action = "Print";
       }
-      if (item.service == null || item.service_package == null) {
+      console.log(item);
+      if (item.service_list == null || item.package_list == null) {
         alert("Please select Lab-Request first!");
       } else {
         this.updateID = item.id;
         //   this.selected = JSON.parse(item.service);
         // this.selectedPackage = JSON.parse(item.service_package);
         let data = {
-          service_list: item.service,
-          package_list: item.service_package,
+          service_list: item.service_list,
+          package_list: item.package_list,
         };
         // console.log(data);
 
@@ -1220,30 +827,12 @@ export default {
 
         this.confirmationDialog = true;
       }
-
-      // if (item.service != null) {
-      //   this.selected = JSON.parse(item.service).map((service) => service.id);
-      // } else {
-      //   this.selected = [];
-      // }
-      // if (item.service_package != null) {
-      //   this.selectedPackage = JSON.parse(item.service_package).map(
-      //     (service_package) => service_package.id
-      //   );
-      // } else {
-      //   this.selectedPackage = [];
-      // }
-
-      // this.laboratoryDialog = true;
-      // this.action = "Pay";
     },
     submitServicePayment() {
       let data = {
-        labID: this.labID,
         status: 1,
         patientID: this.id,
       };
-      console.log(data);
       this.axiosCall(
         "/appointment/updateAppointmentStatus/" + this.updateID,
         "PATCH",
@@ -1261,7 +850,6 @@ export default {
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
           this.fadeAwayMessage.message = res.data.msg;
-          this.addAppointmentDialog = false;
           this.confirmationDialog = false;
           this.resetForm();
         } else if (res.data.status == 400) {
@@ -1292,13 +880,46 @@ export default {
       // });
     },
 
-    AddAppointment() {
-      this.addAppointmentDialog = true;
+    addLabRequest() {
+      console.log(
+        "selected",
+        this.selected,
+        "Selected Packages",
+        this.selectedPackage
+      );
+
+      let data = {
+        patientID: this.id,
+        service_list: JSON.stringify(this.selected),
+        package_list: JSON.stringify(this.selectedPackage),
+      };
+      this.axiosCall("/services/createServiceAppointment/", "POST", data).then(
+        (res) => {
+          if (res.data.status == 200) {
+            // alert("updated");
+            this.initialize();
+            this.updateID = null;
+            this.oldSelected = [];
+            this.selected = [];
+            this.oldSelectedPackage = [];
+            this.selectedPackage = [];
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+            this.resetForm();
+          } else if (res.data.status == 400) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+          }
+        }
+      );
     },
     assignDoctor(item) {
       console.log(item);
       this.updateID = item.id;
-      this.labID = item.labID;
       this.assignAppointmentDialog = true;
       this.action = "Update";
       this.assignPerson = "Doctor";
@@ -1306,20 +927,23 @@ export default {
     assignMedtech(item) {
       console.log(item);
       this.updateID = item.id;
-      this.labID = item.labID;
       this.assignAppointmentDialog = true;
       this.action = "Update";
       this.assignPerson = "Med-Tech";
+    },
+    updateLabRequest() {
+      this.confirmDialog = true;
     },
 
     updateDoctor() {
       console.log(this.doctor);
       let data = {
         patientID: this.id,
-        labID: this.labID,
         doctorID: JSON.parse(this.doctor),
-        appointmentID: this.updateID,
+        // appointmentID: this.updateID,
+        labID: this.updateID,
       };
+      console.log(data);
 
       this.axiosCall("/appointment/addPatient/Doctor", "POST", data).then(
         (res) => {
@@ -1347,9 +971,9 @@ export default {
       console.log(this.medtech);
       let data = {
         patientID: this.id,
-        labID: this.labID,
         medtechID: JSON.parse(this.medtech),
-        appointmentID: this.updateID,
+        // appointmentID: this.updateID,
+        labID: this.updateID,
       };
       console.log(data);
 
@@ -1373,6 +997,42 @@ export default {
           }
         }
       );
+    },
+
+    confirmUpdateService() {
+      let data = {
+        patientID: this.id,
+        service_list: JSON.stringify(this.selected),
+        package_list: JSON.stringify(this.selectedPackage),
+      };
+      console.log(data);
+      this.axiosCall(
+        "/services/updateServiceAppointment/" + this.updateID,
+        "PATCH",
+        data
+      ).then((res) => {
+        if (res.data.status == 201) {
+          // alert("updated");
+          this.initialize();
+          this.updateID = null;
+          this.oldSelected = [];
+          this.selected = [];
+          this.oldSelectedPackage = [];
+          this.selectedPackage = [];
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "success";
+          this.fadeAwayMessage.header = "System Message";
+          this.fadeAwayMessage.message = res.data.msg;
+          this.addAppointmentDialog = false;
+          this.confirmDialog = false;
+          this.resetForm();
+        } else if (res.data.status == 400) {
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "error";
+          this.fadeAwayMessage.header = "System Message";
+          this.fadeAwayMessage.message = res.data.msg;
+        }
+      });
     },
   },
 };
