@@ -21,6 +21,8 @@ import { TestType } from 'src/test-type/entities/test-type.entity';
 import { UserDetail } from 'src/user-details/entities/user-detail.entity';
 import { UserRole } from 'src/user-role/entities/user-role.entity';
 import { UserType } from 'src/user-type/entities/user-type.entity';
+import { ServiceAppointment } from 'src/services/entities/service-appointment.entity';
+import { ServiceLabResult } from 'src/services/entities/service-lab-result.dto';
 
 const entities = [
   Users,
@@ -39,14 +41,14 @@ const entities = [
   Payment,
   Role,
   TestType,
-
   Service,
   ServicePackages,
   ServiceCategory,
   PatientDoctor,
   PatientMedtech,
-  MedicalInfo
-
+  MedicalInfo,
+  ServiceAppointment,
+  ServiceLabResult
 ];
 
 export {
@@ -71,7 +73,9 @@ export {
   ServiceCategory,
   PatientDoctor,
   PatientMedtech,
-  MedicalInfo
+  MedicalInfo,
+  ServiceAppointment,
+  ServiceLabResult
 
 };
 

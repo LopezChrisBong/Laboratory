@@ -23,6 +23,9 @@ export class ServiceAppointment {
     @Column({ type: 'longtext', nullable: true })
     package_list: string;
 
+     @Column({ type: "int", default:0 })
+    status: number
+
     
 
     @CreateDateColumn({

@@ -43,7 +43,7 @@
                   </v-autocomplete>
                 </v-col>
 
-                <v-col cols="12" v-if="userId == 3">
+                <v-col cols="12">
                   <v-autocomplete
                     v-model="verifyModel.assignedModuleID"
                     :rules="userId == 3 ? [formRules.required] : []"
@@ -235,7 +235,8 @@ export default {
 
     getAssignedModules() {
       this.axiosCall("/assigned-modules", "GET").then((res) => {
-        this.assignedModulesList = res.data;
+        let data = (res.data = res.data.filter((item) => item.id !== 4));
+        this.assignedModulesList = data;
       });
     },
     getUseRoles() {

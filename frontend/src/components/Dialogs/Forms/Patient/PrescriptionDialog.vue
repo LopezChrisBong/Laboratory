@@ -10,7 +10,7 @@
     >
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span>Patient Examination Data Table</span>
+          <span>Patient Prescription Data Table</span>
           <v-spacer></v-spacer>
           <v-btn icon dark @click="closeD()">
             <v-icon>mdi-close</v-icon>
@@ -27,13 +27,14 @@
               </v-col>
               <v-spacer></v-spacer>
               <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
-                <!-- <v-btn
-                  @click="AddFunction()"
+                <v-btn
+                  v-if="assignedModuleID == 5"
+                  @click="addPrescription()"
                   class="white--text rounded-lg"
                   color="blue"
                 >
                   Add
-                </v-btn> -->
+                </v-btn>
               </v-col>
               <v-col cols="12" class=" pt-2 px-4">
                 <v-data-table
@@ -155,79 +156,66 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="laboratoryDialog" fullscreen>
-      <v-card>
-        <v-card-title>Laboratory Result</v-card-title>
-        <v-card-text>
-          <v-simple-table dense class="text-caption">
-            <thead>
-              <tr>
-                <th class="text-left">Test</th>
-                <th class="text-left">Result</th>
-                <th class="text-center" colspan="2">Reference Range (Male)</th>
-                <th class="text-center" colspan="2">
-                  Reference Range (Female)
-                </th>
-                <th class="text-left">Unit</th>
-                <th class="text-left">Remarks</th>
-              </tr>
-              <tr>
-                <th></th>
-                <th></th>
-                <th>Lower</th>
-                <th>Upper</th>
-                <th>Lower</th>
-                <th>Upper</th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in service" :key="index">
-                <td>{{ item.service_description }}</td>
+    <v-dialog v-model="prescriptionDialog" eager scrollable max-width="600px">
+      <v-form ref="submitPrescription" @submit.prevent>
+        <v-card>
+          <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
+            <span>{{ action }} Prescription</span>
+            <v-spacer></v-spacer>
+            <v-btn icon dark @click="prescriptionDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-card-title>
 
-                <!-- Input field for result -->
-                <td>
+          <v-card-text style="max-height: 700px" class="my-4">
+            <v-container>
+              <v-row>
+                <v-col col="12" md="12">
+                  <label for="finding">
+                    <strong
+                      ><h3>
+                        Prescription
+                      </h3></strong
+                    ></label
+                  >
+                  <vue-editor
+                    v-model="prescription_description"
+                    :readonly="action == 'View'"
+                    :editorToolbar="customToolbar"
+                  ></vue-editor>
+                </v-col>
+                <v-col cols="12">
                   <v-text-field
-                    v-model="input[index]"
-                    dense
-                    hide-details
-                    :readonly="action == 'View' ? true : false"
-                    outlined
-                    class="ma-0 pa-0"
-                    style="max-width: 100px"
+                    label="Doctors Fee"
+                    v-model="doctors_fee"
+                    :rules="[formRules.required]"
+                    class="text-uppercase"
+                    type="number"
+                    required
                   />
-                </td>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-divider></v-divider>
 
-                <!-- Static reference values (replace with dynamic data if available) -->
-                <td>{{ item.male_lower || "-" }} 33</td>
-                <td>{{ item.male_upper || "-" }} 33</td>
-                <td>{{ item.female_lower || "-" }} 33</td>
-                <td>{{ item.female_upper || "-" }} 33</td>
-                <td>{{ item.unit || "-" }}</td>
-                <td>
-                  <v-text-field
-                    dense
-                    hide-details
-                    :readonly="action == 'View' ? true : false"
-                    outlined
-                    class="ma-0 pa-0"
-                    style="max-width: 150px"
-                  ></v-text-field>
-                </td>
-              </tr>
-            </tbody>
-          </v-simple-table>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="laboratoryDialog = false">Close</v-btn>
-          <v-btn text @click="submitResult()" v-if="action == 'Update'"
-            >Submit</v-btn
-          >
-        </v-card-actions>
-      </v-card>
+          <v-card-actions class="pa-5">
+            <v-spacer></v-spacer>
+            <v-btn color="red" outlined @click="prescriptionDialog = false">
+              <v-icon>mdi-close-circle-outline</v-icon>
+              Cancel
+            </v-btn>
+            <!-- <v-btn
+              :color="$vuetify.theme.themes.light.submitBtns"
+              class="white--text"
+              @click="accept()"
+            >
+              <v-icon>mdi-check-circle</v-icon>
+              {{ action == "Verify" ? "Accept" : "Update" }}
+            </v-btn> -->
+          </v-card-actions>
+        </v-card>
+      </v-form>
     </v-dialog>
 
     <MedicalInformation :data="medicalData" :action="action" />
@@ -244,10 +232,12 @@
 </template>
 
 <script>
+import { VueEditor } from "vue2-editor";
 export default {
   components: {
     MedicalInformation: () => import("./MedicalInformation.vue"),
     // viewStrategicOutcome: () => import("./ViewStrategicOutcome.vue"),
+    VueEditor,
   },
   props: {
     data: null,
@@ -257,6 +247,7 @@ export default {
       service_description: "Red Blood Cell",
       input: [],
       input1: [],
+      doctors_fee: null,
       updateID: null,
       male_lower: 4.0,
       male_upper: 5.9,
@@ -267,12 +258,18 @@ export default {
       options: {},
       strategicData: null,
       action: null,
+      prescription_description: null,
       newPackageData: {},
       service: [],
       desc: null,
+      customToolbar: [
+        ["bold", "italic", "underline"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        // [{ list: "bullet" }],
+      ],
       itemToDelete: null,
       confirmDialog: false,
-      laboratoryDialog: false,
+      prescriptionDialog: false,
       fadeAwayMessage: {
         show: false,
         type: "success",
@@ -296,25 +293,19 @@ export default {
           width: 50,
           sortable: false,
         },
+
         {
-          text: "Liscence No.",
-          value: "liscence_no",
-          align: "start",
-          valign: "start",
-          sortable: false,
-        },
-        {
-          text: "Medtech",
+          text: "Doctors Name",
           value: "Med_name",
           align: "start",
           valign: "start",
           sortable: false,
         },
         {
-          text: "Status",
-          value: "status",
-          align: "center",
-          valign: "center",
+          text: "Presciption",
+          value: "prescription",
+          align: "start",
+          valign: "start",
           sortable: false,
         },
 
@@ -364,35 +355,6 @@ export default {
       let userID = this.$store.state.user.id;
       console.log(userID);
       // alert(this.assignedModuleID);
-      if (this.assignedModuleID == 2) {
-        this.axiosCall(
-          "/appointment/getAssignedBookedAppointment/Medtech/" +
-            userID +
-            "/" +
-            this.data.id,
-          "GET"
-        ).then((res) => {
-          if (res) {
-            console.log(res.data);
-            this.dataItem = res.data;
-            this.loading = false;
-          }
-        });
-      } else if (this.assignedModuleID == 5) {
-        this.axiosCall(
-          "/appointment/getAssignedBookedAppointment/Doctor/" +
-            userID +
-            "/" +
-            this.data.id,
-          "GET"
-        ).then((res) => {
-          if (res) {
-            console.log(res.data);
-            this.dataItem = res.data;
-            this.loading = false;
-          }
-        });
-      }
     },
     submitResult() {
       console.log(this.input, this.input1, this.updateID);
@@ -411,7 +373,7 @@ export default {
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
           this.fadeAwayMessage.message = res.data.msg;
-          this.laboratoryDialog = false;
+          this.prescriptionDialog = false;
         } else if (res.data.status == 400) {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
@@ -422,7 +384,7 @@ export default {
     },
 
     closeD() {
-      this.eventHub.$emit("closeExamineDataDialog", false);
+      this.eventHub.$emit("closePrescrioptionDialog", false);
       this.dialog = false;
     },
 
@@ -439,7 +401,7 @@ export default {
           this.service = res.data;
         }
       });
-      this.laboratoryDialog = true;
+      this.prescriptionDialog = true;
     },
     view(item) {
       console.log(item);
@@ -455,7 +417,7 @@ export default {
           this.service = res.data;
         }
       });
-      this.laboratoryDialog = true;
+      this.prescriptionDialog = true;
     },
 
     editMedicalInfo(item) {
@@ -463,6 +425,16 @@ export default {
       console.log(item);
       this.medicalData = { id: null, userIDd: this.data.id, data: item };
       this.action = "Add";
+    },
+    accept() {
+      if (this.$refs.submitPrescription.validate()) {
+        console.log("love");
+      }
+    },
+
+    addPrescription() {
+      this.action = "Add";
+      this.prescriptionDialog = true;
     },
   },
 };

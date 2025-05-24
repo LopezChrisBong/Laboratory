@@ -8,11 +8,15 @@ export class PatientMedtech {
         @Column({ type: "int" })
         patientID: number
 
-        @Column({ type: "int" })
+        @Column({ type: "int", nullable:true })
         appointmentID: number
 
         @Column({ type: "int", nullable:true })
         medtechID: number
+
+        @Column({ type: "int", nullable:true })
+        labID: number
+        
         
 
         @CreateDateColumn({

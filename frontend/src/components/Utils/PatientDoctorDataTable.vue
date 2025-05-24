@@ -100,6 +100,7 @@
               color="green"
               outlined
               @click="editMedicalInfo(item)"
+              v-if="assignedModuleID != 2"
               block
             >
               <v-icon size="14" class="mr-1">mdi-note</v-icon>Medical
@@ -112,6 +113,7 @@
               outlined
               @click="patientAppointment(item)"
               block
+              v-if="assignedModuleID != 2"
             >
               <v-icon size="14" class="mr-1">mdi-calendar</v-icon>Appointment
             </v-btn>

@@ -15,11 +15,11 @@ export class Appointment {
         @Column({ type: "varchar", nullable:true })
         time: string
 
-         @Column({ type: "longtext", nullable:true})
-        service: string
+        //  @Column({ type: "longtext", nullable:true})
+        // service: string
 
-         @Column({ type: "longtext", nullable:true})
-        service_package: string
+        //  @Column({ type: "longtext", nullable:true})
+        // service_package: string
 
         @Column({ type: "longtext", nullable:true})
         clinic: string

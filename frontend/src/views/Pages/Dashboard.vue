@@ -59,7 +59,29 @@
               class="elevation-1"
             >
               <template v-slot:[`item.status`]="{ item }">
-                {{ item.status == 0 ? "Pending" : "Done" }}
+                <v-chip
+                  :color="
+                    item.status == 0
+                      ? 'orange'
+                      : item.status == 1
+                      ? 'blue'
+                      : 'green'
+                  "
+                  dark
+                  small
+                >
+                  <span>
+                    {{
+                      item.status == 0
+                        ? "Pending"
+                        : item.status == 1
+                        ? "On-Going"
+                        : item.status == 2
+                        ? "Lab-Result Done"
+                        : "Done"
+                    }}
+                  </span>
+                </v-chip>
               </template>
             </v-data-table>
           </v-card>
@@ -110,12 +132,12 @@ export default {
       ],
       headers: [
         { text: "Name", value: "name" },
-        { text: "Identification No.", value: "id" },
-        { text: "Last Visit", value: "lastVisit" },
+        { text: "Identification No.", value: "patientID" },
+        // { text: "Last Visit", value: "lastVisit" },
         { text: "Status", value: "status" },
-        { text: "Next Visit", value: "nextVisit" },
-        { text: "Recent Topic", value: "recentTopic" },
-        { text: "Recent Doctor", value: "recentDoctor" },
+        // { text: "Next Visit", value: "nextVisit" },
+        // { text: "Recent Topic", value: "recentTopic" },
+        // { text: "Recent Doctor", value: "recentDoctor" },
       ],
       patients: [
         {
