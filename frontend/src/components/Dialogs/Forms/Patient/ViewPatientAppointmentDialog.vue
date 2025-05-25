@@ -125,8 +125,8 @@
                       outlined
                       color="red"
                       block
+                      v-if="userRoleID == 3"
                       >Doctors Fee
-                      <!-- v-if="userRoleID == 3" -->
                     </v-btn>
                     <v-btn
                       x-small
