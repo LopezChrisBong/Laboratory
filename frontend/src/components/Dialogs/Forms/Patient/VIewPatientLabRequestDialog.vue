@@ -93,7 +93,7 @@
                       block
                       >Pay</v-btn
                     >
-                    <v-btn
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="assignDoctor(item)"
@@ -101,7 +101,7 @@
                       color="orange"
                       block
                       >Assign Doctor</v-btn
-                    >
+                    > -->
                     <v-btn
                       x-small
                       class="mt-1"
@@ -394,10 +394,10 @@
             <li v-for="item in selectedPackage" :key="item.id">
               <div class="d-flex justify-space-between">
                 <div>
-                  {{ item.service_description }}
+                  {{ item.description }}
                 </div>
                 <div>
-                  {{ "  ₱" + item.service_price }}
+                  {{ "  ₱" + item.price }}
                 </div>
               </div>
             </li>
@@ -582,13 +582,13 @@ export default {
           sortable: false,
         },
 
-        {
-          text: "Doctor",
-          value: "doctor_name",
-          align: "center",
-          valign: "center",
-          sortable: false,
-        },
+        // {
+        //   text: "Doctor",
+        //   value: "doctor_name",
+        //   align: "center",
+        //   valign: "center",
+        //   sortable: false,
+        // },
 
         {
           text: "Med-Tech",
@@ -628,19 +628,15 @@ export default {
     //   return today.toISOString().substr(0, 10);
     // },
     totalPrice() {
-      if (this.oldSelected) {
-        let data = this.selected
-          .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
-          .toFixed(2);
-
-        let data1 = this.selectedPackage
-          .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
-          .toFixed(2);
-        let newData = parseFloat(data) + parseFloat(data1);
-        // this.serviceTotalPrice = data;
-        return newData;
-      }
-      return 0;
+      let data = this.selected
+        .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
+        .toFixed(2);
+      let data1 = this.selectedPackage
+        .reduce((sum, item) => sum + parseFloat(item.price || 0), 0)
+        .toFixed(2);
+      let newData = parseFloat(data) + parseFloat(data1);
+      // this.serviceTotalPrice = data;
+      return newData;
     },
   },
 
@@ -762,6 +758,8 @@ export default {
 
     resetForm() {
       this.laboratoryDialog = false;
+      this.selected = [];
+      this.selectedPackage = [];
       this.date = null;
       this.time = null;
     },
@@ -769,6 +767,8 @@ export default {
     closeD() {
       this.eventHub.$emit("closepatientAppointmentDialog", false);
       this.dataItem = [];
+      this.action = null;
+
       this.assignPerson = null;
       this.dialog = false;
     },
@@ -812,7 +812,7 @@ export default {
           service_list: item.service_list,
           package_list: item.package_list,
         };
-        // console.log(data);
+        console.log(data);
 
         this.axiosCall(
           "/services/pay-items/" + JSON.stringify(data) + "",

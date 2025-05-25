@@ -184,7 +184,7 @@
                     :editorToolbar="customToolbar"
                   ></vue-editor>
                 </v-col>
-                <v-col cols="12">
+                <!-- <v-col cols="12">
                   <v-text-field
                     label="Doctors Fee"
                     v-model="doctors_fee"
@@ -193,7 +193,7 @@
                     type="number"
                     required
                   />
-                </v-col>
+                </v-col> -->
               </v-row>
             </v-container>
           </v-card-text>
@@ -247,7 +247,6 @@ export default {
       service_description: "Red Blood Cell",
       input: [],
       input1: [],
-      doctors_fee: null,
       updateID: null,
       male_lower: 4.0,
       male_upper: 5.9,
