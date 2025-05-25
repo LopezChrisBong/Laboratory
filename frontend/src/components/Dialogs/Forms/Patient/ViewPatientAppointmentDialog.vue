@@ -121,6 +121,16 @@
                     <v-btn
                       x-small
                       class="mt-1"
+                      @click="doctorsFee(item)"
+                      outlined
+                      color="red"
+                      block
+                      >Doctors Fee
+                      <!-- v-if="userRoleID == 3" -->
+                    </v-btn>
+                    <v-btn
+                      x-small
+                      class="mt-1"
                       @click="payLabTest(2, item)"
                       outlined
                       color="red"
@@ -506,10 +516,10 @@
             <li v-for="item in selectedPackage" :key="item.id">
               <div class="d-flex justify-space-between">
                 <div>
-                  {{ item.service_description }}
+                  {{ item.description }}
                 </div>
                 <div>
-                  {{ "  ₱" + item.service_price }}
+                  {{ "  ₱" + item.price }}
                 </div>
               </div>
             </li>
@@ -652,6 +662,40 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="doctorFeeDialog" max-width="400" persistent>
+      <v-card>
+        <v-card-title>Doctor Fee</v-card-title>
+        <v-card-text>
+          <div>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="doctor_fee"
+                  required
+                  label="Doctor Fee"
+                  class="rounded-lg"
+                  color="#6DB249"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="doctorFeeDialog = false">Cancel</v-btn>
+          <!-- <v-btn
+            v-if="action != 'View'"
+            color="green darken-1"
+            text
+            @click="assignPerson == 'Doctor' ? updateDoctor() : updateMedTech()"
+            >{{
+              assignPerson == "Doctor" ? "Update Doctor" : "Update Med-Tech"
+            }}</v-btn
+          > -->
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -674,6 +718,7 @@ export default {
   },
   data() {
     return {
+      doctor_fee: null,
       activeTab: { id: 1, name: "Laboratory" },
       tab: 1,
       tabList: [
@@ -734,9 +779,11 @@ export default {
         top: 10,
       },
       dialog: false,
+      doctorFeeDialog: false,
 
       medicalData: null,
       id: null,
+      userRoleID: null,
       isButtonLoading: false,
       assignAppointmentDialog: false,
       dataItem: [],
@@ -857,19 +904,16 @@ export default {
       return today.toISOString().substr(0, 10);
     },
     totalPrice() {
-      if (this.selected) {
-        let data = this.selected
-          .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
-          .toFixed(2);
+      let data = this.selected
+        .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
+        .toFixed(2);
 
-        let data1 = this.selectedPackage
-          .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
-          .toFixed(2);
-        let newData = parseFloat(data) + parseFloat(data1);
-        // this.serviceTotalPrice = data;
-        return newData;
-      }
-      return 0;
+      let data1 = this.selectedPackage
+        .reduce((sum, item) => sum + parseFloat(item.price || 0), 0)
+        .toFixed(2);
+      let newData = parseFloat(data) + parseFloat(data1);
+      // this.serviceTotalPrice = data;
+      return newData;
     },
   },
 
@@ -922,6 +966,7 @@ export default {
       this.getAllPackages();
       this.getAllDoctors();
       this.getAllMedtech();
+      this.userRoleID = this.$store.state.user.user.user_roleID;
       this.axiosCall(
         "/appointment/getBookedAppointment/" + this.id,
         "GET"
@@ -1054,6 +1099,10 @@ export default {
     },
     confirmSubmitService() {
       this.confirmDialog = true;
+    },
+    doctorsFee(item) {
+      console.log(item);
+      this.doctorFeeDialog = true;
     },
     confirmUpdateService() {
       let data = {

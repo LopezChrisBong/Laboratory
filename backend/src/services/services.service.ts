@@ -361,7 +361,7 @@ export class ServicesService {
   }
 
   async getItemPaid(data:any){
-    // console.log(JSON.parse(data.service_list))
+    // console.log(JSON.parse(data.service_list),JSON.parse(data.package_list))
 
     let service_data = JSON.parse(data.service_list)
     let package_data = JSON.parse(data.package_list)
@@ -383,7 +383,7 @@ export class ServicesService {
     
      for (let i = 0; i < package_data.length; i++) {
       let dataID = package_data[i]
-     let data = await this.servicesRepository
+     let data = await this.servicesPackagesRepository
       .createQueryBuilder('sp')
       .select([
         " sp.*",
