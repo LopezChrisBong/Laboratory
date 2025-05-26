@@ -163,19 +163,19 @@ export default {
     slides: [
       {
         src2: require("@/assets/img/mobile1.png"),
-        src: require("@/assets/img/carousel1.jpg"),
+        src: require("@/assets/img/img1.png"),
         // title: "Welcome to PARAGON",
         // subtitle: "",
       },
       {
         src2: require("@/assets/img/mobile2.png"),
-        src: require("@/assets/img/carousel2.jpg"),
+        src: require("@/assets/img/img2.png"),
         // title: "SAmple",
         // subtitle: "",
       },
 
       {
-        src: require("@/assets/img/carousel3.jpg"),
+        src: require("@/assets/img/img3.png"),
         src2: require("@/assets/img/mobile3.png"),
         // title: "SAmple",
         // subtitle: "",
