@@ -11,9 +11,25 @@
         >
           <v-icon>mdi-menu</v-icon>
         </v-btn>
-        {{
+        <!-- {{
           $vuetify.breakpoint.smAndUp ? "Laboratory Information System" : "LIS"
-        }}
+        }} -->
+        <div
+          class="d-flex justify-center align-center"
+          style="margin:0 auto; width:250px"
+          v-if="$vuetify.breakpoint.smAndUp"
+        >
+          <v-img
+            src="../../assets/img/paragon logo website.png"
+            style="width: 2%;"
+          ></v-img>
+          <div v-if="$vuetify.breakpoint.smAndUp" align="center">
+            <h1 style="color: white;">PARAGON</h1>
+            <p style="color: white; margin-top: -15px; font-size: 11px;">
+              Diagnostics And Multi-Specialty Clinic
+            </p>
+          </div>
+        </div>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-menu offset-y>
