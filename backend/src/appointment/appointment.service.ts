@@ -40,6 +40,7 @@ export class AppointmentService {
           const data = queryRunner.manager.create(Patient, {
           f_name: patient.f_name,
           l_name: patient.l_name,
+          suffix: patient.suffix,
           m_name: patient.m_name,
           age: patient.age,
           civil_status: patient.civil_status,
@@ -375,15 +376,48 @@ export class AppointmentService {
       return data
   }
 
-  async getAllPatient(){
-      let data = await this.patientRepository
+  async getAllPatient(tabID:number){
+    let data
+    if(tabID == 1){
+       data = await this.patientRepository
       .createQueryBuilder('pt')
       .select([
         "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
         " pt.*",
       ])
       .getRawMany()
-      // console.log(data)
+    }
+  else if(tabID == 2){
+       data = await this.patientRepository
+      .createQueryBuilder('pt')
+      .select([
+        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+        " pt.*",
+      ])
+      .where('pt.status = 1')
+      .getRawMany()
+  }  else if(tabID == 3){
+       data = await this.patientRepository
+      .createQueryBuilder('pt')
+      .select([
+        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+        " pt.*",
+      ])
+      .where('pt.status = 2')
+      .getRawMany()
+  }
+    else if(tabID == 4){
+       data = await this.patientRepository
+      .createQueryBuilder('pt')
+      .select([
+        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+        " pt.*",
+      ])
+      .where('pt.status = 3')
+      .getRawMany()
+  }
+
+      console.log(data)
       return data
   }
 

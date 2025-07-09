@@ -44,7 +44,9 @@
         hide-default-footer
       >
         <template v-slot:[`item.fname`]="{ item }">
-          {{ item.fname }} {{ item.mname }} {{ item.lname }}
+          <p class="text-uppercase">
+            {{ item.fname }} {{ item.mname }} {{ item.lname }}
+          </p>
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-chip

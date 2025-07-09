@@ -20,6 +20,9 @@ export class Patient {
     @Column({ type: "varchar", nullable:true })
     m_name: string
 
+     @Column({ type: "varchar", nullable:true })
+    suffix: string
+
     
     @Column({ type: "int" })
     age: number

@@ -52,9 +52,9 @@ export class AppointmentController {
     return this.appointmentService.findAllMedtech();
   }
 
-    @Get('getAllPatient')
-  getAllPatient() {
-    return this.appointmentService.getAllPatient();
+    @Get('getAllPatient/:tabID')
+  getAllPatient(@Param('tabID') tabID: string) {
+    return this.appointmentService.getAllPatient(+tabID);
   }
      @Get('getAllPatientForDoctor/:doctorID')
   getAllPatientForDoctor(@Param('doctorID') doctorID: string) {

@@ -249,6 +249,11 @@ export default {
       );
     },
     register() {
+      // this.$store.dispatch("setEmail", this.email);
+      // this.fadeAwayMessage.show = true;
+      // this.fadeAwayMessage.type = "success";
+      // this.fadeAwayMessage.message = "Sample Massage";
+      // this.fadeAwayMessage.header = "System Message";
       // if (this.$refs.Step2Formref.validate())
       if (this.$refs.Step1Formref.validate()) {
         this.isLoading = true;
@@ -263,13 +268,30 @@ export default {
 
         this.axiosCall("/auth/registerUser", "POST", data).then((res) => {
           if (res.data.status == 201) {
-            this.isLoading = false;
-            this.$store.dispatch("setEmail", this.email);
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.message = res.data.message;
-            this.fadeAwayMessage.header = "System Message";
-            this.$router.push("/login");
+            let notif_data = {
+              title: "Verify Account",
+              message: "Verify registered users!",
+              route: "/acc_verify",
+              assignedID: 3,
+            };
+            this.axiosCall("/notification", "POST", notif_data).then((res) => {
+              if (res.data.status == 200) {
+                this.isLoading = false;
+                this.$store.dispatch("setEmail", this.email);
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "success";
+                this.fadeAwayMessage.message = res.data.message;
+                this.fadeAwayMessage.header = "System Message";
+                this.$router.push("/login");
+              } else {
+                this.isLoading = false;
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "error";
+                this.fadeAwayMessage.message = res.data.message;
+                this.fadeAwayMessage.header = "System Message";
+                this.animated = true;
+              }
+            });
           } else {
             this.isLoading = false;
             this.fadeAwayMessage.show = true;

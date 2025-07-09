@@ -59,7 +59,16 @@
                       @input="toUppercase('l_name', $event)"
                     />
                   </v-col>
-                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                  <v-col cols="12" md="2" sm="12" v-show="info == 1">
+                    <v-text-field
+                      label="Suffix"
+                      v-model="form.suffix"
+                      class="text-uppercase"
+                      required
+                      @input="toUppercase('l_name', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="12" v-show="info == 1">
                     <v-text-field
                       label="Birth Date"
                       v-model="form.b_date"
@@ -81,7 +90,7 @@
                       class="text-uppercase"
                     />
                   </v-col>
-                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                  <!-- <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-text-field
                       label="Civil Status"
                       v-model="form.civil_status"
@@ -89,6 +98,16 @@
                       class="text-uppercase"
                       required
                       @input="toUppercase('civil_status', $event)"
+                    />
+                  </v-col> -->
+                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                    <v-select
+                      label="Civil Status"
+                      :items="statusList"
+                      v-model="form.civil_status"
+                      :rules="[(v) => !!v || 'Gender is required']"
+                      required
+                      class="text-uppercase"
                     />
                   </v-col>
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
@@ -435,106 +454,54 @@
         </v-col>
       </v-row>
 
-      <v-dialog v-model="confirmationDialog" max-width="600">
+      <v-dialog v-model="confirmationDialog" max-width="450">
         <v-card>
-          <v-card-title>Confirm Booking</v-card-title>
+          <!-- <v-card-title
+            ><p style="text-align: center;">
+              Thank you for your submission!
+            </p></v-card-title
+          > -->
+          <div class="pt-4">
+            <p style="text-align: center; font-size: 24px;">
+              <b>Thank you for your submission!</b>
+            </p>
+          </div>
           <v-card-text>
             <v-row>
-              <v-col cols="12">
-                <p>
-                  <strong>Name:</strong>
-                  {{
-                    form.m_name != null
-                      ? form.f_name + " " + form.m_name + " " + form.l_name
-                      : form.f_name + " " + " " + form.l_name
-                  }}
-                </p>
-              </v-col>
-              <v-col cols="12">
-                <label for="">Schedule:</label>
-                <br />
-                <p style="font-size: 24px;">
-                  {{ formatDate(form.date) + " " + formatTime(form.time) }}
-                </p>
-              </v-col>
-            </v-row>
-            <p>
-              <strong>Clinic to Visit:</strong><br />
-              <span style="font-size: 24px;"> {{ clinicDecription.name }}</span>
-            </p>
-            <v-row style="background-color: #eff1f3; border-radius: 20px;">
               <v-col cols="12" class="mb-1">
-                <div style="border: 1px solid black; border-radius: 20px;">
-                  <p style="text-align: justify; font-size: 12px;" class="pa-2">
-                    <strong>Note:</strong>
-                    <!-- <span style=" color: blue;">
-                Kindly take a screenshot or photo before confirming, to serve as
-                proof of your appointment.</span
-              > -->
-                    <span style=" color: blue;">
-                      Please take a screenshot of this confirmation receipt. You
-                      will need to present it when you arrive at the clinic for
-                      verification. Present a valid ID uppon arrival.
-                    </span>
+                <div>
+                  <p style="text-align: center; font-size: 14px;" class="px-2">
+                    Please take a screenshot of this confirmation receipt. You
+                    will need to present it together with your valid ID when you
+                    arrive at the clinic for validation
                   </p>
                 </div>
               </v-col>
+
               <v-col cols="12" class="mb-1">
-                <div style="border: 1px solid black; border-radius: 20px;">
-                  <p style="text-align: justify; font-size: 12px;" class="pa-2">
-                    <strong>Info:</strong>
-                    <span style=" color: blue;">
-                      For any questions or concerns, feel free to message us on
-                      our official Facebook page,
-                      <a href="https://www.facebook.com/paragondiagnostics"
-                        >Paragon Diagnostics and Multi-Specialty Clinic</a
-                      >
-                    </span>
+                <div>
+                  <p style="text-align: center; font-size: 14px;" class="px-2">
+                    For any question and concerns, feel free to message us on
+                    our official facebook page,
+                    <br />
+                    <b>Paragon Diagnostics and Multi-speciality Clinic</b>
                   </p>
                 </div>
               </v-col>
             </v-row>
-            <!-- <label> <strong>Services Availed: </strong></label>
-            <ul>
-              <li v-for="item in selected" :key="item.id">
-                <div class="d-flex justify-space-between">
-                  <div>
-                    {{ item.description }}
-                  </div>
-                  <div>
-                    {{ "₱" + item.price }}
-                  </div>
-                </div>
-              </li>
-            </ul>
-            <br /> -->
-            <!-- <label> <strong>Package Availed: </strong></label>
-            <ul>
-              <li v-for="item in selectedPackage" :key="item.id">
-                <div class="d-flex justify-space-between">
-                  <div>
-                    {{ item.description }}
-                  </div>
-                  <div>
-                    {{ "  ₱" + item.price }}
-                  </div>
-                </div>
-              </li>
-            </ul>
-            <br />
-            <div class="d-flex justify-space-between">
-              <div>
-                <strong>Total: </strong>
-              </div>
-              <div>
-                <strong> ₱{{ totalPrice }}</strong>
-              </div>
-            </div> -->
           </v-card-text>
           <v-card-actions>
+            <v-btn
+              color="red"
+              class="mt-4 px-6"
+              @click="confirmationDialog = false"
+              >Cancel</v-btn
+            >
             <v-spacer />
-            <v-btn text @click="confirmationDialog = false">Cancel</v-btn>
-            <v-btn color="green darken-1" text @click="confirmBooking"
+            <v-btn
+              color="green darken-1"
+              class="mt-4 px-6"
+              @click="confirmBooking"
               >Confirm</v-btn
             >
           </v-card-actions>
@@ -575,6 +542,7 @@ export default {
       confirmationDialog: false,
       form: {
         f_name: null,
+        suffix: null,
         l_name: null,
         m_name: null,
         age: null,
@@ -616,6 +584,7 @@ export default {
       selectedIndex: null,
       dataPackages: [],
       genderList: ["Male", "Female"],
+      statusList: ["Single", "Married"],
       Laboratory_services: [],
       Imaging_services: [],
       Package_services: [],
@@ -712,7 +681,12 @@ export default {
       this.form[field] = value.toUpperCase();
     },
     alerts() {
-      alert("Please fill all field before booking!");
+      this.fadeAwayMessage.show = true;
+      this.fadeAwayMessage.type = "error";
+      this.fadeAwayMessage.header = "Please fill all field before booking!";
+      this.info = 1;
+      this.confirmationDialog = false;
+      // alert("Please fill all field before booking!");
     },
     async fetchBookings(date) {
       console.log(date);
@@ -761,6 +735,7 @@ export default {
       let data = {
         f_name: this.form.f_name,
         l_name: this.form.l_name,
+        suffix: this.form.suffix,
         m_name: this.form.m_name,
         age: this.form.age,
         civil_status: this.form.civil_status,
@@ -876,6 +851,7 @@ export default {
         f_name: null,
         l_name: null,
         m_name: null,
+        suffix: null,
         age: null,
         civil_status: null,
         occupation: null,

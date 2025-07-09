@@ -1,12 +1,17 @@
 <template>
   <div>
     <v-row class="mx-2">
-      <v-col cols="12" md="6" class="pa-0">
-        <!-- <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
-          <v-tab v-for="tab in tabList" :key="tab.id" @click="changeTab(tab)">{{
-            tab.name
-          }}</v-tab>
-        </v-tabs> -->
+      <v-col cols="12" md="12" class="pa-0">
+        <v-tabs
+          v-model="activeTab"
+          color="#2196F3"
+          align-tabs="left"
+          v-if="assignedModuleID == 3"
+        >
+          <v-tab v-for="tab in tabList" :key="tab.id" @click="changeTab(tab)"
+            >{{ tab.name }}
+          </v-tab>
+        </v-tabs>
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="12" md="12" class="d-flex justify-space-between">
@@ -44,7 +49,9 @@
         hide-default-footer
       >
         <template v-slot:[`item.fname`]="{ item }">
-          {{ item.fname }} {{ item.mname }} {{ item.lname }}
+          <p class="text-uppercase">
+            {{ item.fname }} {{ item.mname }} {{ item.lname }}
+          </p>
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-chip
@@ -285,9 +292,9 @@ export default {
     headers: [
       { text: "Name", value: "name" },
       { text: "Identification No.", value: "patientID" },
-      { text: "Last Visit", value: "lastVisit" },
-      { text: "Status", value: "status" },
-      { text: "Next Visit", value: "nextVisit" },
+      // { text: "Last Visit", value: "lastVisit" },
+      // { text: "Status", value: "status" },
+      // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
       // { text: "Recent Doctor", value: "recentDoctor" },
       {
@@ -316,12 +323,13 @@ export default {
       },
     ],
 
-    activeTab: { id: 1, name: "Laboratory" },
+    activeTab: { id: 1, name: "Patients" },
     tab: 1,
     tabList: [
-      { id: 1, name: "Laboratory" },
-      { id: 2, name: "Imaging" },
-      { id: 3, name: "Packages" },
+      { id: 1, name: "Patients" },
+      { id: 2, name: "Pending Laboratory" },
+      { id: 3, name: "Pending Checkup" },
+      { id: 4, name: "Done" },
     ],
     data: [],
     addPatient: null,
@@ -418,31 +426,48 @@ export default {
       this.loading = true;
       this.getAllPackages();
       this.getAllServices();
+      this.getAllPatients();
+    },
+    getAllPatients() {
       this.userRoleID = this.$store.state.user.user.user_roleID;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
-      if (
-        this.assignedModuleID != 3 &&
-        this.assignedModuleID != 1 &&
-        this.assignedModuleID != 4
-      ) {
-        this.axiosCall(
-          "/appointment/getAllPatientByRole/" + this.$store.state.user.id,
-          "GET"
-        ).then((res) => {
-          if (res) {
-            this.data = res.data;
-            this.loading = false;
-          }
-        });
+      if (this.tab == 1) {
+        if (
+          this.assignedModuleID != 3 &&
+          this.assignedModuleID != 1 &&
+          this.assignedModuleID != 4
+        ) {
+          this.axiosCall(
+            "/appointment/getAllPatientByRole/" + this.$store.state.user.id,
+            "GET"
+          ).then((res) => {
+            if (res) {
+              this.data = res.data;
+              this.loading = false;
+            }
+          });
+        } else {
+          this.axiosCall("/appointment/getAllPatient/" + this.tab, "GET").then(
+            (res) => {
+              if (res) {
+                this.data = res.data;
+                this.loading = false;
+              }
+            }
+          );
+        }
       } else {
-        this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
-          if (res) {
-            this.data = res.data;
-            this.loading = false;
+        this.axiosCall("/appointment/getAllPatient/" + this.tab, "GET").then(
+          (res) => {
+            if (res) {
+              this.data = res.data;
+              this.loading = false;
+            }
           }
-        });
+        );
       }
     },
+
     getAllServices() {
       this.axiosCall(
         "/services/getAllServicesForBooking/" + this.tab,
@@ -450,14 +475,12 @@ export default {
       ).then((res) => {
         if (res) {
           this.dataServices = res.data;
-          console.log("LOVED", res.data);
         }
       });
     },
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
-          console.log("Pakes", res.data);
           this.dataPackages = res.data;
         }
       });
