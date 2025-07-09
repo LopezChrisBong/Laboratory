@@ -61,7 +61,18 @@
                     color="blue"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="12" md="2">
+                  <v-text-field
+                    v-model="suffix"
+                    dense
+                    outlined
+                    required
+                    label="Suffix"
+                    class="rounded-lg"
+                    color="blue"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
                   <v-menu
                     ref="menu"
                     :close-on-content-click="false"
@@ -244,6 +255,7 @@ export default {
       medicalDate: null,
       genderList: [],
       gender: null,
+      suffix: null,
       fname: null,
       lname: null,
       mname: null,
@@ -273,6 +285,7 @@ export default {
         if (data.id) {
           this.initialize();
           this.fname = data.f_name;
+          this.suffix = data.suffix;
           this.lname = data.l_name;
           this.mname = data.m_name;
           this.gender = data.gender;
@@ -286,6 +299,7 @@ export default {
           this.$refs.AddPatient.reset();
           this.initialize();
           this.fname = null;
+          this.suffix = null;
           this.lname = null;
           this.mname = null;
           this.gender = null;
@@ -329,6 +343,7 @@ export default {
       if (type == "ADD") {
         let data = {
           f_name: this.fname,
+          suffix: this.suffix,
           l_name: this.lname,
           m_name: this.mname,
           age: this.age,
@@ -364,6 +379,7 @@ export default {
 
         let data = {
           fname: this.fname,
+          suffix: this.suffix,
           lname: this.lname,
           mname: this.mname,
           age: this.age,

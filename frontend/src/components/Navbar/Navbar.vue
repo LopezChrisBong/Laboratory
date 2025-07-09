@@ -1,37 +1,33 @@
 <template>
   <v-app>
-    <!-- Top Bar -->
-    <v-app-bar app color="#0e2b62" dark>
-      <v-toolbar-title>
-        <!-- <v-icon class="mr-2">mdi-account</v-icon> -->
-        <v-btn
-          v-if="$vuetify.breakpoint.smAndDown"
-          icon
-          @click="sidebarOpen = !sidebarOpen"
-        >
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
-        <!-- {{
-          $vuetify.breakpoint.smAndUp ? "Laboratory Information System" : "LIS"
-        }} -->
-        <div
-          class="d-flex justify-center align-center"
-          style="margin:0 auto; width:250px"
-          v-if="$vuetify.breakpoint.smAndUp"
-        >
+    <!-- App Bar -->
+    <v-app-bar app color="white" dark>
+      <v-app-bar-nav-icon
+        color="black"
+        @click.stop="drawer = !drawer"
+      ></v-app-bar-nav-icon>
+      <v-toolbar-title style="margin:0 auto; width:250px">
+        <div class="d-flex justify-center align-center">
           <v-img
+            v-if="$vuetify.breakpoint.smAndUp"
             src="../../assets/img/paragon logo website.png"
             style="width: 2%;"
           ></v-img>
+
           <div v-if="$vuetify.breakpoint.smAndUp" align="center">
-            <h1 style="color: white;">PARAGON</h1>
-            <p style="color: white; margin-top: -15px; font-size: 11px;">
+            <h1 style="color: black;">PARAGON</h1>
+            <p style="color: black; margin-top: -15px; font-size: 11px;">
               Diagnostics And Multi-Specialty Clinic
             </p>
           </div>
+          <div v-else>
+            <h4>PARAGON</h4>
+          </div>
         </div>
       </v-toolbar-title>
+
       <v-spacer></v-spacer>
+
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on">
@@ -58,7 +54,7 @@
           </v-btn>
         </template>
         <v-card width="300">
-          <v-list>
+          <v-list v-if="notifications.legnth != []">
             <v-list-item
               v-for="(notif, index) in notifications"
               :key="index"
@@ -69,11 +65,23 @@
                   :style="{ color: notif.read ? 'inherit' : 'red' }"
                 >
                   {{ notif.title }}
+                  <!-- {{ notif.read == true ? "(read)" : "(unread)" }} -->
+                  <v-icon size="large" color="teal-darken-2">{{
+                    notif.read == true ? "mdi-email-open" : "mdi-email"
+                  }}</v-icon>
                 </v-list-item-title>
                 <v-list-item-subtitle
-                  >{{ notif.date }}
-                  {{ notif.read == true ? "" : "(1)" }}</v-list-item-subtitle
-                >
+                  >{{ formatDate(notif.created_at) }}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+          <v-list v-else>
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-subtitle>
+                  No data found!
+                </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -87,7 +95,7 @@
       </v-menu>
       <v-menu>
         <template v-slot:activator="{ on }">
-          <v-chip v-on="on" color="#0e2b62" class="rounded-lg d-flex py-2">
+          <v-chip v-on="on" color="#3386ff" class="rounded-lg d-flex py-2">
             <v-avatar left :size="$vuetify.breakpoint.smAndUp ? 100 : 100">
               <img :src="profImg" max-width="100" />
             </v-avatar>
@@ -110,7 +118,7 @@
               class="mx-1"
               >mdi-account-arrow-right</v-icon
             >
-            <v-icon right class="px-2"> mdi-chevron-down </v-icon>
+            <v-icon right color="white" class="px-2"> mdi-chevron-down </v-icon>
           </v-chip>
         </template>
         <v-card width="240">
@@ -160,32 +168,16 @@
       </v-menu>
     </v-app-bar>
 
-    <!-- Sidebar -->
-    <v-navigation-drawer
-      app
-      v-model="sidebarOpen"
-      :temporary="$vuetify.breakpoint.smAndDown"
-      class="pa-3"
-      v-if="$vuetify.breakpoint.smAndDown"
-    >
-      <v-list nav dense class="sidebar mt-2">
-        <v-list-item>
-          <v-list-item-avatar>
-            <v-avatar>
-              <img :src="profImg" max-width="60" />
-            </v-avatar>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title class="text-uppercase">
-              <!-- {{ $store.state.user.fname }} -->
-              {{ $store.state.user.lname }}</v-list-item-title
-            >
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-divider></v-divider>
-
-        <div v-for="(link, i) in links" :key="i" style="background: white">
+    <!-- Navigation Drawer -->
+    <v-navigation-drawer class="sidebar" color="#33caff" app v-model="drawer">
+      <v-list dense class="mt-2">
+        <div style="justify-items: center; align-items: center; ">
+          <v-img
+            src="../../assets/img/paragon logo website.png"
+            style="width: 20%;  "
+          ></v-img>
+        </div>
+        <div v-for="(link, i) in links" :key="i" style="background: #33caff">
           <v-list-item
             v-if="!link.subLink"
             :key="link.title"
@@ -228,90 +220,12 @@
       </v-list>
     </v-navigation-drawer>
 
-    <!-- Layout with Sidebar and Content -->
+    <!-- Main Content -->
     <v-main>
       <v-container fluid>
         <v-row>
-          <!-- Sidebar -->
-          <v-col
-            :cols="$vuetify.breakpoint.smAndUp ? '2' : '0'"
-            class="pa-3"
-            style="border-right: 1px solid #ddd; position: fixed;"
-            v-if="$vuetify.breakpoint.smAndUp"
-          >
-            <v-list nav dense class="sidebar mt-2">
-              <v-list-item>
-                <v-list-item-avatar>
-                  <v-avatar>
-                    <img :src="profImg" max-width="60" />
-                  </v-avatar>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-title class="text-uppercase">
-                    <!-- {{ $store.state.user.fname }} -->
-                    {{ $store.state.user.lname }}</v-list-item-title
-                  >
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-divider></v-divider>
-
-              <div
-                v-for="(link, i) in links"
-                :key="i"
-                style="background: white"
-              >
-                <v-list-item
-                  v-if="!link.subLink"
-                  :key="link.title"
-                  router
-                  :to="'/' + userType + link.route"
-                  color="#808191"
-                >
-                  <v-list-item-icon>
-                    <v-icon>{{ link.icon }}</v-icon>
-                  </v-list-item-icon>
-
-                  <v-list-item-content>
-                    <v-list-item-title>{{ link.title }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-
-                <v-list-group v-else :key="link" color="#3a3b3a" :value="false">
-                  <v-icon slot="prependIcon">{{ link.icon }}</v-icon>
-                  <template v-slot:activator>
-                    <v-list-item-title>{{ link.title }}</v-list-item-title>
-                  </template>
-                  <div class="sub-item">
-                    <v-list-item
-                      v-for="sublink in link.subLink"
-                      router
-                      :to="'/' + userType + sublink.route"
-                      :key="sublink.title"
-                      color="#808191"
-                    >
-                      <v-list-item-icon>
-                        <!-- <v-icon class="">{{ sublink.icon }}</v-icon> -->
-                      </v-list-item-icon>
-                      <v-list-item-title class="">{{
-                        sublink.title
-                      }}</v-list-item-title>
-                    </v-list-item>
-                  </div>
-                </v-list-group>
-              </div>
-            </v-list>
-          </v-col>
-        </v-row>
-        <v-row>
           <!-- Feed -->
-          <v-col
-            :cols="$vuetify.breakpoint.smAndUp ? '2' : '0'"
-            class="pa-3"
-            v-if="$vuetify.breakpoint.smAndUp"
-          >
-          </v-col>
-          <v-col :cols="$vuetify.breakpoint.smAndUp ? '10' : '12'" class="pa-3">
+          <v-col class="pa-3">
             <div class=" fill-height pb-6" style="background-color:white; ">
               <div class="d-flex justify-space-between py-4 px-4  ">
                 <strong class="text-gray-100">{{ $route.meta.title }}</strong>
@@ -322,7 +236,6 @@
         </v-row>
       </v-container>
     </v-main>
-
     <v-dialog v-model="showAllNotifDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">All Notifications</v-card-title>
@@ -331,10 +244,15 @@
           <v-list dense>
             <v-list-item v-for="(notif, index) in notifications" :key="index">
               <v-list-item-content>
-                <v-list-item-title>{{ notif.title }}</v-list-item-title>
+                <v-list-item-title
+                  >{{ notif.title }}
+                  <!-- {{
+                    notif.read == true ? "(read)" : "(unread)"
+                  }} -->
+                </v-list-item-title>
                 <v-list-item-subtitle
-                  >{{ notif.date }} {{ notif.read }}</v-list-item-subtitle
-                >
+                  >{{ formatDate(notif.created_at) }}
+                </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -383,26 +301,7 @@ export default {
       loading: false,
       options: [],
       schooYearList: [],
-      notifications: [
-        {
-          title: "New lab result uploaded",
-          date: "April 19, 2025",
-          read: false,
-          route: "/reports/123",
-        },
-        {
-          title: "Sample received",
-          date: "April 18, 2025",
-          read: true,
-          route: "/reports/123",
-        },
-        {
-          title: "Patient report ready",
-          date: "April 18, 2025",
-          read: false,
-          route: "/reports/123",
-        },
-      ],
+      notifications: [],
       sidebarOpen: true,
     };
   },
@@ -416,20 +315,28 @@ export default {
   },
 
   mounted() {
-    if (this.$vuetify.breakpoint.xs) {
-      this.drawer = false;
-      this.mini = false;
-    }
+    this.initialize();
   },
 
   methods: {
+    initialize() {
+      this.getAllNotifications();
+    },
     openNotification(notif) {
-      // Example handler – you can route or open a dialog
       notif.read = true;
-      console.log("Open notification:", notif);
-      if (notif.route) {
-        this.$router.push(notif.route);
-      }
+      let data = {
+        read: true,
+      };
+      this.axiosCall("/notification/" + notif.id, "PATCH", data).then((res) => {
+        console.log(res);
+        if (notif.route) {
+          // this.$router.push(notif.route);
+          this.$router.push("/" + this.userType + notif.route);
+        }
+      });
+      // Example handler – you can route or open a dialog
+
+      //   console.log("Open notification:", notif);
     },
     getMyRole(id) {
       var role;
@@ -439,6 +346,14 @@ export default {
         }
       }
       return role;
+    },
+    getAllNotifications() {
+      let userID = this.$store.state.user.id;
+      this.axiosCall("/notification/getAllNotifications/" + userID, "GET").then(
+        (res) => {
+          this.notifications = res.data;
+        }
+      );
     },
 
     openMobileNav() {
@@ -562,213 +477,20 @@ export default {
 </script>
 
 <style scoped>
-.modal_content {
-  padding: 5px 0 5px 0;
-}
-.modal_header {
-  background-color: #2196f3;
-  padding: 5px;
-}
-.notifDiv {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background-color: #2196f3;
-  color: white;
-  flex: auto;
-  justify-content: space-between;
-}
-.showAllNotifDiv {
-  position: sticky;
-  bottom: 0;
-  cursor: pointer;
-}
-.showAllNotif {
+body {
+  background-color: #f9f9f9;
   margin: 0;
-  font-size: 12px;
-  background-color: #2196f3;
-  padding: 10px;
-  text-align: center;
-  max-height: 55vh;
-  color: white;
-}
-.unopened {
-  /* top right bottom left */
-  margin: 10px;
-  /* border-bottom: 0.5px solid #cbcec7; */
-  border-radius: 10px;
-  background-color: #1882d8;
-}
-.unopened:hover {
-  background-color: #d8ff8f;
-}
-.opened {
-  /* top right bottom left */
-  margin: 10px;
-  border: 0.5px solid #0fb2b8;
-  border-radius: 10px;
-}
-.opened:hover {
-  background-color: #d8ff8f;
-}
-::v-deep .v-toolbar__content {
-  padding: 8px !important;
-}
-.v-list-item__icon {
-  color: gray !important;
-}
-.sidebar .v-list-item {
-  border-radius: 5px;
-  /* margin-left: 10px; */
-  color: gray;
-}
-
-.notifBadgeYellow {
-  background-color: rgba(255, 255, 34, 0.5);
-  /* border: 1px solid rgb(255, 217, 0); */
-  padding: 3px;
-  border-radius: 4px;
-  font-size: 10px;
-  color: rgb(140, 140, 14);
-  margin: 0px 0px 0px 5px;
-}
-
-.notifBadgePurple {
-  background-color: rgba(255, 138, 255, 0.5);
-  /* border: 1px solid rgb(255, 217, 0); */
-  padding: 3px;
-  border-radius: 4px;
-  font-size: 10px;
-  color: purple;
-  margin: 0px 0px 0px 5px;
-}
-
-.notifBadgeBlue {
-  background-color: rgba(138, 210, 255, 0.5);
-  /* border: 1px solid rgb(255, 217, 0); */
-  padding: 3px;
-  border-radius: 4px;
-  font-size: 10px;
-  color: rgb(0, 75, 128);
-  margin: 0px 0px 0px 5px;
-}
-
-.notifBadgeGreen {
-  background-color: rgba(157, 255, 138, 0.5);
-  /* border: 1px solid rgb(255, 217, 0); */
-  padding: 3px;
-  border-radius: 4px;
-  font-size: 10px;
-  color: rgb(21, 128, 0);
-  margin: 0px 0px 0px 5px;
-}
-
-.sidebar .v-list-item:hover {
-  /* background-color: rgba(255, 247, 247, 0.949);
-  color: black; */
-  border-radius: 5px;
-  transition: 0.5s;
-}
-
-.sidebar .v-list-item--active .v-list-item__title {
-  color: #3a3b3a !important;
-}
-
-.sidebar .v-list-item--active .v-list-item__icon i {
-  color: #3a3b3a !important;
-}
-
-.v-list-group--active .man {
-  color: #3a3b3a !important;
+  padding: 0;
 }
 
 .sidebar .v-list-item--active {
-  background-color: #3597e7 !important;
-  color: #3a3b3a !important;
+  background-color: #001799 !important;
+  color: #ffffff !important;
 }
+
 .sidebar .v-list-group--active {
-  background-color: #3597e7 !important;
+  background-color: #383be9 !important;
   border-radius: 5px;
-
-  color: #3a3b3a !important;
+  color: #ffffff !important;
 }
-
-.sidebar div .sub-item .v-list-item {
-  background-color: rgb(255, 255, 255) !important;
-}
-
-.sidebar div .sub-item .v-list-item .v-list-item__title {
-  color: #3a3b3a !important;
-}
-.sidebar div .sub-item .v-list-item .v-list-item__icon i {
-  color: #3a3b3a !important;
-}
-
-.sidebar div .sub-item .v-list-item--active {
-  background-color: #76ccee !important;
-  color: #3a3b3a !important;
-}
-
-.active_grp {
-  background-color: white;
-}
-
-.nav-drawer .item-title {
-  font-style: normal;
-  font-weight: 500;
-  line-height: 21px;
-}
-.v-subheader {
-  border-bottom: 1px solid #cdcbd0;
-  color: green;
-}
-.notif_msg {
-  font-size: 10px;
-}
-.v-application--is-ltr
-  .v-list--dense.v-list--nav
-  .v-list-group--no-action
-  > .v-list-group__items
-  > .v-list-item {
-  padding: 0 8;
-}
-.sub-item {
-  border-radius: 5px;
-  background: white;
-}
-
-.v-list-item__title {
-  color: black !important;
-}
-
-.v-list-item__icon i {
-  color: rgb(0, 0, 0) !important;
-}
-
-/* 
-.v-list-group {
-  color: white !important;
-} */
-
-.v-hover {
-  border-color: grey !important;
-}
-.v-list-group .v-list-group--active {
-  color: #3a3b3a !important;
-}
-::v-deep .v-list-group i {
-  color: rgb(0, 0, 0) !important;
-}
-
-::v-deep .v-list-group--active i {
-  color: #3a3b3a !important;
-}
-.text-red {
-  color: red !important;
-  font-weight: bold;
-}
-
-/* .v-list-group__header__append-icon {
-  display: none !important;
-} */
 </style>

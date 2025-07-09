@@ -29,6 +29,7 @@ import { PatientModule } from './patient/patient.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ServicesModule } from './services/services.module';
 import { MedicalInfoModule } from './medical-info/medical-info.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { MedicalInfoModule } from './medical-info/medical-info.module';
     InventoryModule,
     ServicesModule,
     MedicalInfoModule,
+    NotificationModule,
   ],
 
   controllers: [AppController],

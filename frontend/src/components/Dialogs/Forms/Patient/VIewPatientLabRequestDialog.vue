@@ -981,14 +981,25 @@ export default {
         (res) => {
           if (res.data.status == 200) {
             // alert("updated");
-            this.initialize();
-            this.updateID = null;
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "System Message";
-            this.fadeAwayMessage.message = res.data.msg;
-            this.assignAppointmentDialog = false;
-            this.resetForm();
+            let notif_data = {
+              patientID: this.id,
+              title: "Patient Appointment",
+              message: "You Have Appoitnment",
+              route: "/patient",
+              assignedID: JSON.parse(this.medtech),
+            };
+            this.axiosCall("/notification", "POST", notif_data).then((res) => {
+              if (res.data.status == 200) {
+                this.initialize();
+                this.updateID = null;
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "success";
+                this.fadeAwayMessage.header = "System Message";
+                this.fadeAwayMessage.message = res.data.msg;
+                this.assignAppointmentDialog = false;
+                this.resetForm();
+              }
+            });
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "error";

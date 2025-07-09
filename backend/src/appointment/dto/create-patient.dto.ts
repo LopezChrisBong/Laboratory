@@ -8,6 +8,9 @@ export class CreatePatientDto {
   l_name: string;
 
   @ApiProperty()
+  suffix: string;
+
+  @ApiProperty()
   m_name: string;
 
   @ApiProperty()
