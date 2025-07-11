@@ -188,7 +188,7 @@
         </v-list-item> -->
 
         <!-- Logo -->
-        <div>
+        <div v-if="$vuetify.breakpoint.smAndUp">
           <v-row>
             <v-col
               cols="12"
@@ -211,6 +211,17 @@
               </div>
             </v-col>
           </v-row>
+        </div>
+        <div v-if="$vuetify.breakpoint.smAndDown" class="d-flex align-center">
+          <div style="width: 30%;" class="ml-5">
+            <v-img
+              src="../../assets/img/paragon logo website.png"
+              style="width: 90%;  "
+            ></v-img>
+          </div>
+          <div>
+            <h2>PARAGON</h2>
+          </div>
         </div>
 
         <!-- List Items -->
