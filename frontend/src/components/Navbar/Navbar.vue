@@ -169,21 +169,67 @@
     </v-app-bar>
 
     <!-- Navigation Drawer -->
-    <v-navigation-drawer class="sidebar" color="#33caff" app v-model="drawer">
+    <!-- Navigation Drawer -->
+    <v-navigation-drawer
+      class="sidebar"
+      color="#1C2536"
+      app
+      dark
+      v-model="drawer"
+      width="280"
+    >
       <v-list dense class="mt-2">
-        <div style="justify-items: center; align-items: center; ">
-          <v-img
-            src="../../assets/img/paragon logo website.png"
-            style="width: 20%;  "
-          ></v-img>
+        <!-- Create New Button -->
+        <!-- <v-list-item class="px-4">
+          <v-btn block color="#3B82F6" dark>
+            <v-icon left>mdi-plus</v-icon>
+            Create New...
+          </v-btn>
+        </v-list-item> -->
+
+        <!-- Logo -->
+        <div>
+          <v-row>
+            <v-col
+              cols="12"
+              md="6"
+              style="justify-items: right; align-items: right: ;;"
+            >
+              <v-img
+                src="../../assets/img/paragon logo website.png"
+                style="width: 50%;  "
+              ></v-img>
+            </v-col>
+            <v-col
+              cols="12"
+              md="6"
+              style="justify-items: left; align-items: center;"
+            >
+              <div class="mt-4">
+                <h2>PARAGON</h2>
+              </div>
+            </v-col>
+          </v-row>
         </div>
-        <div v-for="(link, i) in links" :key="i" style="background: #33caff">
+
+        <!-- List Items -->
+        <div v-for="(link, i) in links" :key="i">
+          <!-- Section Titles -->
+          <v-subheader
+            v-if="link.section"
+            class="text-uppercase font-weight-bold white--text text--disabled"
+          >
+            {{ link.section }}
+          </v-subheader>
+
+          <!-- Single Item -->
           <v-list-item
             v-if="!link.subLink"
             :key="link.title"
             router
             :to="'/' + userType + link.route"
-            color="#808191"
+            class="rounded-lg mx-2"
+            active-class="active-link"
           >
             <v-list-item-icon>
               <v-icon>{{ link.icon }}</v-icon>
@@ -192,29 +238,58 @@
             <v-list-item-content>
               <v-list-item-title>{{ link.title }}</v-list-item-title>
             </v-list-item-content>
+
+            <!-- Badge Count or Dot -->
+            <v-list-item-action v-if="link.badge">
+              <v-chip
+                v-if="link.badge !== true"
+                small
+                color="#334155"
+                text-color="white"
+                >{{ link.badge }}</v-chip
+              >
+              <v-badge
+                v-else
+                color="red"
+                dot
+                offset-x="10"
+                offset-y="10"
+              ></v-badge>
+            </v-list-item-action>
           </v-list-item>
 
-          <v-list-group v-else :key="link" color="#3a3b3a" :value="false">
-            <v-icon slot="prependIcon">{{ link.icon }}</v-icon>
+          <!-- Grouped Items -->
+          <v-list-group
+            v-else
+            color="#3a3b3a"
+            no-action
+            :value="false"
+            class="mx-2"
+            :key="link.title"
+          >
             <template v-slot:activator>
-              <v-list-item-title>{{ link.title }}</v-list-item-title>
-            </template>
-            <div class="sub-item">
-              <v-list-item
-                v-for="sublink in link.subLink"
-                router
-                :to="'/' + userType + sublink.route"
-                :key="sublink.title"
-                color="#808191"
-              >
+              <v-list-item>
                 <v-list-item-icon>
-                  <!-- <v-icon class="">{{ sublink.icon }}</v-icon> -->
+                  <v-icon>{{ link.icon }}</v-icon>
                 </v-list-item-icon>
-                <v-list-item-title class="">{{
-                  sublink.title
-                }}</v-list-item-title>
+                <v-list-item-content>
+                  <v-list-item-title>{{ link.title }}</v-list-item-title>
+                </v-list-item-content>
               </v-list-item>
-            </div>
+            </template>
+
+            <v-list-item
+              v-for="sublink in link.subLink"
+              :key="sublink.title"
+              router
+              :to="'/' + userType + sublink.route"
+              class="pl-10"
+            >
+              <v-list-item-icon>
+                <v-icon v-if="sublink.icon">{{ sublink.icon }}</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>{{ sublink.title }}</v-list-item-title>
+            </v-list-item>
           </v-list-group>
         </div>
       </v-list>
@@ -236,6 +311,7 @@
         </v-row>
       </v-container>
     </v-main>
+
     <v-dialog v-model="showAllNotifDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">All Notifications</v-card-title>

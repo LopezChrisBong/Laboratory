@@ -600,6 +600,32 @@ let data = await this.appointmentRepository
    }
   }
 
+  updatePatientInfo(id: number, updatePatientDto: UpdatePatientDto) {
+    console.log(id)
+       try {
+       this.dataSource.manager.update(Patient, id,{
+          f_name: updatePatientDto.f_name,
+          l_name: updatePatientDto.l_name,
+          suffix: updatePatientDto.suffix,
+          m_name: updatePatientDto.m_name,
+          age: updatePatientDto.age,
+          civil_status: updatePatientDto.civil_status,
+          occupation: updatePatientDto.occupation,
+          gender: updatePatientDto.gender,
+          contact_no: updatePatientDto.contact_no,
+          b_date: updatePatientDto.b_date,
+          address: updatePatientDto.address,
+     })
+     return{
+       msg:'Updated successfully!', status:HttpStatus.CREATED
+     }
+   } catch (error) {
+     return{
+       msg:'Something went wrong!'+ error, status:HttpStatus.BAD_REQUEST
+     }
+   }
+  }
+
 
     async updateServiceResult(id: number, updateServiceResultsDto: UpdateServiceResultsDto) {
      

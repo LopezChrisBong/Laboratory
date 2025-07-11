@@ -375,38 +375,38 @@ export default {
           }
         });
       } else if (type == "UPDATE") {
-        // alert("UPDATED");
-
+        // alert(this.data.id);
         let data = {
-          fname: this.fname,
+          f_name: this.fname,
           suffix: this.suffix,
-          lname: this.lname,
-          mname: this.mname,
+          l_name: this.lname,
+          m_name: this.mname,
           age: this.age,
-          cstatus: this.cstatus,
+          civil_status: this.cstatus,
           gender: this.gender,
           address: this.address,
-          number: this.number,
+          contact_no: this.number,
           occupation: this.occupation,
-          bdate: this.bdate,
+          b_date: this.bdate,
           //   pregnant: this.pregnant,
         };
-        let existingData =
-          JSON.parse(localStorage.getItem("patientData")) || [];
-
-        let index = existingData.findIndex((item) => item.id === data.id);
-
-        if (index !== -1) {
-          Object.assign(existingData[index], data);
-        } else {
-          existingData.push(data);
-        }
-        localStorage.setItem("patientData", JSON.stringify(existingData));
-        this.fadeAwayMessage.show = true;
-        this.fadeAwayMessage.type = "success";
-        this.fadeAwayMessage.header = "System Message";
-        this.fadeAwayMessage.message = "Successfully Updated";
-        this.closeD();
+        this.axiosCall(
+          "/appointment/updatePatientInfo/" + this.data.id,
+          "PATCH",
+          data
+        ).then((res) => {
+          if (res.data.status == 201) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = "Successfully Updated";
+            this.closeD();
+          } else if (res.data.status == 400) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = res.data.msg;
+          }
+        });
       }
     },
     generateUUID() {

@@ -140,24 +140,24 @@ export default {
         // { text: "Recent Doctor", value: "recentDoctor" },
       ],
       patients: [
-        {
-          name: "Courtney Henry",
-          id: "21789057",
-          lastVisit: "Jan 20, 2020",
-          status: "Active",
-          nextVisit: "Jan 24, 2020",
-          recentTopic: "Radiology",
-          recentDoctor: "Dr M. Wagner",
-        },
-        {
-          name: "Leslie Alexander",
-          id: "37890606",
-          lastVisit: "Jan 20, 2020",
-          status: "Active",
-          nextVisit: "Feb 1, 2020",
-          recentTopic: "Pediatrics",
-          recentDoctor: "Dr R. Green",
-        },
+        // {
+        //   name: "Courtney Henry",
+        //   id: "21789057",
+        //   lastVisit: "Jan 20, 2020",
+        //   status: "Active",
+        //   nextVisit: "Jan 24, 2020",
+        //   recentTopic: "Radiology",
+        //   recentDoctor: "Dr M. Wagner",
+        // },
+        // {
+        //   name: "Leslie Alexander",
+        //   id: "37890606",
+        //   lastVisit: "Jan 20, 2020",
+        //   status: "Active",
+        //   nextVisit: "Feb 1, 2020",
+        //   recentTopic: "Pediatrics",
+        //   recentDoctor: "Dr R. Green",
+        // },
       ],
     };
   },
@@ -216,7 +216,7 @@ export default {
     },
     getAllPatient() {
       this.loading = true;
-      this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
+      this.axiosCall("/appointment/getAllPatient/" + 1, "GET").then((res) => {
         if (res) {
           this.patients = res.data;
           this.loading = false;
