@@ -192,20 +192,21 @@
           <v-row>
             <v-col
               cols="12"
-              md="6"
+              md="4"
               style="justify-items: right; align-items: right: ;;"
             >
               <v-img
                 src="../../assets/img/paragon logo website.png"
-                style="width: 50%;  "
+                style="width: 60%;  "
               ></v-img>
             </v-col>
             <v-col
               cols="12"
-              md="6"
+              md="8"
+              class="m-0"
               style="justify-items: left; align-items: center;"
             >
-              <div class="mt-4">
+              <div class="mt-2">
                 <h2>PARAGON</h2>
               </div>
             </v-col>
