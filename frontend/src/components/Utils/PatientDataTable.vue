@@ -28,12 +28,12 @@
         ></v-text-field>
         <v-btn
           v-if="assignedModuleID == 3"
-          class="white--text ml-2 rounded-lg"
+          class="white--text ml-2 rounded-lg d-flex justify-center"
           color="#2196F3"
           @click="add()"
         >
           <v-icon left> mdi-plus-box-outline </v-icon>
-          Add New
+          <v-icon left> mdi-account-injury </v-icon>
         </v-btn>
       </v-col>
     </v-row>
@@ -78,18 +78,18 @@
         <template v-slot:[`item.actions`]="{ item }">
           <div class="">
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
               @click="view(item)"
               block
             >
-              <v-icon size="14" class="mr-1">mdi-eye</v-icon>Profile
+              <v-icon size="14" class="mr-1">mdi-eye</v-icon>
             </v-btn>
             <!-- 
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
@@ -102,7 +102,7 @@
             </v-btn> -->
 
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
@@ -110,11 +110,10 @@
               block
               v-if="assignedModuleID != 2"
             >
-              <v-icon size="14" class="mr-1">mdi-note</v-icon>Medical
-              Information
+              <v-icon size="14" class="mr-1">mdi-medication-outline</v-icon>
             </v-btn>
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
@@ -122,11 +121,11 @@
               block
               v-if="assignedModuleID != 2"
             >
-              <v-icon size="14" class="mr-1">mdi-calendar</v-icon>Appointment
+              <v-icon size="14" class="mr-1">mdi-calendar</v-icon>
             </v-btn>
 
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
@@ -134,11 +133,10 @@
               block
               v-if="assignedModuleID == 2"
             >
-              <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon
-              >Examine
+              <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon>
             </v-btn>
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
@@ -146,11 +144,10 @@
               block
               v-if="assignedModuleID == 3"
             >
-              <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon
-              >Laboratory Request
+              <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon>
             </v-btn>
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
@@ -158,12 +155,11 @@
               block
               v-if="assignedModuleID != 2"
             >
-              <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon
-              >Prescription
+              <v-icon size="14" class="mr-1">mdi-prescription</v-icon>
             </v-btn>
 
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined
@@ -171,13 +167,12 @@
               block
               v-if="assignedModuleID != 2 && assignedModuleID != 3"
             >
-              <v-icon size="14" class="mr-1">mdi-mortar-pestle-plus</v-icon>Lab
-              Result
+              <v-icon size="14" class="mr-1">mdi-medical-bag</v-icon>
             </v-btn>
 
             <!-- 
             <v-btn
-              class="ma-1 d-flex justify-start"
+              class="ma-1 d-flex justify-center"
               x-small
               color="green"
               outlined

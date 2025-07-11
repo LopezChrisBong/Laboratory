@@ -108,6 +108,12 @@ export class AppointmentController {
     return this.appointmentService.update(+id, updateAppointmentDto);
   }
 
+
+    @Patch('updatePatientInfo/:id')
+  updatePatientInfo(@Param('id') id: string, @Body() updatePatientDto: UpdatePatientDto) {
+    return this.appointmentService.updatePatientInfo(+id, updatePatientDto);
+  }
+
     @Patch('updateServiceResult/:id')
   updateServiceResult(@Param('id') id: string, @Body() updateServiceResultsDto: UpdateServiceResultsDto) {
     return this.appointmentService.updateServiceResult(+id, updateServiceResultsDto);

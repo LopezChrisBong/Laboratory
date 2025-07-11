@@ -27,6 +27,8 @@ import PatientAppointment from "../views/Auth/PatientAppointment.vue"
 import LandingPage from "../views/Auth/LandingPage.vue"
 import Services from "../views/Pages/Services.vue"
 import PatientDoctor from "../views/Pages/PatientDoctor.vue"
+import PatientEntry from "../views/Auth/PatientEntry.vue";
+import DoctorsUtility from "../views/Pages/DoctorsUtility.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -62,6 +64,12 @@ const routes = [
          {
         path: "patient-appointment",
         component: PatientAppointment,
+        meta: { authRequired: false },
+      },
+
+            {
+        path: "patient-entry",
+        component: PatientEntry,
         meta: { authRequired: false },
       },
  
@@ -254,6 +262,7 @@ const routes = [
         component: ReuestData,
         meta: { title: "Request Data Table", authRequired: true },
       },
+   
 
       
 
@@ -324,6 +333,11 @@ const routes = [
         path: "patient-doctor",
         component: PatientDoctor,
         meta: { title: "Patient Doctor List", authRequired: true },
+      },
+      {
+        path: "doctors-utility",
+        component: DoctorsUtility,
+        meta: { title: "Doctors Utility", authRequired: true },
       },
 
     ],
