@@ -24,6 +24,7 @@ import { UserType } from 'src/user-type/entities/user-type.entity';
 import { ServiceAppointment } from 'src/services/entities/service-appointment.entity';
 import { ServiceLabResult } from 'src/services/entities/service-lab-result.dto';
 import { Notification } from 'src/notification/entities/notification.entity';
+import { DoctorsSchedule } from 'src/doctors-schedule/entities/doctors-schedule.entity';
 
 const entities = [
   Users,
@@ -50,7 +51,8 @@ const entities = [
   MedicalInfo,
   ServiceAppointment,
   ServiceLabResult,
-  Notification
+  Notification,
+  DoctorsSchedule,
 ];
 
 export {
@@ -78,7 +80,8 @@ export {
   MedicalInfo,
   ServiceAppointment,
   ServiceLabResult,
-  Notification
+  Notification,
+  DoctorsSchedule,
 
 };
 

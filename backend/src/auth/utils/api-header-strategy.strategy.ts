@@ -15,7 +15,7 @@ export class HeaderApiKeyStrategy extends PassportStrategy(
   }
 
   public validate = (apiKey: string, done: (error: Error, data) => {}) => {
-    console.log('CALLED HERE');
+    // console.log('CALLED HERE');
     if (process.env.API_KEY === apiKey) {
       done(null, true);
     }

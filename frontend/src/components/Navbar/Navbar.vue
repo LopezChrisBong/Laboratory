@@ -577,8 +577,12 @@ body {
 }
 
 .sidebar .v-list-group--active {
-  background-color: #383be9 !important;
+  background-color: #8587f3 !important;
   border-radius: 5px;
+  color: #ffffff !important;
+}
+.sidebar .v-list-group .v-list-item--active {
+  background-color: #001799 !important;
   color: #ffffff !important;
 }
 </style>

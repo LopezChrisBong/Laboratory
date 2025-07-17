@@ -1,6 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateDoctorSpecializationDto {
+
+     @ApiProperty()
+    doctorID: number;
+
     @ApiProperty()
-    specialization_name: string;
+    specialty: string;
+
+    @ApiProperty()
+    specialty_description: string;
 }

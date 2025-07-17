@@ -40,7 +40,7 @@ export class AuthService {
 
   async create(registerUser: RegisterUserDto) {
 
-    console.log(registerUser)
+    // console.log(registerUser)
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();

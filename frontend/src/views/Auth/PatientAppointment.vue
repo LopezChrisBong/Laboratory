@@ -334,60 +334,93 @@
                                 clinicData(item);
                               "
                             >
-                              {{ item.name }}
+                              {{ item.specialty }}
                             </v-btn>
                           </li>
                         </ul>
                       </v-col>
                       <v-col cols="12" md="7">
-                        <div
-                          class="d-flex justify-center align-center"
-                          style="text-align: justify;"
-                        >
-                          <p>
-                            {{ clinicDecription.description }}
-                          </p>
-                        </div>
+                        <v-card class="pa-2">
+                          <v-card class="ma-1">
+                            <v-card-title>
+                              <span class="">Description:</span></v-card-title
+                            >
+                            <div
+                              class="d-flex justify-center align-center"
+                              style="text-align: justify;"
+                            >
+                              <p>
+                                {{ clinicDecription.description }}
+                              </p>
+                            </div>
+                          </v-card>
+                          <v-card class="ma-1">
+                            <v-card-title>
+                              <p class="">Doctor/s Encharge:</p>
+                            </v-card-title>
+                            <div class="mb-2">
+                              <ul class="pb-2">
+                                <li
+                                  v-for="item in clinicDecription.doctors"
+                                  :key="item.id"
+                                >
+                                  Dr. {{ item.name }}
+                                </li>
+                              </ul>
+                            </div>
+                          </v-card>
+                        </v-card>
                       </v-col>
                     </v-row>
                   </v-col>
 
-                  <v-col cols="12" v-show="info == 3">
+                  <v-col cols="12" md="6" v-show="info == 3">
                     <div class="mt-8">
                       Select date and time:
                     </div></v-col
                   >
-
-                  <v-col cols="12" md="6" sm="12" v-show="info == 3">
-                    <v-menu
-                      ref="menu"
-                      v-model="menu"
-                      :close-on-content-click="false"
-                      transition="scale-transition"
-                      :nudge-right="40"
-                      offset-y
-                      min-width="auto"
+                  <v-col cols="12" md="6" v-show="info == 3">
+                    <div class="mt-8">
+                      Profile:
+                    </div></v-col
+                  >
+                  <v-col cols="12" v-show="info == 3">
+                    <v-row
+                      v-if="
+                        !clinicDecription.doctors ||
+                          clinicDecription.specialty == 'Others'
+                      "
                     >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
-                          v-model="form.date"
-                          label="Pick a date"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
-                        />
-                      </template>
-                      <v-date-picker
-                        v-model="form.date"
-                        :min="minDate"
-                        :max="maxDate"
-                        @change="menu = false"
-                      />
-                    </v-menu>
-                  </v-col>
-                  <v-col cols="12" md="6" sm="12" v-show="info == 3">
-                    <!-- <v-select
+                      <v-col cols="12" md="6" sm="12">
+                        <v-menu
+                          ref="menu"
+                          v-model="menu"
+                          :close-on-content-click="false"
+                          transition="scale-transition"
+                          :nudge-right="40"
+                          offset-y
+                          min-width="auto"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-text-field
+                              v-model="form.date"
+                              label="Pick a date"
+                              prepend-icon="mdi-calendar"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"
+                            />
+                          </template>
+                          <v-date-picker
+                            v-model="form.date"
+                            :min="minDate"
+                            :max="maxDate"
+                            @change="menu = false"
+                          />
+                        </v-menu>
+                      </v-col>
+                      <v-col cols="12" md="6" sm="12">
+                        <!-- <v-select
                       label="Select Time"
                       :items="availableTimes"
                       v-model="form.time"
@@ -395,16 +428,81 @@
                       required
                     /> -->
 
-                    <v-autocomplete
-                      v-model="form.time"
-                      small-chips
-                      deletable-chips
-                      :rules="[(v) => !!v || 'Time is required']"
-                      label="Select Time"
-                      :items="availableTimes"
-                      class="rounded-lg"
-                      color="#6DB249"
-                    ></v-autocomplete>
+                        <v-autocomplete
+                          v-model="form.time"
+                          small-chips
+                          deletable-chips
+                          :rules="[(v) => !!v || 'Time is required']"
+                          label="Select Time"
+                          :items="allTimes"
+                          class="rounded-lg"
+                          color="#6DB249"
+                        ></v-autocomplete>
+                      </v-col>
+                    </v-row>
+                    <v-row v-else>
+                      <v-col cols="12" md="6">
+                        <v-autocomplete
+                          v-model="doctors_date"
+                          small-chips
+                          deletable-chips
+                          :rules="[(v) => !!v || 'required']"
+                          label="Select Date"
+                          item-value="id"
+                          item-text="date"
+                          @change="changeSchedule(doctors_date)"
+                          :items="doctors_schedList"
+                          class="rounded-lg"
+                          color="#6DB249"
+                        ></v-autocomplete>
+                        <br />
+                        <v-autocomplete
+                          v-model="doctor_time"
+                          small-chips
+                          deletable-chips
+                          :rules="[(v) => !!v || 'Time is required']"
+                          label="Select Time"
+                          :items="availableTimes"
+                          class="rounded-lg"
+                          color="#6DB249"
+                        ></v-autocomplete>
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <v-card class="pa-2">
+                          <v-row>
+                            <v-col
+                              cols="12"
+                              v-for="item in doc_profile"
+                              :key="item.id"
+                            >
+                              <div>
+                                <!-- <p>image {{ item.profile }}</p> -->
+                                <v-img
+                                  style="width: 200px; height: 150px;"
+                                  :src="item.profile"
+                                ></v-img>
+                              </div>
+                              <div>
+                                <p>
+                                  Name:<b> Dr. {{ item.name }}</b>
+                                </p>
+                              </div>
+                              <div>
+                                <p>Field of experties:</p>
+                                <ul>
+                                  <li
+                                    v-for="items in item.specialization"
+                                    :key="items.id"
+                                  >
+                                    {{ items.specialty }}
+                                  </li>
+                                </ul>
+                              </div>
+                            </v-col>
+                          </v-row>
+                        </v-card>
+                      </v-col>
+                    </v-row>
                   </v-col>
                 </v-row>
                 <v-card-actions>
@@ -527,6 +625,12 @@ export default {
       allTotalServices: null,
       serviceTotalPrice: null,
       packageTotalPrice: null,
+      doctors_time: null,
+      doctors_date: null,
+      doc_profile: [],
+      doctor_time: null,
+      doctors_schedList: [],
+      doctors_schedList1: [],
       activeTab: { id: 1, name: "Laboratory" },
       tab: 1,
       tabList: [
@@ -555,32 +659,7 @@ export default {
         date: null,
         time: null,
       },
-      clinicList: [
-        { id: 1, name: "Pediatrician ", description: "1Sample description" },
-        {
-          id: 2,
-          name: "Obstetrician-Gynecologist ",
-          description: "2Sample description",
-        },
-        { id: 3, name: "General Surgery ", description: "3Sample description" },
-        { id: 4, name: "Family Medicine ", description: "4Sample description" },
-        {
-          id: 5,
-          name: "Internal Medicine ",
-          description: "5Sample description",
-        },
-        { id: 6, name: "Ent-Head/Neck  ", description: "6Sample description" },
-        { id: 7, name: "Surgeon ", description: "7Sample description" },
-        { id: 8, name: "General  ", description: "8Sample description" },
-        {
-          id: 9,
-          name: "Physician/Occupation ",
-          description: "9Sample description",
-        },
-        { id: 10, name: "al Medicine ", description: "10Sample description" },
-        { id: 11, name: "Pathologist ", description: "11Sample description" },
-        { id: 12, name: "Radiologist ", description: "12Sample description" },
-      ],
+      clinicList: [],
       selectedIndex: null,
       dataPackages: [],
       genderList: ["Male", "Female"],
@@ -598,6 +677,32 @@ export default {
         "02:00 PM",
         "03:00 PM",
         "04:00 PM",
+      ],
+      allTimes1: [
+        "01:00 AM",
+        "02:00 AM",
+        "03:00 AM",
+        "04:00 AM",
+        "05:00 AM",
+        "06:00 AM",
+        "07:00 AM",
+        "08:00 AM",
+        "09:00 AM",
+        "10:00 AM",
+        "11:00 AM",
+        "12:00 PM",
+        "01:00 PM",
+        "02:00 PM",
+        "03:00 PM",
+        "04:00 PM",
+        "05:00 PM",
+        "06:00 PM",
+        "07:00 PM",
+        "08:00 PM",
+        "09:00 PM",
+        "10:00 PM",
+        "11:00 PM",
+        "12:00 AM",
       ],
       dataServices: [],
       bookings: [],
@@ -662,6 +767,7 @@ export default {
     this.getAllSchedule();
     this.getAllServices();
     this.getAllPackages();
+    this.getAllClinic();
   },
   methods: {
     selectButton(index) {
@@ -675,6 +781,7 @@ export default {
         this.info = 2;
       } else if (this.info == 2) {
         this.info = 3;
+        this.getAllDoctorsSchedule();
       }
     },
     toUppercase(field, value) {
@@ -702,11 +809,21 @@ export default {
     submitForm() {
       this.confirmationDialog = true;
     },
+    changeSchedule(sched) {
+      let newArr = [];
+      for (let i = 0; i < this.doctors_schedList1.length; i++) {
+        if (this.doctors_schedList1[i].id == sched) {
+          newArr.push(this.doctors_schedList1[i]);
+        }
+      }
+
+      this.doc_profile = newArr;
+      console.log("Scdad", this.doc_profile);
+    },
     getAllSchedule() {
       this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
         (res) => {
           if (res) {
-            console.log("scheduled", res.data);
             this.bookings = res.data;
           }
         }
@@ -719,19 +836,85 @@ export default {
       ).then((res) => {
         if (res) {
           this.dataServices = res.data;
-          console.log("LOVED", res.data);
         }
       });
     },
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
-          console.log("Pakes", res.data);
           this.dataPackages = res.data;
         }
       });
     },
+
+    getAllClinic() {
+      this.axiosCall("/doctor-specialization/getAllClinic", "GET").then(
+        (res) => {
+          if (res) {
+            let others = [
+              {
+                specialty: "Others",
+                description: "No specific Clinic to visit!",
+                doctors: [],
+              },
+            ];
+            this.clinicList = res.data;
+            Object.assign(this.clinicList, others);
+            // this.clinicList.reverse();
+            // console.log("Clinic Data", this.clinicList);
+          }
+        }
+      );
+    },
+    getAllDoctorsSchedule() {
+      let docList;
+      if (
+        !this.clinicDecription.doctors ||
+        this.clinicDecription.specialty == "Others"
+      ) {
+        docList = [];
+      } else {
+        docList = JSON.stringify(this.clinicDecription.doctors);
+      }
+      this.axiosCall(
+        "/doctors-schedule/getAllDoctorsSched/" + docList,
+        "GET"
+      ).then((res) => {
+        if (res) {
+          console.log(res.data);
+          let data = res.data;
+          Object.assign(data, { oldDate: null });
+          this.doctors_schedList1 = res.data;
+          for (let i = 0; i < data.length; i++) {
+            data[i].oldDate = data[i].date;
+            data[i].date =
+              this.formatDate(data[i].date) +
+              " From: " +
+              data[i].timeFrom +
+              " To: " +
+              data[i].timeTo;
+
+            data[i].profile = data[i].profile
+              ? process.env.VUE_APP_SERVER +
+                "/user-details/getProfileImg/" +
+                data[i].profile
+              : process.env.VUE_APP_SERVER +
+                "/user-details/getProfileImg/img_avatar.png";
+          }
+
+          this.doctors_schedList = data;
+        }
+      });
+    },
     confirmBooking() {
+      // if (
+      //   this.clinicDecription.specialty == "Others" ||
+      //   !this.clinicDecription.doctors
+      // ) {
+      //   alert("Others");
+      // } else {
+      //   alert(this.doc_profile[0].doctorID);
+      // }
       let data = {
         f_name: this.form.f_name,
         l_name: this.form.l_name,
@@ -753,7 +936,7 @@ export default {
         let errorCode = res.data.duplicate;
 
         if (errorCode == true) {
-          alert("Duplicate Patient");
+          // alert("Duplicate Patient");
           this.axiosCall(
             "/appointment/checkPatient/dataExist/" +
               this.form.f_name +
@@ -766,9 +949,24 @@ export default {
 
               let data2 = {
                 patientID: res.data.id,
-                date: this.form.date,
-                time: this.form.time,
-                clinic: JSON.stringify(this.clinicDecription.id),
+                date:
+                  this.clinicDecription.specialty == "Others" ||
+                  !this.clinicDecription.doctors
+                    ? this.form.date
+                    : this.doc_profile[0].oldDate,
+                time:
+                  this.clinicDecription.specialty == "Others" ||
+                  !this.clinicDecription.doctors
+                    ? this.form.time
+                    : this.doctor_time,
+                clinic: this.clinicDecription.specialty
+                  ? this.clinicDecription.specialty
+                  : "",
+                doctorID:
+                  this.clinicDecription.specialty == "Others" ||
+                  !this.clinicDecription.doctors
+                    ? null
+                    : this.doc_profile[0].doctorID,
               };
 
               this.axiosCall(
@@ -794,9 +992,24 @@ export default {
         } else {
           let data2 = {
             patientID: res.data.id,
-            date: this.form.date,
-            time: this.form.time,
-            clinic: JSON.stringify(this.clinicDecription.id),
+            date:
+              this.clinicDecription.specialty == "Others" ||
+              !this.clinicDecription.doctors
+                ? this.form.date
+                : this.doc_profile[0].oldDate,
+            time:
+              this.clinicDecription.specialty == "Others" ||
+              !this.clinicDecription.doctors
+                ? this.form.time
+                : this.doctor_time,
+            clinic: this.clinicDecription.specialty
+              ? this.clinicDecription.specialty
+              : "",
+            doctorID:
+              this.clinicDecription.specialty == "Others" ||
+              !this.clinicDecription.doctors
+                ? null
+                : this.doc_profile[0].doctorID,
           };
 
           this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
@@ -862,6 +1075,12 @@ export default {
         date: null,
         time: null,
       };
+      this.clinicDecription = [];
+      this.doc_profile = null;
+      this.doctor_time = null;
+      this.doctors_date = null;
+      this.doctors_schedList = [];
+      this.doctors_schedList1 = [];
       this.selected = [];
     },
   },

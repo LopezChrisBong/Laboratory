@@ -22,7 +22,7 @@ export class MedicalInfoController {
     return this.medicalInfoService.findAll();
   }
 
-  @Get(':id')
+  @Get('/patientMedicalInfo/:id')
   findOne(@Param('id') id: string) {
     return this.medicalInfoService.findOne(+id);
   }

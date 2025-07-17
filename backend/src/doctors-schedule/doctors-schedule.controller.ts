@@ -17,6 +17,17 @@ export class DoctorsScheduleController {
     return this.doctorsScheduleService.findAll();
   }
 
+    @Get('/getMySchedule/:id')
+  getMySchedule(@Param('id') id: string) {
+    return this.doctorsScheduleService.getMySchedule(+id);
+  }
+
+      @Get('/getAllDoctorsSched/:data')
+  getAllDoctorsSched(@Param('data') data: string) {
+    return this.doctorsScheduleService.getAllDoctorsSched(data);
+  }
+
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.doctorsScheduleService.findOne(+id);

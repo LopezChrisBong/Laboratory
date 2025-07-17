@@ -53,8 +53,10 @@ export class AppointmentController {
   }
 
     @Get('getAllPatient/:tabID')
-  getAllPatient(@Param('tabID') tabID: string) {
-    return this.appointmentService.getAllPatient(+tabID);
+  getAllPatient(@Param('tabID') tabID: string,@Headers() headers,) {
+       var head_str = headers.authorization;
+        const curr_user = currentUser(head_str);
+    return this.appointmentService.getAllPatient(+tabID, curr_user);
   }
      @Get('getAllPatientForDoctor/:doctorID')
   getAllPatientForDoctor(@Param('doctorID') doctorID: string) {
