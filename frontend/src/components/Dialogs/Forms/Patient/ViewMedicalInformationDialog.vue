@@ -293,13 +293,17 @@ export default {
     },
     getAllPatientMedicalInfo() {
       this.loading = true;
-      this.axiosCall("/medical-info/" + this.id, "GET").then((res) => {
-        if (res) {
-          console.log("Get Data", res.data);
-          this.dataItem = res.data;
+      this.axiosCall("/medical-info/patientMedicalInfo/" + this.id, "GET").then(
+        (res) => {
+          if (res) {
+            console.log("Get Data", res.data);
+            this.dataItem = res.data;
+          } else {
+            this.dataItem = null;
+          }
+          this.loading = false;
         }
-        this.loading = false;
-      });
+      );
     },
     closeD() {
       this.eventHub.$emit("closeViewMedicalInformationDialog", false);

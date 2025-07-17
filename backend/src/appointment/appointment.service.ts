@@ -106,7 +106,8 @@ export class AppointmentService {
           patientID: appointment.patientID,
           date: appointment.date,
           time: appointment.time,
-          clinic:appointment.clinic
+          clinic:appointment.clinic,
+          doctorID:appointment.doctorID
         });
 
         await queryRunner.manager.save(data);
@@ -145,7 +146,7 @@ export class AppointmentService {
     await queryRunner.startTransaction();
     try {
       let infoID = createPatientDoctorDto;
-      console.log(infoID)
+      // console.log(infoID)
       if(infoID.appointmentID){
         //  console.log('Info1',infoID.appointmentID)
        const isExist = await this.patientDoctorRepository.findOneBy({appointmentID: infoID.appointmentID, patientID:infoID.patientID});
@@ -251,9 +252,9 @@ export class AppointmentService {
       if(infoID.appointmentID){
 
        const isExist = await this.patientMedtechRepository.findOneBy({appointmentID: infoID.appointmentID, patientID:infoID.patientID});
-      console.log('INFFFOOOO',infoID)
+      // console.log('INFFFOOOO',infoID)
       if(!isExist){
-        console.log('Added')
+        // console.log('Added')
         const data = queryRunner.manager.create(PatientMedtech, {
           patientID: infoID.patientID,
           medtechID: infoID.medtechID,
@@ -376,9 +377,11 @@ export class AppointmentService {
       return data
   }
 
-  async getAllPatient(tabID:number){
+  async getAllPatient(tabID:number, user:any){
+    //  console.log(user.userdetail.user.assignedModuleID)
     let data
     if(tabID == 1){
+      if(user.userdetail.user.assignedModuleID == 3){
        data = await this.patientRepository
       .createQueryBuilder('pt')
       .select([
@@ -386,6 +389,15 @@ export class AppointmentService {
         " pt.*",
       ])
       .getRawMany()
+      }else{
+      data = await this.patientRepository
+      .createQueryBuilder('pt')
+      .select([
+        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+        " pt.*",
+      ])
+      .getRawMany()
+      }
     }
   else if(tabID == 2){
        data = await this.patientRepository
@@ -397,6 +409,16 @@ export class AppointmentService {
       .where('pt.status = 1')
       .getRawMany()
   }  else if(tabID == 3){
+
+            const users = await this.patientRepository
+            .createQueryBuilder('pt')
+            .where('pt.medtechID IS NOT NULL')
+            .andWhere('pt.medtechID != :empty', { empty: '' })
+            .getMany();
+
+    if(users){
+      data = []
+    }else{
        data = await this.patientRepository
       .createQueryBuilder('pt')
       .select([
@@ -405,6 +427,8 @@ export class AppointmentService {
       ])
       .where('pt.status = 2')
       .getRawMany()
+    }
+
   }
     else if(tabID == 4){
        data = await this.patientRepository
@@ -417,7 +441,7 @@ export class AppointmentService {
       .getRawMany()
   }
 
-      console.log(data)
+     
       return data
   }
 
@@ -452,7 +476,11 @@ export class AppointmentService {
     query.andWhere('pt.status = 1');
   } 
   else if (role === 5) {
-    query.andWhere('pt.status IN (0 ,1, 2)');
+         query.andWhere('pt.status IN (0,1, 2)');
+        query.andWhere('pt.medtechID IS NULL')
+   
+    // query.andWhere('pt.medtechID IS EQUAL NULL');
+    // query.andWhere('pt.medtechID == :empty', { empty: '' })
   }
 
   const data = await query.getRawMany();
@@ -488,12 +516,12 @@ export class AppointmentService {
       .andWhere('ap.date != "null" ')
       .andWhere('ap.date != "null" ')
       .getRawMany()
-      console.log(data)
+      // console.log(data)
       return data
   }
 
       async getAssignedBookedAppointmentDoctor(id:number,patientID:number){
-      console.log(id,patientID)
+      // console.log(id,patientID)
       let data = await this.serviceAppointmentRepository
       .createQueryBuilder('sa')
       .select([
@@ -509,12 +537,12 @@ export class AppointmentService {
       .where('sa.doctorID = :id',{id})
       .andWhere('sa.patientID = :patientID',{patientID})
       .getRawMany()
-      console.log(data)
+      // console.log(data)
       return data
   }
 
         async getAssignedBookedAppointmentMedtech(id:number, patientID: number){
-      console.log(id,patientID)
+      // console.log(id,patientID)
       let data = await this.serviceAppointmentRepository
       .createQueryBuilder('sa')
       .select([
@@ -530,7 +558,7 @@ export class AppointmentService {
       .where('sa.medtechID = :id',{id})
       .andWhere('sa.patientID = :patientID',{patientID})
       .getRawMany()
-      console.log(data)
+      // console.log(data)
       return data
   }
 
@@ -601,7 +629,7 @@ let data = await this.appointmentRepository
   }
 
   updatePatientInfo(id: number, updatePatientDto: UpdatePatientDto) {
-    console.log(id)
+    // console.log(id)
        try {
        this.dataSource.manager.update(Patient, id,{
           f_name: updatePatientDto.f_name,
@@ -658,11 +686,11 @@ let data = await this.appointmentRepository
 
       async updateAppointmentStatus(id: number, updateAppointmentDto: UpdateAppointmentDto) {
       // console.log('Data ID',id)
-      console.log('Data',updateAppointmentDto)
+      // console.log('Data',updateAppointmentDto)
       
        try {
           if(updateAppointmentDto.labID){
-            console.log('naay sulod')
+            // console.log('naay sulod')
                   this.dataSource.manager.update(Appointment, id,{
         status:updateAppointmentDto.status,
      })
@@ -679,7 +707,7 @@ let data = await this.appointmentRepository
        msg:'Updated successfully!', status:HttpStatus.CREATED
      }
           }else{
-            console.log('walay sulod')
+            // console.log('walay sulod')
 
                      this.dataSource.manager.update(Patient, updateAppointmentDto.patientID,{
         status:updateAppointmentDto.status,

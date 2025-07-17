@@ -469,6 +469,7 @@ export default {
     //   });
     // },
     closeD() {
+      // alert("LIvcew");
       this.eventHub.$emit("closeMedicalInformation", false);
       this.dialog = false;
     },
