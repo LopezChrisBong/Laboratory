@@ -384,7 +384,7 @@ export default {
       },
       headers: [
         { text: "Name", value: "name", align: "start" },
-        { text: "PatientID", value: "patientID", align: "center" },
+        { text: "PatientID", value: "unique_patientID", align: "center" },
         { text: "Date", value: "date", align: "center" },
         { text: "Time", value: "time", align: "center" },
         { text: "Actions", value: "actions", sortable: false, align: "end" },
