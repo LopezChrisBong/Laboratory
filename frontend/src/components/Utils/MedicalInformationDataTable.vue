@@ -101,7 +101,7 @@
               Information
             </v-btn> -->
 
-            <!-- <v-btn
+            <v-btn
               class="ma-1 d-flex justify-center"
               x-small
               color="green"
@@ -112,7 +112,7 @@
             >
               <v-icon size="14" class="mr-1">mdi-medication-outline</v-icon>
             </v-btn>
-            <v-btn
+            <!-- <v-btn
               class="ma-1 d-flex justify-center"
               x-small
               color="green"
@@ -122,7 +122,7 @@
               v-if="assignedModuleID != 2"
             >
               <v-icon size="14" class="mr-1">mdi-calendar</v-icon>
-            </v-btn> -->
+            </v-btn>
 
             <v-btn
               class="ma-1 d-flex justify-center"
@@ -146,7 +146,7 @@
             >
               <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon>
             </v-btn>
-            <!-- <v-btn
+            <v-btn
               class="ma-1 d-flex justify-center"
               x-small
               color="green"
@@ -157,7 +157,7 @@
             >
               <v-icon size="14" class="mr-1">mdi-prescription</v-icon>
             </v-btn>
--->
+
             <v-btn
               class="ma-1 d-flex justify-center"
               x-small
@@ -168,7 +168,7 @@
               v-if="assignedModuleID != 2 && assignedModuleID != 3"
             >
               <v-icon size="14" class="mr-1">mdi-medical-bag</v-icon>
-            </v-btn>
+            </v-btn> -->
 
             <!-- 
             <v-btn

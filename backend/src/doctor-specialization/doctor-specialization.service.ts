@@ -81,7 +81,44 @@ export class DoctorSpecializationService {
     return data
   }
 
+  async getSpecificClinic(specialty:string){
+          const rawData = await this.userDetailRepository
+          .createQueryBuilder('ud')
+          .select([
+            "ds.specialty as specialty",
+            "ds.specialty_description as description",
+            "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname), concat(ud.fname, ' ', ud.lname)) as name",
+            'ud.id as doctorId',
+          ])
+          .leftJoin(Users, 'us', 'us.id = ud.userID')
+          .leftJoin(DoctorSpecialization, 'ds', 'ds.doctorID = ud.id')
+          .where('us.isAdminApproved = 1')
+          .andWhere('us.assignedModuleID = 5')
+          .andWhere('ds.specialty = :specialty', {specialty})
+          .orderBy('ds.specialty', 'ASC')
+          .getRawMany();
+        const grouped = {};
+          for (const item of rawData) {
+            const key = item.specialty;
+            if (!grouped[key]) {
+              grouped[key] = {
+                specialty: key,
+                description: item.description,
+                doctors: [],
+              };
+            }
+            grouped[key].doctors.push({
+              id: item.doctorId,
+              name: item.name,
+            });
+          }
+          const result = Object.values(grouped)[0];
+          // console.log("Sample Clinic Data:", result);
+
+          return result
+  }
  async getAllClinic(){
+  
       // let data = await this.userDetailRepository
       // .createQueryBuilder('ud')
       // .select([

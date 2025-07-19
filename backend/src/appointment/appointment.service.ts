@@ -598,6 +598,26 @@ let data = await this.appointmentRepository
       return data
   }
 
+   async getAllScheduleAppointment(){
+  let data = await this.appointmentRepository
+  .createQueryBuilder('ap')
+  .select([
+    'ap.*',
+    "IF (!ISNULL(p.m_name), concat(p.f_name, ' ',SUBSTRING(p.m_name, 1, 1) ,'. ',p.l_name) ,concat(p.f_name, ' ', p.l_name)) as name",
+    'p.patientID as unique_patientID'
+  ])
+  .leftJoin(Patient, 'p', 'p.id = ap.patientID')
+  .getRawMany();
+
+//     let data =[
+//   { date: "2025-05-18", time: "08:00 AM" },
+//   { date: "2025-05-18", time: "09:00 AM" },
+  // { date: "2025-05-19", time: "10:00 AM" }
+// ] 
+// console.log('Appointment',data);
+      return data
+  }
+
   async checkPatient(f_name: string, l_name:string) {
     // console.log(f_name)
     const isExist = await this.patientRepository.findOneBy({ f_name, l_name});
