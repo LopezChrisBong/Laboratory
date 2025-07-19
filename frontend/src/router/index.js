@@ -29,6 +29,7 @@ import Services from "../views/Pages/Services.vue"
 import PatientDoctor from "../views/Pages/PatientDoctor.vue"
 import PatientEntry from "../views/Auth/PatientEntry.vue";
 import DoctorsUtility from "../views/Pages/DoctorsUtility.vue";
+import MedicalInformation from "../views/Pages/MedicalInformation.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -298,21 +299,13 @@ const routes = [
         component: Inventory,
         meta: { title: "Inventory Table", authRequired: true },
       },
-      {
-        path: "appointment",
-        component: Appointment,
-        meta: { title: "Appointment Table", authRequired: true },
-      },
+
       {
         path: "billing",
         component: HospitalBilling,
         meta: { title: "Hospital Billing", authRequired: true },
       },
-      {
-        path: "request",
-        component: LaboratoryRequest,
-        meta: { title: "Laboratory & Imaging Request", authRequired: true },
-      },
+
       {
         path: "billing-data",
         component: BillingData,
@@ -334,10 +327,29 @@ const routes = [
         component: PatientDoctor,
         meta: { title: "Patient Doctor List", authRequired: true },
       },
+      
       {
         path: "doctors-utility",
         component: DoctorsUtility,
         meta: { title: "Doctors Utility", authRequired: true },
+      },
+
+      {
+        path: "medical-information",
+        component: MedicalInformation,
+        meta: { title: "Medical Information", authRequired: true },
+      },
+
+      {
+        path: "request",
+        component: LaboratoryRequest,
+        meta: { title: "Laboratory & Imaging Request", authRequired: true },
+      },
+
+      {
+        path: "appointment",
+        component: Appointment,
+        meta: { title: "Appointment Table", authRequired: true },
       },
 
     ],

@@ -60,7 +60,7 @@
                     </v-chip>
                   </template>
                   <template v-slot:[`item.action`]="{ item }">
-                    <v-btn
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="view(item)"
@@ -68,7 +68,7 @@
                       color="green"
                       block
                       >View</v-btn
-                    >
+                    > -->
                     <v-btn
                       x-small
                       class="mt-1"
@@ -77,10 +77,10 @@
                       color="blue"
                       block
                       v-if="item.status == 0"
-                      >Update</v-btn
+                      >View</v-btn
                     >
 
-                    <v-btn
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="labRequest(item)"
@@ -88,8 +88,8 @@
                       color="blue"
                       block
                       >Lab Request</v-btn
-                    >
-                    <v-btn
+                    > -->
+                    <!-- <v-btn
                       v-if="item.status == 0"
                       x-small
                       class="mt-1"
@@ -98,8 +98,8 @@
                       color="blue"
                       block
                       >Pay</v-btn
-                    >
-                    <v-btn
+                    > -->
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="assignDoctor(item)"
@@ -107,8 +107,8 @@
                       color="orange"
                       block
                       >Assign Doctor</v-btn
-                    >
-                    <v-btn
+                    > -->
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="assignMedtech(item)"
@@ -116,8 +116,8 @@
                       color="orange"
                       block
                       >Assign Med-Tech</v-btn
-                    >
-
+                    > -->
+                    <!-- 
                     <v-btn
                       x-small
                       class="mt-1"
@@ -127,8 +127,8 @@
                       block
                       v-if="userRoleID == 3"
                       >Doctors Fee
-                    </v-btn>
-                    <v-btn
+                    </v-btn> -->
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="payLabTest(2, item)"
@@ -136,7 +136,7 @@
                       color="red"
                       block
                       >Print</v-btn
-                    >
+                    > -->
 
                     <v-btn
                       x-small
@@ -836,21 +836,21 @@ export default {
           sortable: false,
         },
 
-        {
-          text: "Doctor",
-          value: "Doc_name",
-          align: "center",
-          valign: "center",
-          sortable: false,
-        },
+        // {
+        //   text: "Doctor",
+        //   value: "Doc_name",
+        //   align: "center",
+        //   valign: "center",
+        //   sortable: false,
+        // },
 
-        {
-          text: "Med-Tech",
-          value: "Med_name",
-          align: "center",
-          valign: "center",
-          sortable: false,
-        },
+        // {
+        //   text: "Med-Tech",
+        //   value: "Med_name",
+        //   align: "center",
+        //   valign: "center",
+        //   sortable: false,
+        // },
 
         {
           text: "Action",

@@ -75,9 +75,16 @@ export class AppointmentController {
   findOne(@Param('id') id: string) {
     return this.appointmentService.findOne(+id);
   }
+
+
   @Get('getAllSchedule/DataAppointment')
   getAllScheduleData() {
   return this.appointmentService.getAllScheduleData();
+}
+
+  @Get('getAllScheduleAppointment/AllAppointment')
+  getAllScheduleAppointment() {
+  return this.appointmentService.getAllScheduleAppointment();
 }
 
   @Get('getBookedAppointment/:id')
