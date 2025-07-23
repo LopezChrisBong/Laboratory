@@ -47,9 +47,24 @@
         <template v-slot:[`item.date`]="{ item }">
           {{ formatDate(item.date) }}
         </template>
+        <template v-slot:[`item.status`]="{ item }">
+          <v-chip
+            x-small
+            class="pa-2"
+            :color="item.status == 0 ? 'orange' : 'green'"
+            >{{ item.status == 0 ? "Pending" : "Confirmed" }}</v-chip
+          >
+        </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-btn icon @click="openDialog(item), (update = true)">
+          <v-btn
+            icon
+            @click="openDialog(item), (update = true)"
+            v-if="item.status == 0"
+          >
             <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <v-btn icon @click="confirmDialog(item)" v-if="item.status == 0">
+            <v-icon>mdi-check-decagram</v-icon>
           </v-btn>
           <!-- <v-btn icon @click="cancelAppointment(item.id)">
             <v-icon color="red">mdi-delete</v-icon>
@@ -386,6 +401,7 @@ export default {
         { text: "Name", value: "name", align: "start" },
         { text: "PatientID", value: "unique_patientID", align: "center" },
         { text: "Date", value: "date", align: "center" },
+        { text: "Status", value: "status", align: "center" },
         { text: "Time", value: "time", align: "center" },
         { text: "Actions", value: "actions", sortable: false, align: "end" },
       ],
@@ -516,7 +532,7 @@ export default {
       this.paginationData = data;
     },
     clinicData(item) {
-      console.log(item);
+      // console.log(item);
       this.clinicDecription = item;
     },
     selectButton(index) {
@@ -543,7 +559,7 @@ export default {
         "GET"
       ).then((res) => {
         if (res) {
-          console.log(res.data);
+          // console.log(res.data);
           let data = res.data;
           Object.assign(data, { oldDate: null });
           this.doctors_schedList1 = res.data;
@@ -577,7 +593,7 @@ export default {
       }
 
       this.doc_profile = newArr;
-      console.log("Scdad", this.doc_profile);
+      // console.log("Scdad", this.doc_profile);
     },
     getAllAppointment() {
       this.loading = true;
@@ -599,7 +615,7 @@ export default {
         for (let i = 0; i < data.length; i++) {
           data[i].name = this.toTitleCase(data[i].name);
         }
-        console.log("Doctors", data);
+        // console.log("Doctors", data);
         this.selectedDoctor = data[0];
         this.doctors = data;
       });
@@ -626,7 +642,7 @@ export default {
             this.clinicList = res.data;
             Object.assign(this.clinicList, others);
             // this.clinicList.reverse();
-            // console.log("Clinic Data", this.clinicList);
+            // // console.log("Clinic Data", this.clinicList);
           }
         }
       );
@@ -641,13 +657,42 @@ export default {
         "GET"
       ).then((res) => {
         this.clinicDecription = res.data;
-        // console.log("description", res.data);
+        // // console.log("description", res.data);
       });
       this.action = "Update";
       this.selectedIndex = item.clinic;
-      console.log(item);
+      // console.log(item);
       this.updateID = item.id;
       this.dialog = true;
+    },
+    confirmDialog(item) {
+      // console.log(item);
+      let data = {
+        status: 1,
+      };
+      this.axiosCall(
+        "/appointment/confirmAppointment/" + item.id,
+        "PATCH",
+        data
+      ).then((res) => {
+        if (res.data.status == 201) {
+          // alert("updated");
+          this.initialize();
+          this.updateID = null;
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "success";
+          this.fadeAwayMessage.header = "System Message";
+          this.fadeAwayMessage.message = res.data.msg;
+
+          this.addAppointmentDialog = false;
+          this.resetForm();
+        } else if (res.data.status == 400) {
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "error";
+          this.fadeAwayMessage.header = "System Message";
+          this.fadeAwayMessage.message = res.data.msg;
+        }
+      });
     },
 
     refresh() {
@@ -682,7 +727,7 @@ export default {
             ? null
             : this.doc_profile[0].doctorID,
       };
-      console.log(data);
+      // console.log(data);
 
       this.axiosCall("/appointment/bookAppointment", "POST", data).then(
         (res) => {
@@ -691,9 +736,9 @@ export default {
             this.fadeAwayMessage.type = "success";
             this.fadeAwayMessage.header = "Successfully Updated";
             this.dialog = false;
+            this.initialize();
             this.resetForm();
             this.close();
-            this.initialize();
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "error";
@@ -755,7 +800,7 @@ export default {
             ? null
             : this.doc_profile[0].doctorID,
       };
-      console.log(data, this.updateID);
+      // console.log(data, this.updateID);
       this.axiosCall("/appointment/" + this.updateID, "PATCH", data).then(
         (res) => {
           if (res.data.status == 201) {

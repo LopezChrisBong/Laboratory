@@ -21,7 +21,7 @@ export default {
   },
   methods: {
     graphChart() {
-      console.log("PIEDATA");
+      // console.log("PIEDATA");
       this.renderChart(
         {
           labels: ["2025", "2026", "2027", "2028", "2029"],

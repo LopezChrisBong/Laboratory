@@ -65,7 +65,7 @@
                       v-model="form.suffix"
                       class="text-uppercase"
                       required
-                      @input="toUppercase('l_name', $event)"
+                      @input="toUppercase('suffix', $event)"
                     />
                   </v-col>
                   <v-col cols="12" md="4" sm="12" v-show="info == 1">
@@ -797,7 +797,7 @@ export default {
     },
     async fetchBookings(date) {
       console.log(date);
-      console.log(this.bookings);
+      // console.log(this.bookings);
       // try {
       //   this.axiosCall("/appointment/booking", "POST", date).then((res) => {
       //     this.bookings = res.data;
@@ -818,7 +818,7 @@ export default {
       }
 
       this.doc_profile = newArr;
-      console.log("Scdad", this.doc_profile);
+      // console.log("Scdad", this.doc_profile);
     },
     getAllSchedule() {
       this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
@@ -861,7 +861,7 @@ export default {
             this.clinicList = res.data;
             Object.assign(this.clinicList, others);
             // this.clinicList.reverse();
-            // console.log("Clinic Data", this.clinicList);
+            // // console.log("Clinic Data", this.clinicList);
           }
         }
       );
@@ -881,7 +881,7 @@ export default {
         "GET"
       ).then((res) => {
         if (res) {
-          console.log(res.data);
+          // console.log(res.data);
           let data = res.data;
           Object.assign(data, { oldDate: null });
           this.doctors_schedList1 = res.data;
@@ -929,10 +929,10 @@ export default {
         address: this.form.address,
       };
 
-      console.log("Data Passed", data);
+      // console.log("Data Passed", data);
 
       this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
-        console.log(res.data.status, res.data.duplicate);
+        // console.log(res.data.status, res.data.duplicate);
         let errorCode = res.data.duplicate;
 
         if (errorCode == true) {
@@ -945,7 +945,7 @@ export default {
             "GET"
           ).then((res) => {
             if (res) {
-              console.log("Patient", res.data);
+              // console.log("Patient", res.data);
 
               let data2 = {
                 patientID: res.data.id,

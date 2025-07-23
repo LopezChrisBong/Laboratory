@@ -26,7 +26,7 @@ export class DoctorsScheduleService {
     ){}
     
  async create(createDoctorsScheduleDto: CreateDoctorsScheduleDto){
-      // console.log(createDoctorsScheduleDto)
+      // // console.log(createDoctorsScheduleDto)
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
@@ -84,7 +84,7 @@ export class DoctorsScheduleService {
       .andWhere('ds.date >= :today', { today: today.toISOString().split('T')[0] })
       .orderBy('ds.date', 'ASC')
       .getRawMany();
-      // console.log(data)
+      // // console.log(data)
     return data
   }
 
@@ -124,7 +124,7 @@ export class DoctorsScheduleService {
     }
    
     const flatData = newArr.flat();
-    //  console.log(flatData)
+    //  // console.log(flatData)
      return flatData
     
   }
@@ -139,7 +139,7 @@ export class DoctorsScheduleService {
 
   update(id: number, updateDoctorsScheduleDto: UpdateDoctorsScheduleDto) {
 
-      // console.log(id, updateDoctorsScheduleDto)
+      // // console.log(id, updateDoctorsScheduleDto)
           try {
          this.dataSource.manager.update(DoctorsSchedule, id,{
             date:updateDoctorsScheduleDto.date,

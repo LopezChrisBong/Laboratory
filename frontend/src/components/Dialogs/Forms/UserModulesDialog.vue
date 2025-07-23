@@ -218,7 +218,7 @@ export default {
       }
     },
     addSubList($event, item) {
-      console.log(item);
+      // console.log(item);
       this.toggleActive();
       $event.target.classList.add("active");
       if (item.isParent == "1" || item.isParent == 1) {
@@ -253,7 +253,7 @@ export default {
     getAllModules() {
       this.axiosCall("/sys-modules", "GET").then((res) => {
         if (res.data) {
-          // console.log(res.data);
+          // // console.log(res.data);
           this.moduleslist = res.data;
         }
       });
@@ -263,7 +263,7 @@ export default {
       this.axiosCall("/assigned-modules/getRemainingModules/" + id, "GET").then(
         (res) => {
           if (res.data) {
-            // console.log(res.data);
+            // // console.log(res.data);
             this.moduleslist = res.data;
           }
         }

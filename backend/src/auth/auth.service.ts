@@ -40,7 +40,7 @@ export class AuthService {
 
   async create(registerUser: RegisterUserDto) {
 
-    // console.log(registerUser)
+    // // console.log(registerUser)
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -84,7 +84,7 @@ export class AuthService {
         status: HttpStatus.BAD_REQUEST,
       };
       return toReturn;
-      // console.log(err)
+      // // console.log(err)
     } finally {
       await queryRunner.release();
     }

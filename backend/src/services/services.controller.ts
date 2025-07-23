@@ -77,7 +77,7 @@ export class ServicesController {
     @Param('data') data:any
   ) {
     const getDatas = JSON.parse(data);  
-    // console.log(getDatas)
+    // // console.log(getDatas)
 
     return this.servicesService.getItemPaid(getDatas);
   }

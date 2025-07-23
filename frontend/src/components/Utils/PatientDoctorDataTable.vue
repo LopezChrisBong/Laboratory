@@ -71,18 +71,25 @@
         </template>
 
         <template v-slot:[`item.actions`]="{ item }">
-          <div class="">
-            <v-btn
-              class="ma-1 d-flex justify-center"
-              x-small
-              color="green"
-              outlined
-              @click="view(item)"
-              block
-            >
-              <v-icon size="14" class="mr-1">mdi-eye</v-icon>
-            </v-btn>
-            <!-- 
+          <v-btn
+            class="ma-1 "
+            x-small
+            color="green"
+            outlined
+            @click="viewAll(item)"
+          >
+            <v-icon size="14">mdi-eye</v-icon>
+          </v-btn>
+          <!-- <v-btn
+            class="ma-1 "
+            x-small
+            color="green"
+            outlined
+            @click="view(item)"
+          >
+            <v-icon size="14">mdi-eye</v-icon>
+          </v-btn> -->
+          <!-- 
             <v-btn
               class="ma-1 d-flex justify-center"
               x-small
@@ -92,58 +99,64 @@
               block
               v-if="userRoleID == 3"
             >
-              <v-icon size="14" class="mr-1">mdi-note</v-icon>Medical
+              <v-icon size="14" >mdi-note</v-icon>Medical
               Information
             </v-btn> -->
 
-            <v-btn
-              class="ma-1 d-flex justify-center"
-              x-small
-              color="green"
-              outlined
-              @click="editMedicalInfo(item)"
-              v-if="assignedModuleID != 2"
-              block
-            >
-              <v-icon size="14" class="mr-1">mdi-medication-outline</v-icon>
-            </v-btn>
-            <v-btn
-              class="ma-1 d-flex justify-center"
-              x-small
-              color="green"
-              outlined
-              @click="patientAppointment(item)"
-              block
-              v-if="assignedModuleID != 2"
-            >
-              <v-icon size="14" class="mr-1">mdi-calendar</v-icon>
-            </v-btn>
+          <!-- <v-btn
+            class="ma-1"
+            x-small
+            color="green"
+            outlined
+            @click="editMedicalInfo(item)"
+            v-if="assignedModuleID != 2"
+          >
+            <v-icon size="14">mdi-medication-outline</v-icon>
+          </v-btn>
+          <v-btn
+            class="ma-1"
+            x-small
+            color="green"
+            outlined
+            @click="patientAppointment(item)"
+            v-if="assignedModuleID != 2"
+          >
+            <v-icon size="14">mdi-calendar</v-icon>
+          </v-btn>
+          <v-btn
+            class="ma-1"
+            x-small
+            color="green"
+            outlined
+            @click="prescription(item)"
+            v-if="assignedModuleID == 5"
+          >
+            <v-icon size="14">mdi-prescription</v-icon>
+          </v-btn>
 
-            <v-btn
-              class="ma-1 d-flex justify-center"
-              x-small
-              color="green"
-              outlined
-              @click="examinePatient(item)"
-              block
-              v-if="assignedModuleID == 2"
-            >
-              <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon>
-            </v-btn>
+          <v-btn
+            class="ma-1"
+            x-small
+            color="green"
+            outlined
+            @click="examinePatient(item)"
+            v-if="assignedModuleID == 2"
+          >
+            <v-icon size="14">mdi-account-arrow-left</v-icon>
+          </v-btn>
 
-            <v-btn
-              class="ma-1 d-flex justify-center"
-              x-small
-              color="green"
-              outlined
-              @click="examinePatient(item)"
-              block
-              v-if="assignedModuleID != 2"
-            >
-              <v-icon size="14" class="mr-1">mdi-medical-bag</v-icon>
-            </v-btn>
+          <v-btn
+            class="ma-1"
+            x-small
+            color="green"
+            outlined
+            @click="examinePatient(item)"
+            v-if="assignedModuleID != 2"
+          >
+            <v-icon size="14">mdi-medical-bag</v-icon>
+          </v-btn> -->
 
-            <!-- 
+          <!-- 
             <v-btn
               class="ma-1 d-flex justify-center"
               x-small
@@ -153,9 +166,8 @@
               block
               v-if="assignedModuleID == 3"
             >
-              <v-icon size="14" class="mr-1">mdi-printer</v-icon> Print
+              <v-icon size="14" >mdi-printer</v-icon> Print
             </v-btn> -->
-          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -195,11 +207,100 @@
         </v-pagination>
       </v-col>
     </v-row>
+    <v-dialog v-model="dialog" max-width="500px" persistent>
+      <v-card>
+        <v-card-title>
+          <span class="headline"></span><v-spacer />
+          <v-btn icon color="red" dark @click="dialog = false">
+            <v-icon color="red" small>mdi-close-outline</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-btn
+                text
+                style="width: 100%; height: auto;"
+                @click="view(patientItem)"
+              >
+                <div class="d-flex justify-center align-center">
+                  <div>
+                    <v-icon size="90">mdi-file-cog-outline</v-icon><br />Update
+                  </div>
+                </div>
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6" v-if="userRoleID == 3">
+              <v-btn
+                text
+                style="width: 100%; height: auto;"
+                @click="editMedicalInfo(patientItem)"
+              >
+                <div class="d-flex justify-center align-center">
+                  <div>
+                    <v-icon size="90">mdi-file-image-plus-outline</v-icon
+                    ><br />Medical Info
+                  </div>
+                </div>
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6" v-if="assignedModuleID != 2">
+              <v-btn
+                text
+                style="width: 100%; height: auto;"
+                @click="prescription(patientItem)"
+              >
+                <div class="d-flex justify-center align-center">
+                  <div>
+                    <v-icon size="90">mdi-file-sign</v-icon><br />Prescription
+                  </div>
+                </div>
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6" v-if="assignedModuleID == 2">
+              <v-btn
+                text
+                style="width: 100%; height: auto;"
+                @click="examinePatient(patientItem)"
+              >
+                <div class="d-flex justify-center align-center">
+                  <div>
+                    <v-icon size="90">mdi-file-arrow-left-right</v-icon
+                    ><br />Examine
+                  </div>
+                </div>
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6" v-if="assignedModuleID != 2">
+              <v-btn
+                text
+                style="width: 100%; height: auto;"
+                @click="patientAppointment(patientItem)"
+              >
+                <div class="d-flex justify-center align-center">
+                  <div>
+                    <v-icon size="90">mdi-file-chart-check-outline</v-icon
+                    ><br />Appointment
+                  </div>
+                </div>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <!-- <v-card-actions>
+          <v-spacer />
+          <v-btn color="red" outlined class="mt-4" @click="dialog = false">
+            Cancel
+          </v-btn>
+        </v-card-actions> -->
+      </v-card>
+    </v-dialog>
 
     <AddPatientDialog :data="addPatient" :action="action" />
     <MedicalInformation :data="medicalInfo" />
     <ViewPatientAppointmentDialog :data="patientAppointement" />
     <ExaminePatientDialog :data="patientExamine" />
+    <PrescriptionDialog :data="prescriptionData" />
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -225,6 +326,8 @@ export default {
       ),
     ExaminePatientDialog: () =>
       import("../../components/Dialogs/Forms/Patient/ExaminePatientDialog.vue"),
+    PrescriptionDialog: () =>
+      import("../../components/Dialogs/Forms/Patient/PrescriptionDialog.vue"),
   },
   filters: {
     highlight: function(value, query) {
@@ -238,7 +341,10 @@ export default {
     search: "",
     deadline_date: null,
     resetDeadlineDialog: false,
+    dialog: false,
+    patientItem: [],
     patientAppointement: null,
+    prescriptionData: null,
     patientExamine: null,
     medicalInfo: null,
     headers: [
@@ -353,6 +459,10 @@ export default {
     pagination(data) {
       this.paginationData = data;
     },
+    prescription(item) {
+      // console.log(item);
+      this.prescriptionData = item;
+    },
 
     // changeTab(tab) {
     //   this.activeTab = tab;
@@ -364,11 +474,7 @@ export default {
       this.loading = true;
       this.userRoleID = this.$store.state.user.user.user_roleID;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
-      if (
-        this.assignedModuleID != 3 &&
-        this.assignedModuleID != 1 &&
-        this.assignedModuleID != 4
-      ) {
+      if (this.assignedModuleID == 5) {
         this.axiosCall(
           "/appointment/getAllPatientForDoctor/" + this.$store.state.user.id,
           "GET"
@@ -378,8 +484,11 @@ export default {
             this.loading = false;
           }
         });
-      } else {
-        this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
+      } else if (this.assignedModuleID == 2) {
+        this.axiosCall(
+          "/appointment/getAllPatientForMedtech/" + this.$store.state.user.id,
+          "GET"
+        ).then((res) => {
           if (res) {
             this.data = res.data;
             this.loading = false;
@@ -404,12 +513,16 @@ export default {
       this.addPatient = item;
       this.action = "View";
     },
+    viewAll(item) {
+      this.patientItem = item;
+      this.dialog = true;
+    },
     editMedicalInfo(item) {
       this.medicalInfo = item;
     },
 
     patientAppointment(item) {
-      console.log(item);
+      // console.log(item);
       this.patientAppointement = item;
     },
     examinePatient(item) {

@@ -502,7 +502,7 @@ export default {
     },
 
     patientAppointment(item) {
-      console.log(item);
+      // console.log(item);
       this.patientAppointement = item;
     },
     examinePatient(item) {
@@ -517,11 +517,11 @@ export default {
       window.open(url);
     },
     laboratoryRequest(item) {
-      console.log(item);
+      // console.log(item);
       this.patientLabRequestData = item;
     },
     prescription(item) {
-      console.log(item);
+      // console.log(item);
       this.prescriptionData = item;
     },
 

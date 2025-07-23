@@ -426,7 +426,7 @@ export default {
     openNotification(notif) {
       // Example handler – you can route or open a dialog
       notif.read = true;
-      console.log("Open notification:", notif);
+      // console.log("Open notification:", notif);
       if (notif.route) {
         this.$router.push(notif.route);
       }

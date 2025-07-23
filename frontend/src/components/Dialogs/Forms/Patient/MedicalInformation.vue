@@ -326,7 +326,7 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("View Data", data);
+        // console.log("View Data", data);
 
         if (data.id) {
           this.initialize();
@@ -372,7 +372,7 @@ export default {
   methods: {
     initialize() {
       this.changeMedical();
-      console.log(this.pregnant);
+      // console.log(this.pregnant);
       this.genderList = [
         { id: 1, description: "Male" },
         { id: 2, description: "Female" },
@@ -405,7 +405,7 @@ export default {
         pregnant: this.pregnant,
       };
 
-      console.log(data, this.data.data.doctorID);
+      // console.log(data, this.data.data.doctorID);
 
       this.axiosCall("/medical-info/addMedicalInfo", "POST", data).then(
         (res) => {
@@ -447,7 +447,7 @@ export default {
       //   JSON.parse(localStorage.getItem("patientMedicalInfo")) || [];
 
       // let index = existingData.findIndex((item) => item.id === data.id);
-      // console.log(index);
+      // // console.log(index);
       // if (index !== -1) {
       //   Object.assign(existingData[index], data);
       // } else {

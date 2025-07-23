@@ -350,29 +350,26 @@ export default {
         // selectedSection: this.selectedSection,
       };
       axios
-      .post(
-        process.env.VUE_APP_SERVER + "/inventory", data  
-      )
-      .then((res) => {
-        console.log(res.data);
-        // console.log("succesfull");
-      
-        this.fadeAwayMessage.show = true;
-        this.fadeAwayMessage.type = "success";
-        this.fadeAwayMessage.header = "System Message";
-        this.fadeAwayMessage.message = "Successfully Added";
-        this.initialize(this.selectedSection);
-        this.dialog = false;
-        this.resetForm();
-      });      
-      
-      // console.log(data);
+        .post(process.env.VUE_APP_SERVER + "/inventory", data)
+        .then((res) => {
+          console.log(res.data);
+          // // console.log("succesfull");
+
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "success";
+          this.fadeAwayMessage.header = "System Message";
+          this.fadeAwayMessage.message = "Successfully Added";
+          this.initialize(this.selectedSection);
+          this.dialog = false;
+          this.resetForm();
+        });
+
+      // // console.log(data);
       // let existingData =
       //   JSON.parse(localStorage.getItem("inventoryData")) || [];
       // existingData.push(data);
       // localStorage.setItem("inventoryData", JSON.stringify(existingData));
       // //   this.items.push({ ...this.form, section: this.selectedSection });
-      
     },
     add() {
       this.dialog = true;
@@ -384,7 +381,7 @@ export default {
       this.resetForm();
     },
     update(item) {
-      console.log(item.id);
+      // console.log(item.id);
       this.dialog = true;
       this.action = "Update";
       this.form.itemName = item.itemName;
@@ -430,7 +427,7 @@ export default {
         JSON.parse(localStorage.getItem("inventoryData")) || [];
 
       let index = existingData.findIndex((item) => item.id === id);
-      console.log("Data", data, existingData, "Index:", index, "id", id);
+      // console.log("Data", data, existingData, "Index:", index, "id", id);
       if (index !== -1) {
         Object.assign(existingData[index], data);
       } else {
@@ -453,7 +450,7 @@ export default {
 
     initialize(section) {
       this.loading = true;
-      console.log("Selected Section:", section);
+      // console.log("Selected Section:", section);
 
       let inventoryData = JSON.parse(localStorage.getItem("inventoryData"));
 
@@ -461,20 +458,16 @@ export default {
         this.itemData = [];
         this.loading = false;
       } else {
-        console.log("inventoryData:", inventoryData);
+        // console.log("inventoryData:", inventoryData);
         this.itemData = inventoryData
           .filter((entry) => entry.selectedSection === section)
           .reverse();
         this.loading = false;
       }
     },
-    getData(){
-      axios
-      .get(
-        process.env.VUE_APP_SERVER + "/inventory"  
-      )
-      .then((res) => {
-        // console.log(res.data);
+    getData() {
+      axios.get(process.env.VUE_APP_SERVER + "/inventory").then((res) => {
+        // // console.log(res.data);
         this.itemData = res.data;
       });
     },
@@ -515,8 +508,8 @@ export default {
     },
   },
   mounted() {
-      this.getData();
-  }
+    this.getData();
+  },
 };
 </script>
 

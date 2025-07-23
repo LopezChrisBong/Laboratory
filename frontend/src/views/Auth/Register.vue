@@ -238,7 +238,7 @@ export default {
       this.emailChecking = true;
       this.axiosCall("/auth/checkEmailIfExist/" + this.email, "GET").then(
         (res) => {
-          console.log(res.data);
+          // console.log(res.data);
           if (res.data) {
             this.emailError = "Email Already Exist!";
           } else {
