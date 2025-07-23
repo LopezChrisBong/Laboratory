@@ -467,7 +467,7 @@ export default {
       this.specialtyDialog = true;
     },
     viewSchedule(item) {
-      console.log(item);
+      // console.log(item);
       this.action = "View";
       this.date = item.date;
       this.day = item.day;
@@ -476,14 +476,14 @@ export default {
       this.scheduleDialog = true;
     },
     viewExperty(item) {
-      console.log(item);
+      // console.log(item);
       this.action = "View";
       this.experty = item.specialty;
       this.specialtyDescription = item.specialty_description;
       this.specialtyDialog = true;
     },
     editExperty(item) {
-      console.log(item);
+      // console.log(item);
       this.action = "Update";
       this.experty = item.specialty;
       this.specialtyDescription = item.specialty_description;
@@ -491,7 +491,7 @@ export default {
       this.specialtyDialog = true;
     },
     editSchedule(item) {
-      console.log(item);
+      // console.log(item);
       this.action = "Update";
       this.date = item.date;
       this.day = item.day;
@@ -534,7 +534,7 @@ export default {
           timeFrom: this.timeFrom,
           timeTo: this.timeTo,
         };
-        // console.log(data);
+        // // console.log(data);
 
         this.axiosCall("/doctors-schedule", "POST", data).then((res) => {
           if (res.data.status == 200) {
@@ -560,7 +560,7 @@ export default {
           specialty: this.experty,
           specialty_description: this.specialtyDescription,
         };
-        console.log(data);
+        // console.log(data);
 
         this.axiosCall("/doctor-specialization", "POST", data).then((res) => {
           if (res.data.status == 200) {
@@ -587,7 +587,7 @@ export default {
           timeFrom: this.timeFrom,
           timeTo: this.timeTo,
         };
-        console.log(data);
+        // console.log(data);
 
         this.axiosCall(
           "/doctors-schedule/" + this.updateID,
@@ -616,7 +616,7 @@ export default {
           specialty: this.experty,
           specialty_description: this.specialtyDescription,
         };
-        console.log(data);
+        // console.log(data);
 
         this.axiosCall(
           "/doctor-specialization/" + this.updateID,
@@ -639,7 +639,7 @@ export default {
       }
     },
     deleteSchedule(item) {
-      // console.log(item);
+      // // console.log(item);
       this.axiosCall("/doctors-schedule/" + item.id, "DELETE").then((res) => {
         if (res.data.status == 200) {
           this.fadeAwayMessage.show = true;
@@ -681,7 +681,7 @@ export default {
           this.specialtyDescription = this.specialtyList[i].description;
         }
       }
-      // console.log(this.specialtyDescription);
+      // // console.log(this.specialtyDescription);
     },
     resetForm() {
       this.scheduleDialog = false;

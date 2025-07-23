@@ -323,7 +323,7 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("STRAT", data);
+        // console.log("STRAT", data);
         this.id = data.id;
         this.tab = 1;
         this.initialize();
@@ -356,7 +356,7 @@ export default {
       // alert(this.assignedModuleID);
     },
     submitResult() {
-      console.log(this.input, this.input1, this.updateID);
+      // console.log(this.input, this.input1, this.updateID);
       let data = {
         status: 2,
         updateID: this.updateID,
@@ -390,29 +390,29 @@ export default {
     edit(item) {
       this.action = "Update";
       this.updateID = item.id;
-      console.log(item);
+      // console.log(item);
       this.axiosCall(
         "/services/getAllServiceToUpdateResult/" + item.id,
         "GET"
       ).then((res) => {
         if (res) {
-          console.log(res.data);
+          // console.log(res.data);
           this.service = res.data;
         }
       });
       this.prescriptionDialog = true;
     },
     view(item) {
-      console.log(item);
+      // console.log(item);
       this.action = "View";
       this.updateID = item.id;
-      console.log(item);
+      // console.log(item);
       this.axiosCall(
         "/services/getAllServiceToUpdateResult/" + item.id,
         "GET"
       ).then((res) => {
         if (res) {
-          console.log(res.data);
+          // console.log(res.data);
           this.service = res.data;
         }
       });
@@ -421,13 +421,13 @@ export default {
 
     editMedicalInfo(item) {
       // alert(this.data.id);
-      console.log(item);
+      // console.log(item);
       this.medicalData = { id: null, userIDd: this.data.id, data: item };
       this.action = "Add";
     },
     accept() {
       if (this.$refs.submitPrescription.validate()) {
-        console.log("love");
+        // console.log("love");
       }
     },
 

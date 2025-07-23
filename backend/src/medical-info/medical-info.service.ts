@@ -27,7 +27,7 @@ export class MedicalInfoService {
       await queryRunner.startTransaction();
       try {
         let medicalInfo = createMedicalInfoDto;
-        console.log(medicalInfo)
+        // console.log(medicalInfo)
   
           const data = queryRunner.manager.create(MedicalInfo, {
             patientID: medicalInfo.patientID,
@@ -66,7 +66,7 @@ export class MedicalInfoService {
     
 
   
-          console.log(savedCategory.id);
+          // console.log(savedCategory.id);
         await queryRunner.commitTransaction();
         return {
           

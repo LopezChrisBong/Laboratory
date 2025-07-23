@@ -235,7 +235,7 @@ export default {
       this.activeTab = { id: 1, name: "For Verification" };
       this.axiosCall("/user-details/getAllUsersToVerify", "GET").then((res) => {
         if (res) {
-          // console.log(res.data);
+          // // console.log(res.data);
           let data = res.data;
           data.forEach((element, i) => {
             data[i].name = this.toTitleCase(element.name);

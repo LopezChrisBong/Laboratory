@@ -23,7 +23,7 @@ export class DoctorSpecializationService {
         private dataSource: DataSource,
       ){}
  async create(createDoctorSpecializationDto: CreateDoctorSpecializationDto) {
-          // console.log(createDoctorSpecializationDto)
+          // // console.log(createDoctorSpecializationDto)
           const queryRunner = this.dataSource.createQueryRunner();
           await queryRunner.connect();
           await queryRunner.startTransaction();
@@ -77,7 +77,7 @@ export class DoctorSpecializationService {
       .where('ds.doctorID = :id', {id})
       .orderBy('ds.specialty', 'ASC')
       .getRawMany();
-      // console.log(data)
+      // // console.log(data)
     return data
   }
 
@@ -113,7 +113,7 @@ export class DoctorSpecializationService {
             });
           }
           const result = Object.values(grouped)[0];
-          // console.log("Sample Clinic Data:", result);
+          // // console.log("Sample Clinic Data:", result);
 
           return result
   }
@@ -130,7 +130,7 @@ export class DoctorSpecializationService {
       // .where('us.isAdminApproved = 1')
       // .andWhere('us.assignedModuleID = 5')
       // .getRawMany();
-      // // console.log(data)
+      // // // console.log(data)
       // return data
 
       const rawData = await this.userDetailRepository
@@ -162,7 +162,7 @@ export class DoctorSpecializationService {
                   name: item.name,
                 });
               }
-          // console.log('Sample Clinic Data:',grouped)
+          // // console.log('Sample Clinic Data:',grouped)
           return grouped
   }
 
@@ -175,7 +175,7 @@ export class DoctorSpecializationService {
   }
 
   update(id: number, updateDoctorSpecializationDto: UpdateDoctorSpecializationDto) {
-          console.log(id, updateDoctorSpecializationDto)
+          // console.log(id, updateDoctorSpecializationDto)
           try {
            this.dataSource.manager.update(DoctorSpecialization, id,{
                 specialty: updateDoctorSpecializationDto.specialty,

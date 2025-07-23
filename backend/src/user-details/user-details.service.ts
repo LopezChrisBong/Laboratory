@@ -135,14 +135,14 @@ export class UserDetailsService {
 
     let conflict = grade == 'Grade 1'? 1 : grade == 'Grade 2'? 2 : grade == 'Grade 3'? 3 :grade == 'Grade 4'? 4 :grade == 'Grade 5'? 5 :grade == 'Grade 6'? 6 :grade == 'Grade 7'? 7 :grade == 'Grade 8'? 8 :grade == 'Grade 9'? 9 :grade == 'Grade 10'? 10 :grade == 'Grade 11'? 11 : 12
     
-    // console.log('grade',conflict)
+    // // console.log('grade',conflict)
 
 
     const user = await this.dataSource.query(
       'SELECT * FROM user_detail where id ="'+curr_user.userdetail.id+'"',
     );
 
-    // console.log(user[0].id)
+    // // console.log(user[0].id)
 
     const count = await this.dataSource.query(
       'SELECT COUNT(*) as count FROM teacher_grade_level where grade_level ="'+conflict+'"',
@@ -193,7 +193,7 @@ export class UserDetailsService {
   async TeachingRoleAdvisory(id:number, grade:string, curr_user:any) {
     let conflict = grade == 'Grade 1'? 1 : grade == 'Grade 2'? 2 : grade == 'Grade 3'? 3 :grade == 'Grade 4'? 4 :grade == 'Grade 5'? 5 :grade == 'Grade 6'? 6 :grade == 'Grade 7'? 7 :grade == 'Grade 8'? 8 :grade == 'Grade 9'? 9 :grade == 'Grade 10'? 10 :grade == 'Grade 11'? 11 : 12
     
-    // console.log('grade',conflict)
+    // // console.log('grade',conflict)
 
 
     const user = await this.dataSource.query(
@@ -201,13 +201,13 @@ export class UserDetailsService {
     );
 
     let teacherId = id;
-    // console.log(user[0].id)
+    // // console.log(user[0].id)
     if(id != null){
     
-      console.log('naay value ID',teacherId)
+      // console.log('naay value ID',teacherId)
 
     }else{
-      console.log('walay value ID',teacherId)
+      // console.log('walay value ID',teacherId)
     }
 
       let data = await this.dataSource.manager
@@ -226,7 +226,7 @@ export class UserDetailsService {
       .andWhere('UD.id = "'+id+'"')
       .andWhere('UD.status = "'+user[0].status+'"')
       .getRawMany();
-      console.log('No Null',data)
+      // console.log('No Null',data)
     return data;
     
 
@@ -242,7 +242,7 @@ export class UserDetailsService {
       'SELECT * FROM user_detail where id ="'+curr_user.userdetail.id+'"',
     );
 
-    // console.log(user[0].id)
+    // // console.log(user[0].id)
     let data = await this.dataSource.manager
       .createQueryBuilder(UserDetail, 'UD')
       .select([
@@ -348,7 +348,7 @@ export class UserDetailsService {
   }
 
   async uploadProfileImg(filename: string, user: any) {
-    // console.log(user.user[0].id)
+    // // console.log(user.user[0].id)
     try {
       const imgupload = await this.userdetailsRepository.update(
         user.userdetail.id,
@@ -428,7 +428,7 @@ export class UserDetailsService {
       .andWhere('ud.id != 2') //security userID
       .getCount();
 
-      console.log(nonTeaching,teaching);
+      // console.log(nonTeaching,teaching);
 
     return {
       nonTeaching,

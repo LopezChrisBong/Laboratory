@@ -262,7 +262,7 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("STRAT", data);
+        // console.log("STRAT", data);
         this.id = data.id;
         this.initialize();
       },
@@ -296,7 +296,7 @@ export default {
       this.axiosCall("/medical-info/patientMedicalInfo/" + this.id, "GET").then(
         (res) => {
           if (res) {
-            console.log("Get Data", res.data);
+            // console.log("Get Data", res.data);
             this.dataItem = res.data;
           } else {
             this.dataItem = null;
@@ -311,12 +311,12 @@ export default {
     },
 
     edit(item) {
-      console.log(item);
+      // console.log(item);
       this.medicalData = item;
       this.action = "Update";
     },
     view(item) {
-      console.log(item);
+      // console.log(item);
       this.medicalData = item;
       this.action = "View";
     },

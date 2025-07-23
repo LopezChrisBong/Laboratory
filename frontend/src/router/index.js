@@ -366,7 +366,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   // let user = store.state.user;
   const isAuthenticated = store.getters.getIsAuthenticated;
-  // console.log(to);
+  // // console.log(to);
   if (to.matched.some((record) => record.meta.authRequired == true)) {
     if (isAuthenticated) {
       let pt = to.fullPath;

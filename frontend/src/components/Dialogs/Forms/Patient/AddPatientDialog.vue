@@ -280,7 +280,7 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("View Data", data);
+        // console.log("View Data", data);
 
         if (data.id) {
           this.initialize();

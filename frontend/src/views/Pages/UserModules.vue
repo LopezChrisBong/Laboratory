@@ -63,7 +63,7 @@ export default {
   }),
 
   created() {
-    // console.log("created");
+    // // console.log("created");
     if (this.$store.state.expiryDate < Date.now()) {
       this.$store.dispatch("setUser", null);
       this.$store.dispatch("setIsAuthenticated", 0);

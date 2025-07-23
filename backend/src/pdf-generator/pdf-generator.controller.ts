@@ -45,7 +45,7 @@ export class PdfGeneratorController {
 
     res.end(buffer);
 
-    // console.log(n)
+    // // console.log(n)
   }
 
 }

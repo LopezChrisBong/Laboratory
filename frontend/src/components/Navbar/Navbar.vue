@@ -424,7 +424,7 @@ export default {
       });
       // Example handler – you can route or open a dialog
 
-      //   console.log("Open notification:", notif);
+      //   // console.log("Open notification:", notif);
     },
     getMyRole(id) {
       var role;
@@ -572,17 +572,18 @@ body {
 }
 
 .sidebar .v-list-item--active {
-  background-color: #001799 !important;
-  color: #ffffff !important;
+  background-color: #e4fbff !important;
+  color: #000000 !important;
 }
 
 .sidebar .v-list-group--active {
-  background-color: #8587f3 !important;
+  background-color: #111ed8 !important;
   border-radius: 5px;
   color: #ffffff !important;
 }
 .sidebar .v-list-group .v-list-item--active {
-  background-color: #001799 !important;
-  color: #ffffff !important;
+  background-color: #e4fbff !important;
+  border-radius: 5px;
+  color: #000000 !important;
 }
 </style>

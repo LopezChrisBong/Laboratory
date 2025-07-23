@@ -94,7 +94,7 @@ export default {
     },
   }),
   mounted() {
-    console.log(this.$store.getters.getEmail);
+    // console.log(this.$store.getters.getEmail);
     this.OTPInput();
   },
   beforeUnmount() {
@@ -161,7 +161,7 @@ export default {
         otp: this.otp,
       };
       this.axiosCall("/auth/confirmOtp", "POST", data).then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         if (res.data.status == 200) {
           this.isLoading = false;
           this.$store.dispatch("setEmail", null);

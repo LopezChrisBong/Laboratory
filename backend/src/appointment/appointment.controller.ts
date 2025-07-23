@@ -58,7 +58,14 @@ export class AppointmentController {
         const curr_user = currentUser(head_str);
     return this.appointmentService.getAllPatient(+tabID, curr_user);
   }
-     @Get('getAllPatientForDoctor/:doctorID')
+
+
+     @Get('getAllPatientForMedtech/:medtechID')
+  getAllPatientForMedtech(@Param('medtechID') medtechID: string) {
+    return this.appointmentService.getAllPatientForMedtech(+medtechID);
+  }
+
+       @Get('getAllPatientForDoctor/:doctorID')
   getAllPatientForDoctor(@Param('doctorID') doctorID: string) {
     return this.appointmentService.getAllPatientForDoctor(+doctorID);
   }
@@ -129,23 +136,25 @@ export class AppointmentController {
   }
 
 
+      @Patch('confirmAppointment/:id')
+      confirmAppointment(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
+        return this.appointmentService.confirmAppointment(+id, updateAppointmentDto);
+      }
 
-  
-
-      @Patch('updateAppointmentStatus/:id')
-  updateAppointmentStatus(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
-    return this.appointmentService.updateAppointmentStatus(+id, updateAppointmentDto);
-  }
+        @Patch('updateAppointmentStatus/:id')
+        updateAppointmentStatus(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
+          return this.appointmentService.updateAppointmentStatus(+id, updateAppointmentDto);
+        }
 
         @Patch('updatePatientStatus/:id')
-  updatePatientStatus(@Param('id') id: string,  @Body() updatePatientDto: UpdatePatientDto) {
-  
-    return this.appointmentService.updatePatientStatus(+id, updatePatientDto);
-  }
+        updatePatientStatus(@Param('id') id: string,  @Body() updatePatientDto: UpdatePatientDto) {
+        
+          return this.appointmentService.updatePatientStatus(+id, updatePatientDto);
+        }
 
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.appointmentService.remove(+id);
-  }
+      @Delete(':id')
+      remove(@Param('id') id: string) {
+        return this.appointmentService.remove(+id);
+      }
 }

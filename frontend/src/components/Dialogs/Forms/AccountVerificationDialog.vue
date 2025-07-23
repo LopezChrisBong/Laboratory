@@ -147,7 +147,7 @@ export default {
         this.initialize();
         this.$refs.UserVerifyFormref.resetValidation();
         if (data.id) {
-          console.log("Love", data);
+          // console.log("Love", data);
           this.verifyModel.id = data.id;
           this.verifyModel.userID = data.user_id;
           this.verifyModel.name = data.name;
@@ -172,7 +172,7 @@ export default {
     getUserType() {
       this.axiosCall("/user-type/getAllUsertype", "GET").then((res) => {
         if (res.data) {
-          console.log("UserList", res.data);
+          // console.log("UserList", res.data);
           this.usertypeList = res.data;
         }
       });

@@ -258,7 +258,7 @@ export default {
       if (first && second && third && fourth && fifth && sixth) {
         this.isLoading = true;
 
-        console.log(data);
+        // console.log(data);
         this.axiosCall("/auth/compareOTP", "POST", data).then((res) => {
           if (res.data.status == 200) {
             this.isLoading = false;

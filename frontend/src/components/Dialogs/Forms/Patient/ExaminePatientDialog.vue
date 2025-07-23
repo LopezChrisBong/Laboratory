@@ -49,12 +49,12 @@
                   </template>
                   <template v-slot:[`item.status`]="{ item }">
                     <v-chip
-                      :color="item.status == 1 ? 'orange' : 'blue'"
+                      :color="item.status == 0 ? 'orange' : 'blue'"
                       dark
                       small
                     >
                       <span>{{
-                        item.status == 1 ? "Pending" : "Done Examination"
+                        item.status == 0 ? "Pending" : "Done Examination"
                       }}</span>
                     </v-chip>
                   </template>
@@ -333,7 +333,7 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("STRAT", data);
+        // console.log("STRAT", data);
         this.id = data.id;
         this.tab = 1;
         this.initialize();
@@ -362,7 +362,7 @@ export default {
       this.loading = true;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       let userID = this.$store.state.user.id;
-      console.log(userID);
+      // console.log(userID);
       // alert(this.assignedModuleID);
       if (this.assignedModuleID == 2) {
         this.axiosCall(
@@ -373,7 +373,7 @@ export default {
           "GET"
         ).then((res) => {
           if (res) {
-            console.log(res.data);
+            // console.log(res.data);
             this.dataItem = res.data;
             this.loading = false;
           }
@@ -387,7 +387,7 @@ export default {
           "GET"
         ).then((res) => {
           if (res) {
-            console.log(res.data);
+            // console.log(res.data);
             this.dataItem = res.data;
             this.loading = false;
           }
@@ -395,7 +395,7 @@ export default {
       }
     },
     submitResult() {
-      console.log(this.input, this.input1, this.updateID);
+      // console.log(this.input, this.input1, this.updateID);
       let data = {
         status: 2,
         updateID: this.updateID,
@@ -429,29 +429,29 @@ export default {
     edit(item) {
       this.action = "Update";
       this.updateID = item.id;
-      console.log(item);
+      // console.log(item);
       this.axiosCall(
         "/services/getAllServiceToUpdateResult/" + item.id,
         "GET"
       ).then((res) => {
         if (res) {
-          console.log(res.data);
+          // console.log(res.data);
           this.service = res.data;
         }
       });
       this.laboratoryDialog = true;
     },
     view(item) {
-      console.log(item);
+      // console.log(item);
       this.action = "View";
       this.updateID = item.id;
-      console.log(item);
+      // console.log(item);
       this.axiosCall(
         "/services/getAllServiceToUpdateResult/" + item.id,
         "GET"
       ).then((res) => {
         if (res) {
-          console.log(res.data);
+          // console.log(res.data);
           this.service = res.data;
         }
       });
@@ -460,7 +460,7 @@ export default {
 
     editMedicalInfo(item) {
       // alert(this.data.id);
-      console.log(item);
+      // console.log(item);
       this.medicalData = { id: null, userIDd: this.data.id, data: item };
       this.action = "Add";
     },

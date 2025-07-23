@@ -921,7 +921,7 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("STRAT", data);
+        // console.log("STRAT", data);
         if (data.doctorID) {
           this.doctor = data.doctorID.toString();
         } else {
@@ -972,7 +972,7 @@ export default {
         "GET"
       ).then((res) => {
         if (res) {
-          console.log("Data", res.data);
+          // console.log("Data", res.data);
           this.dataItem = res.data;
           this.loading = false;
         }
@@ -985,7 +985,7 @@ export default {
         for (let i = 0; i < data.length; i++) {
           data[i].name = this.toTitleCase(data[i].name);
         }
-        console.log("Doctors", data);
+        // console.log("Doctors", data);
 
         // if (this.data.doctorID == null) {
         //   this.doctor = data[0];
@@ -1000,7 +1000,7 @@ export default {
         for (let i = 0; i < data.length; i++) {
           data[i].name = this.toTitleCase(data[i].name);
         }
-        console.log("Medtech", data);
+        // console.log("Medtech", data);
         // if (this.data.medtechID == null) {
         //   this.medtech = data[0];
         // }
@@ -1014,7 +1014,7 @@ export default {
       ).then((res) => {
         if (res) {
           this.dataServices = res.data;
-          console.log("LOVED", res.data);
+          // console.log("LOVED", res.data);
         }
       });
     },
@@ -1022,7 +1022,7 @@ export default {
       this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
         (res) => {
           if (res) {
-            console.log("scheduled", res.data);
+            // console.log("scheduled", res.data);
             this.bookings = res.data;
           }
         }
@@ -1031,7 +1031,7 @@ export default {
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
-          console.log("Pakes", res.data);
+          // console.log("Pakes", res.data);
           this.dataPackages = res.data;
         }
       });
@@ -1111,7 +1111,7 @@ export default {
         service_list: JSON.stringify(this.selected),
         package_list: JSON.stringify(this.selectedPackage),
       };
-      console.log(data);
+      // console.log(data);
       this.axiosCall(
         "/services/updateServiceAppointment/" + this.updateID,
         "PATCH",
@@ -1171,7 +1171,7 @@ export default {
     },
 
     edit(item) {
-      console.log(item);
+      // console.log(item);
       this.addAppointmentDialog = true;
       this.clinic = parseInt(item.clinic);
       this.date = item.date;
@@ -1180,7 +1180,7 @@ export default {
       this.action = "Update";
     },
     view(item) {
-      console.log(item);
+      // console.log(item);
       this.addAppointmentDialog = true;
       this.clinic = parseInt(item.clinic);
       this.date = item.date;
@@ -1191,7 +1191,7 @@ export default {
       this.confirmationDialog = true;
     },
     labRequest(item) {
-      console.log(item);
+      // console.log(item);
 
       this.updateID = item.id;
       this.updateID = item.id;
@@ -1238,7 +1238,7 @@ export default {
     },
     payLabTest(num, item) {
       this.labID = item.labID;
-      console.log(item);
+      // console.log(item);
       if (num == 1) {
         this.action = "Pay";
       } else if (num == 2) {
@@ -1254,14 +1254,14 @@ export default {
           service_list: item.service,
           package_list: item.service_package,
         };
-        // console.log(data);
+        // // console.log(data);
 
         this.axiosCall(
           "/services/pay-items/" + JSON.stringify(data) + "",
           "GET"
         ).then((res) => {
           if (res) {
-            console.log("items paid", res.data.new_service);
+            // console.log("items paid", res.data.new_service);
             this.selected = res.data.new_service;
             this.selectedPackage = res.data.new_package;
           }
@@ -1292,7 +1292,7 @@ export default {
         status: 1,
         patientID: this.id,
       };
-      console.log(data);
+      // console.log(data);
       this.axiosCall(
         "/appointment/updateAppointmentStatus/" + this.updateID,
         "PATCH",
@@ -1342,10 +1342,13 @@ export default {
     },
 
     AddAppointment() {
-      this.addAppointmentDialog = true;
+      alert(
+        "Major Update for Appointment per Patient in Doctor are, need confirmation"
+      );
+      // this.addAppointmentDialog = true;
     },
     assignDoctor(item) {
-      console.log(item);
+      // console.log(item);
       this.updateID = item.id;
       this.labID = item.labID;
       this.assignAppointmentDialog = true;
@@ -1353,7 +1356,7 @@ export default {
       this.assignPerson = "Doctor";
     },
     assignMedtech(item) {
-      console.log(item);
+      // console.log(item);
       this.updateID = item.id;
       this.labID = item.labID;
       this.assignAppointmentDialog = true;
@@ -1362,7 +1365,7 @@ export default {
     },
 
     updateDoctor() {
-      console.log(this.doctor);
+      // console.log(this.doctor);
       let data = {
         patientID: this.id,
         labID: this.labID,
@@ -1404,14 +1407,14 @@ export default {
     },
 
     updateMedTech() {
-      console.log(this.medtech);
+      // console.log(this.medtech);
       let data = {
         patientID: this.id,
         labID: this.labID,
         medtechID: JSON.parse(this.medtech),
         appointmentID: this.updateID,
       };
-      console.log(data);
+      // console.log(data);
 
       this.axiosCall("/appointment/addPatient/Medtech", "POST", data).then(
         (res) => {

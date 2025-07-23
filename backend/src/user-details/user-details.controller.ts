@@ -188,7 +188,7 @@ export class UserDetailsController {
       //     join(__dirname, `../upload_img/${user.profile_img}`),
       //     async (err) => {
       //       if (err) {
-      //         console.log(err);
+      //         // console.log(err);
       //       }
       //     },
       //   );
@@ -197,7 +197,7 @@ export class UserDetailsController {
         join(process.cwd(), `/../upload_img/${user.profile_img}`),
         async (err) => {
           if (err) {
-            console.log(err);
+            // console.log(err);
           }
         },
       );

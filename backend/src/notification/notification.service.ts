@@ -12,7 +12,7 @@ export class NotificationService {
   ){}
 
  async create(createNotificationDto: CreateNotificationDto) {
-  // console.log(createNotificationDto)
+  // // console.log(createNotificationDto)
         const queryRunner = this.dataSource.createQueryRunner();
             await queryRunner.connect();
             await queryRunner.startTransaction();
@@ -63,14 +63,14 @@ export class NotificationService {
         .orderBy('nt.createdAt', 'DESC')
         .getRawMany()
         
-        // console.log(data)
+        // // console.log(data)
 
         return data
   }
 
   update(id: number, updateNotificationDto: UpdateNotificationDto) {
 
-    // console.log(id, updateNotificationDto)
+    // // console.log(id, updateNotificationDto)
     
         try {
     this.dataSource.manager.update(Notification, id,{

@@ -50,9 +50,7 @@
                       dark
                       small
                     >
-                      <span>{{
-                        item.status == 0 ? "Pending" : "Fully Paid"
-                      }}</span>
+                      <span>{{ item.status == 0 ? "Pending" : "Done" }}</span>
                     </v-chip>
                   </template>
                   <template v-slot:[`item.medtech_name`]="{ item }">
@@ -62,7 +60,6 @@
                       <u>{{ item.liscence_no }}</u></span
                     >
                   </template>
-
                   <template v-slot:[`item.action`]="{ item }">
                     <v-btn
                       x-small
@@ -85,13 +82,13 @@
                     >
                     <v-btn
                       x-small
-                      v-if="item.status == 0"
+                      v-if="item.status == 0 && assignedModuleID == 2"
                       class="mt-1"
                       @click="payLabTest(1, item)"
                       outlined
                       color="blue"
                       block
-                      >Pay</v-btn
+                      >Confirm</v-btn
                     >
                     <!-- <v-btn
                       x-small
@@ -121,7 +118,7 @@
                       >print</v-btn
                     >
 
-                    <v-btn
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="deleteItem(item)"
@@ -129,7 +126,7 @@
                       color="red"
                       block
                       >Delete</v-btn
-                    >
+                    > -->
                   </template>
                 </v-data-table>
               </v-col>
@@ -547,6 +544,7 @@ export default {
       id: null,
       isButtonLoading: false,
       assignAppointmentDialog: false,
+      assignedModuleID: null,
       dataItem: [],
       bookings: [],
       dataServices: [],
@@ -644,7 +642,7 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("STRAT", data);
+        // console.log("STRAT", data);
         if (data.doctorID) {
           this.doctor = data.doctorID.toString();
         } else {
@@ -683,6 +681,7 @@ export default {
   methods: {
     initialize() {
       this.loading = true;
+      this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       //   this.getAllSchedule();
       this.getAllServices();
       this.getAllPackages();
@@ -692,7 +691,7 @@ export default {
         (res) => {
           if (res) {
             // alert(res.data.data);
-            console.log("Data", res.data.data);
+            // console.log("Data", res.data.data);
             this.dataItem = res.data;
             this.loading = false;
           }
@@ -706,7 +705,7 @@ export default {
         for (let i = 0; i < data.length; i++) {
           data[i].name = this.toTitleCase(data[i].name);
         }
-        console.log("Doctors", data);
+        // console.log("Doctors", data);
 
         // if (this.data.doctorID == null) {
         //   this.doctor = data[0];
@@ -721,7 +720,7 @@ export default {
         for (let i = 0; i < data.length; i++) {
           data[i].name = this.toTitleCase(data[i].name);
         }
-        console.log("Medtech", data);
+        // console.log("Medtech", data);
         // if (this.data.medtechID == null) {
         //   this.medtech = data[0];
         // }
@@ -735,7 +734,7 @@ export default {
       ).then((res) => {
         if (res) {
           this.dataServices = res.data;
-          console.log("LOVED", res.data);
+          // console.log("LOVED", res.data);
         }
       });
     },
@@ -743,7 +742,7 @@ export default {
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
-          console.log("Pakes", res.data);
+          // console.log("Pakes", res.data);
           this.dataPackages = res.data;
         }
       });
@@ -775,14 +774,14 @@ export default {
 
     edit(item) {
       this.updateID = item.id;
-      console.log(item);
+      // console.log(item);
       this.laboratoryDialog = true;
       this.selected = JSON.parse(item.service_list);
       this.selectedPackage = JSON.parse(item.package_list);
       this.action = "Update";
     },
     view(item) {
-      console.log(item);
+      // console.log(item);
       this.laboratoryDialog = true;
       this.selected = JSON.parse(item.service_list);
       this.selectedPackage = JSON.parse(item.package_list);
@@ -801,7 +800,7 @@ export default {
       } else if (num == 2) {
         this.action = "Print";
       }
-      console.log(item);
+      // console.log(item);
       if (item.service_list == null || item.package_list == null) {
         alert("Please select Lab-Request first!");
       } else {
@@ -812,14 +811,14 @@ export default {
           service_list: item.service_list,
           package_list: item.package_list,
         };
-        console.log(data);
+        // console.log(data);
 
         this.axiosCall(
           "/services/pay-items/" + JSON.stringify(data) + "",
           "GET"
         ).then((res) => {
           if (res) {
-            console.log("items paid", res.data.new_service);
+            // console.log("items paid", res.data.new_service);
             this.selected = res.data.new_service;
             this.selectedPackage = res.data.new_package;
           }
@@ -881,12 +880,12 @@ export default {
     },
 
     addLabRequest() {
-      console.log(
-        "selected",
-        this.selected,
-        "Selected Packages",
-        this.selectedPackage
-      );
+      // console.log(
+      //   "selected",
+      //   this.selected,
+      //   "Selected Packages",
+      //   this.selectedPackage
+      // );
 
       let data = {
         patientID: this.id,
@@ -918,14 +917,14 @@ export default {
       );
     },
     assignDoctor(item) {
-      console.log(item);
+      // console.log(item);
       this.updateID = item.id;
       this.assignAppointmentDialog = true;
       this.action = "Update";
       this.assignPerson = "Doctor";
     },
     assignMedtech(item) {
-      console.log(item);
+      // console.log(item);
       this.updateID = item.id;
       this.assignAppointmentDialog = true;
       this.action = "Update";
@@ -936,14 +935,14 @@ export default {
     },
 
     updateDoctor() {
-      console.log(this.doctor);
+      // console.log(this.doctor);
       let data = {
         patientID: this.id,
         doctorID: JSON.parse(this.doctor),
         // appointmentID: this.updateID,
         labID: this.updateID,
       };
-      console.log(data);
+      // console.log(data);
 
       this.axiosCall("/appointment/addPatient/Doctor", "POST", data).then(
         (res) => {
@@ -968,14 +967,14 @@ export default {
     },
 
     updateMedTech() {
-      console.log(this.medtech);
+      // console.log(this.medtech);
       let data = {
         patientID: this.id,
         medtechID: JSON.parse(this.medtech),
         // appointmentID: this.updateID,
         labID: this.updateID,
       };
-      console.log(data);
+      // console.log(data);
 
       this.axiosCall("/appointment/addPatient/Medtech", "POST", data).then(
         (res) => {
@@ -1016,7 +1015,7 @@ export default {
         service_list: JSON.stringify(this.selected),
         package_list: JSON.stringify(this.selectedPackage),
       };
-      console.log(data);
+      // console.log(data);
       this.axiosCall(
         "/services/updateServiceAppointment/" + this.updateID,
         "PATCH",

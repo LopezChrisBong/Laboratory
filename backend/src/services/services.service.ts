@@ -64,7 +64,7 @@ export class ServicesService {
         await queryRunner.startTransaction();
         try {
           let services = createServiceAppointmentDto;
-          // console.log(services)
+          // // console.log(services)
             const data = queryRunner.manager.create(ServiceAppointment, {
               patientID:services.patientID,
               doctorID:services.doctorID,
@@ -84,24 +84,24 @@ export class ServicesService {
              const isExist = await this.servicesRepository.findOneBy({ id:service_list[i]});
             new_service.push(isExist)
           }
-          // console.log(new_service)
+          // // console.log(new_service)
 
              for (let i = 0; i < package_list.length; i++) {
              const isExist = await this.servicesPackagesRepository.findOneBy({ id:package_list[i]});
             new_package.push(isExist)
           }
-          // console.log(new_package)
+          // // console.log(new_package)
 
           for (let i = 0; i < new_package.length; i++) {
               let packageData = JSON.parse(new_package[i].assign_mods)
-            // console.log(packageData)
+            // // console.log(packageData)
 
             for (let j = 0; j < packageData.length; j++) {
               
               package_insert.push(packageData[j])
             }
           }
-            // console.log(package_insert)
+            // // console.log(package_insert)
 
             const combined = [...new_service, ...package_insert];
 
@@ -119,10 +119,10 @@ export class ServicesService {
               : JSON.parse(JSON.stringify(item))
             );
 
-            // console.log(cleanedArray)
+            // // console.log(cleanedArray)
 
             for (let i = 0; i < cleanedArray.length; i++) {
-              // console.log(cleanedArray[i].id)
+              // // console.log(cleanedArray[i].id)
               const data = queryRunner.manager.create(ServiceLabResult, {
               labID:saveService.id,
               serviceID:cleanedArray[i].id,
@@ -204,7 +204,7 @@ export class ServicesService {
 
 
   async AddPackages(createServicePackagesDto: CreateServicePackagesDto) {
-      // console.log(createServicePackagesDto)
+      // // console.log(createServicePackagesDto)
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -268,7 +268,7 @@ export class ServicesService {
       .getOne();
 
     let select = JSON.parse(am.selected_modules);
-    // console.log(select);
+    // // console.log(select);
     if (am.selected_modules != '[]') {
       let sm = await this.dataSource
         .createQueryBuilder(Service, 'sysmod')
@@ -318,13 +318,13 @@ export class ServicesService {
             .leftJoin(UserDetail, 'us', 'us.id = sp.medtechID')
       .where('sp.patientID = :patientID',{patientID})
       .getRawMany()
-      // console.log('LABORATORY REQUEST',data)
+      // // console.log('LABORATORY REQUEST',data)
     return data;
   }
 
 
  async getSpecificPackages(id:number){
-  console.log(id)
+  // console.log(id)
     const isExist = await this.servicesPackagesRepository.findOneBy({ id});
     return isExist
   }
@@ -336,14 +336,14 @@ export class ServicesService {
         " sp.*",
       ])
       .getRawMany()
-      // console.log(data)
+      // // console.log(data)
       return data
   }
   
 
 
   findOne(id: number) {
-    console.log(id)
+    // console.log(id)
     // return `This action returns a #${id} service`;
   }
 
@@ -356,12 +356,12 @@ export class ServicesService {
       ])
       .where('sp.service_type = :type',{type})
       .getRawMany()
-      // console.log(data)
+      // // console.log(data)
     return data;
   }
 
   async getItemPaid(data:any){
-    // console.log(JSON.parse(data.service_list),JSON.parse(data.package_list))
+    // // console.log(JSON.parse(data.service_list),JSON.parse(data.package_list))
 
     let service_data = JSON.parse(data.service_list)
     let package_data = JSON.parse(data.package_list)
@@ -393,8 +393,8 @@ export class ServicesService {
       new_package.push(data)
     }
 
-    // console.log('Service',new_service)
-    // console.log('Package',new_package)
+    // // console.log('Service',new_service)
+    // // console.log('Package',new_package)
 
     return {new_service,new_package}
 
@@ -408,7 +408,7 @@ async  getAllServiceToUpdateResult(labID:number){
       ])
       .where('slr.labID = :labID',{labID})
       .getRawMany()
-      console.log(data)
+      // console.log(data)
       return data
   }
 
@@ -421,7 +421,7 @@ async  getAllServiceToUpdateResult(labID:number){
       // ])
       // .where('sp.service_type = :type',{type})
       // .getRawMany()
-      // console.log(data)
+      // // console.log(data)
     
 const servicesWithCategories = await this.dataSource
   .getRepository(Service)
@@ -464,12 +464,12 @@ for (const row of servicesWithCategories) {
 
 result.push(...categoryMap.values());
 
-console.log(result);
+// console.log(result);
     return result;
   }
 
   update(id: number, updateServiceDto: UpdateServiceDto) {
-    // console.log(id,updateServiceDto )
+    // // console.log(id,updateServiceDto )
     try {
     this.dataSource.manager.update(Service, id,{
       service_category:updateServiceDto.service_category,
@@ -493,7 +493,7 @@ console.log(result);
       let mods = JSON.parse(updateServicePackagesDto.assign_mods);
 
       for (let i = 0; i < mods.length; i++) {
-        // console.log('mods', mods[i]);
+        // // console.log('mods', mods[i]);
         let modsEl = mods[i];
         selectedmods.push(modsEl.id);
         if (modsEl.subLink) {
@@ -525,10 +525,10 @@ console.log(result);
 
 
 //    async updateServiceAppointment(id: number, updateServiceAppointmentDto: UpdateServiceAppointmentDto) {
-//     console.log(id,updateServiceAppointmentDto )
+//     // console.log(id,updateServiceAppointmentDto )
 //     try {
 //     const isExist = await this.servicesAppointmentRepository.findOneBy({ id});
-//     console.log(isExist)
+//     // console.log(isExist)
 //     let newServiceList = JSON.parse(updateServiceAppointmentDto.service_list)
 //     let oldServiceList = JSON.parse(isExist.service_list)
 
@@ -549,7 +549,7 @@ console.log(result);
 //           }
 
 
-//           // console.log(new_service)
+//           // // console.log(new_service)
 
 //     //Package Area//////------
 
@@ -560,8 +560,8 @@ console.log(result);
 //     let removedPackageList = oldPackageList.filter(id => !newPackageList.includes(id));
 
 
-//     // console.log('Added',addedPackageListt )
-//     // console.log('Removed',removedPackageList )
+//     // // console.log('Added',addedPackageListt )
+//     // // console.log('Removed',removedPackageList )
 //        let new_add_package = []
 //     let package_add_insert = []
 
@@ -569,11 +569,11 @@ console.log(result);
 //              const isExist = await this.servicesPackagesRepository.findOneBy({ id:addedPackageList[i]});
 //             new_add_package.push(isExist)
 //           }
-//           // console.log(new_package)
+//           // // console.log(new_package)
 
 //           for (let i = 0; i < new_add_package.length; i++) {
 //               let packageData = JSON.parse(new_add_package[i].assign_mods)
-//             // console.log(packageData)
+//             // // console.log(packageData)
 
 //             for (let j = 0; j < packageData.length; j++) {
               
@@ -590,11 +590,11 @@ console.log(result);
 //              const isExist = await this.servicesPackagesRepository.findOneBy({ id:removedPackageList[i]});
 //             new_package.push(isExist)
 //           }
-//           // console.log(new_package)
+//           // // console.log(new_package)
 
 //           for (let i = 0; i < new_package.length; i++) {
 //               let packageData = JSON.parse(new_package[i].assign_mods)
-//             // console.log(packageData)
+//             // // console.log(packageData)
 
 //             for (let j = 0; j < packageData.length; j++) {
               
@@ -602,7 +602,7 @@ console.log(result);
 //             }
 //           }
 
-//           // console.log(package_insert)
+//           // // console.log(package_insert)
 
 //           const combined = [...new_service, ...package_insert];
 
@@ -622,10 +622,10 @@ console.log(result);
 //               : JSON.parse(JSON.stringify(item))
 //             );
 
-//             //  console.log(cleanedArray)
+//             //  // console.log(cleanedArray)
 
 //              for (let i = 0; i < cleanedArray.length; i++) {
-              // console.log(cleanedArray[i].id)
+              // // console.log(cleanedArray[i].id)
 //               await this.servicesLabResultRepository.delete({id:cleanedArray[i].id, labID:id});
 //              }
 
@@ -651,7 +651,7 @@ console.log(result);
 //             );
 
 //              for (let i = 0; i < cleanedArray_added.length; i++) {
-              // console.log(cleanedArray_added[i].id)
+              // // console.log(cleanedArray_added[i].id)
 //               // await this.servicesLabResultRepository.save({id:cleanedArray[i].id, labID:id});
 //               let saveQuarter = this.dataSource.manager.create(ServiceLabResult, {
 //               labID:id,
@@ -680,9 +680,9 @@ console.log(result);
 //   }
 
 async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
-    console.log(id, dto)
+    // console.log(id, dto)
     if(dto.appointmentID){
-      // console.log('naay sulod')
+      // // console.log('naay sulod')
       let newData: {
     patientID: number;
     appointmentID: number;
@@ -705,7 +705,7 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
 
      const existing = await this.servicesAppointmentRepository.findOneBy({ appointmentID:dto.appointmentID });
         if(!existing){
-          // console.log("wala sa data")
+          // // console.log("wala sa data")
            return await this.createServiceAppointment(newData)
           //     return {
           //   msg: 'Saved successfully!',
@@ -714,8 +714,8 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
             
         }
         else{
-          // console.log("naa sa data")
-          // console.log(existing)
+          // // console.log("naa sa data")
+          // // console.log(existing)
 
           try{
     const newServiceList = JSON.parse(dto.service_list);
@@ -806,7 +806,7 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
          
 
     }else{
-      // console.log('walay sulod')
+      // // console.log('walay sulod')
   try {
     const existing = await this.servicesAppointmentRepository.findOneBy({ id });
     if (!existing) {

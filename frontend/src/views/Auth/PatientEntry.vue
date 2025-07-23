@@ -377,7 +377,7 @@ export default {
     },
     async fetchBookings(date) {
       console.log(date);
-      console.log(this.bookings);
+      // console.log(this.bookings);
       // try {
       //   this.axiosCall("/appointment/booking", "POST", date).then((res) => {
       //     this.bookings = res.data;
@@ -393,7 +393,7 @@ export default {
       this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
         (res) => {
           if (res) {
-            console.log("scheduled", res.data);
+            // console.log("scheduled", res.data);
             this.bookings = res.data;
           }
         }
@@ -406,14 +406,14 @@ export default {
       ).then((res) => {
         if (res) {
           this.dataServices = res.data;
-          console.log("LOVED", res.data);
+          // console.log("LOVED", res.data);
         }
       });
     },
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
-          console.log("Pakes", res.data);
+          // console.log("Pakes", res.data);
           this.dataPackages = res.data;
         }
       });
@@ -433,9 +433,9 @@ export default {
         address: this.form.address,
       };
 
-      console.log("Data Passed", data);
+      // console.log("Data Passed", data);
       this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
-        console.log(res.data.status, res.data.duplicate);
+        // console.log(res.data.status, res.data.duplicate);
         let errorCode = res.data.duplicate;
 
         if (errorCode == true) {
