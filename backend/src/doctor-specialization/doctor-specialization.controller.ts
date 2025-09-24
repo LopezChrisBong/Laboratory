@@ -17,6 +17,11 @@ export class DoctorSpecializationController {
     return this.doctorSpecializationService.getAllClinic();
   }
 
+    @Get('getAllDoctorClinic/:id')
+  getAllDoctorClinic(@Param('id') id: string) {
+    return this.doctorSpecializationService.getAllDoctorClinic(+id);
+  }
+
     @Get('getSpecificClinic/:specialty')
   getSpecificClinic(@Param('specialty') specialty: string) {
     return this.doctorSpecializationService.getSpecificClinic(specialty);

@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="dialog"
-      fullscreen
-      eager
-      persistent
-      scrollable
-      max-width="900px"
-    >
+    <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
           <span>Lab Request</span>
@@ -601,7 +594,7 @@ export default {
           value: "action",
           align: "center",
           valign: "center",
-          width: 200,
+          width: 90,
         },
       ],
     };

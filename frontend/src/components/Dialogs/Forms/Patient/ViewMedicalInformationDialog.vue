@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="dialog"
-      fullscreen
-      eager
-      persistent
-      scrollable
-      max-width="900px"
-    >
+    <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
           <span>Medical Information</span>
@@ -68,10 +61,9 @@
                       @click="view(item)"
                       outlined
                       color="green"
-                      block
                       >View</v-btn
                     >
-                    <v-btn
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="edit(item)"
@@ -79,7 +71,7 @@
                       color="blue"
                       block
                       >Update</v-btn
-                    >
+                    > -->
                   </template>
                 </v-data-table>
               </v-col>
@@ -190,7 +182,7 @@ export default {
           sortable: false,
         },
         {
-          text: "Pregnant",
+          text: "Medication",
           value: "pregnant",
           align: "start",
           valign: "start",
@@ -288,22 +280,23 @@ export default {
   methods: {
     initialize() {
       // this.dataItem = [{ pregnant: "0" }];
-      this.userRoleID = this.$store.state.user.user.user_roleID;
       this.getAllPatientMedicalInfo();
+      this.userRoleID = this.$store.state.user.user.user_roleID;
     },
     getAllPatientMedicalInfo() {
       this.loading = true;
-      this.axiosCall("/medical-info/patientMedicalInfo/" + this.id, "GET").then(
-        (res) => {
-          if (res) {
-            // console.log("Get Data", res.data);
-            this.dataItem = res.data;
-          } else {
-            this.dataItem = null;
-          }
-          this.loading = false;
+      this.axiosCall(
+        "/medical-info/patientMedicalInfo/" + this.data.id,
+        "GET"
+      ).then((res) => {
+        if (res) {
+          // console.log("Get Data", res.data);
+          this.dataItem = res.data;
+        } else {
+          this.dataItem = null;
         }
-      );
+        this.loading = false;
+      });
     },
     closeD() {
       this.eventHub.$emit("closeViewMedicalInformationDialog", false);

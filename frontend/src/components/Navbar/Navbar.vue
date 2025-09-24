@@ -236,10 +236,10 @@
 
           <!-- Single Item -->
           <v-list-item
+            :to="'/' + userType + link.route"
             v-if="!link.subLink"
             :key="link.title"
             router
-            :to="'/' + userType + link.route"
             class="rounded-lg mx-2"
             active-class="active-link"
           >

@@ -68,7 +68,7 @@
               style="border-bottom: 1px solid #2196F3;"
             >
               <div>
-                <h2>Experty</h2>
+                <h2>Specialization</h2>
               </div>
               <button
                 class="white--text  d-flex justify-center rounded-lg"
@@ -273,13 +273,13 @@ export default {
   data: () => ({
     data: null,
     daysList: [
+      "Sunday",
       "Monday",
       "Tuesday",
       "Wednesday",
       "Thursday",
       "Friday",
       "Saturday",
-      "Sunday",
     ],
     specialtyDescription: null,
     day: null,
@@ -520,7 +520,7 @@ export default {
         this.day = "Friday";
       } else if (day === 6) {
         this.day = "Saturday";
-      } else if (day === 7) {
+      } else if (day === 0) {
         this.day = "Sunday";
       }
     },

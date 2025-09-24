@@ -10,6 +10,7 @@ import { CreatePatientDoctorDto } from './dto/create-patient-doctor.dto';
 import { CreatePatientMedtechDto } from './dto/create-patient-medtech.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { UpdateServiceResultsDto } from './dto/update-service-result.dto';
+import * as dayjs from 'dayjs';
 @Injectable()
 export class AppointmentService {
   constructor(
@@ -107,6 +108,7 @@ export class AppointmentService {
           date: appointment.date,
           time: appointment.time,
           clinic:appointment.clinic,
+          status:appointment.status ? appointment.status : 0,
           doctorID:appointment.doctorID
         });
 
@@ -378,7 +380,7 @@ export class AppointmentService {
   }
 
   async getAllPatient(tabID:number, user:any){
-     console.log(user.userdetail.user.assignedModuleID)
+     console.log('Love',user.userdetail.user.assignedModuleID)
     let data
     if(tabID == 1){
 
@@ -389,28 +391,30 @@ export class AppointmentService {
         "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
         " pt.*",
       ])
+      .groupBy('pt.patientID')
       .getRawMany()
 
 
-      }else{
-
+      }
+      else{
+       
       data = await this.patientRepository
       .createQueryBuilder('pt')
       .select([
         "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
         " pt.*",
       ])
+      .groupBy('pt.patientID')
       .getRawMany()
       }
     }
-  else if(tabID == 2){
+    else if(tabID == 2){
           const users = await this.serviceAppointmentRepository
             .createQueryBuilder('pt')
             .where('pt.medtechID IS NOT NULL')
             .andWhere('pt.medtechID != :empty', { empty: '' })
             .getMany();
            
-
         if(users){
         data = await this.patientRepository
       .createQueryBuilder('pt')
@@ -421,6 +425,7 @@ export class AppointmentService {
       .leftJoin(ServiceAppointment, 'ap', 'ap.patientID = pt.id')
       .where('ap.status = 0')
       // .andWhere('ap.medtechID != :empty', { empty: '' })
+      .groupBy('pt.patientID')
       .getRawMany()
         }else{
           console.log('Wala')
@@ -442,9 +447,11 @@ export class AppointmentService {
               .select([
                 "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
                 " pt.*",
+                " ap.id as appointmentID",
               ])
               .leftJoin(Appointment, 'ap', 'ap.patientID = pt.id')
               .where('ap.status = 1')
+              .groupBy('pt.patientID')
               .getRawMany()
             }else{
                  console.log('NAA')
@@ -479,6 +486,7 @@ export class AppointmentService {
       // .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
       .where('ap.doctorID = :doctorID', { doctorID })
       // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
+      .groupBy('pt.patientID')
       .getRawMany()
       
       return data
@@ -496,6 +504,7 @@ export class AppointmentService {
       // .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
       .where('sa.medtechID = :medtechID', { medtechID })
       // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
+      .groupBy('pt.patientID')
       .getRawMany()
       console.log(data)
       return data
@@ -505,7 +514,7 @@ export class AppointmentService {
 
     let role = user.userdetail.user.assignedModuleID
     let query;
-     console.log(role, doctorID)
+    //  console.log(role, doctorID)
 
     if (role === 2) {
     query = this.serviceAppointmentRepository
@@ -516,7 +525,8 @@ export class AppointmentService {
     ])
     .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
     .where('ap.medtechID = :doctorID', { doctorID })
-    .andWhere('ap.status = 0');
+    .andWhere('ap.status = 0')
+    .groupBy('pt.patientID')
   } 
   else if (role === 5) {
        query = this.appointmentRepository
@@ -524,18 +534,18 @@ export class AppointmentService {
     .select([
       "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
       "pt.*",
+      "ap.id as appointmentID",
     ])
     .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
     .where('ap.doctorID = :doctorID', { doctorID })
         // query.andWhere('ap.status IN (0,1, 2)');
         .andWhere('ap.status = 1')
-        .andWhere('ap.medtechID IS NULL')
+        // .andWhere('ap.medtechID IS NULL')
+        .groupBy('pt.patientID')
     // query.andWhere('pt.medtechID IS EQUAL NULL');
     // query.andWhere('pt.medtechID == :empty', { empty: '' })
   }  
   
- 
-
   const data = await query.getRawMany();
   return data;
 }
@@ -661,15 +671,77 @@ let data = await this.appointmentRepository
   .leftJoin(Patient, 'p', 'p.id = ap.patientID')
   .where('ap.medtechID IS NULL')
   .getRawMany();
-
-//     let data =[
-//   { date: "2025-05-18", time: "08:00 AM" },
-//   { date: "2025-05-18", time: "09:00 AM" },
-  // { date: "2025-05-19", time: "10:00 AM" }
-// ] 
-// // console.log('Appointment',data);
-      return data
+  return data
   }
+
+
+async getAllDoctorsAppointment(id: number) {
+  const data = await this.appointmentRepository
+    .createQueryBuilder('ap')
+    .select([
+      'ap.*',
+      "IF (!ISNULL(p.m_name), concat(p.f_name, ' ',SUBSTRING(p.m_name, 1, 1) ,'. ',p.l_name) ,concat(p.f_name, ' ', p.l_name)) as name",
+      'p.patientID as unique_patientID'
+    ])
+    .leftJoin(Patient, 'p', 'p.id = ap.patientID')
+    .where('ap.medtechID IS NULL')
+    .andWhere('ap.doctorID = :id', { id })
+    .andWhere('ap.status = 1')
+    .getRawMany();
+
+  const colors = ['blue', 'green', 'orange', 'red', 'purple', 'indigo', 'teal'];
+
+  const events = data.map(item => {
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    const startDate = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A').format('YYYY-MM-DD HH:mm');
+    const endDate = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A').format('YYYY-MM-DD HH:mm');
+
+    return {
+      name: item.name,
+      start: startDate, 
+      end: endDate,    
+      color: randomColor,
+    };
+  });
+
+  return events;
+}
+
+async getAllMedtechAppointment(id: number) {
+  const data = await this.serviceAppointmentRepository
+    .createQueryBuilder('ap')
+    .select([
+      "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+      "ap.*",
+    ])
+    .leftJoin(Patient, 'pt', 'ap.patientID = pt.id')
+    .where('ap.status = 0')
+    .andWhere('ap.medtechID = :id', { id })
+    .getRawMany();
+
+  const colors = ['blue', 'green', 'orange', 'red', 'purple', 'indigo', 'teal'];
+
+  const events = data.map(item => {
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    // use created_at field and convert to 24-hour format
+    const createdAt = dayjs(item.created_at).format('YYYY-MM-DD HH:mm');
+
+    return {
+      name: item.name,
+      start: createdAt,
+      end: createdAt, // or maybe + some duration if you want
+      color: randomColor,
+    };
+  });
+
+  // console.log(events)
+  return events;
+}
+   
+
+
 
   async checkPatient(f_name: string, l_name:string) {
     // // console.log(f_name)

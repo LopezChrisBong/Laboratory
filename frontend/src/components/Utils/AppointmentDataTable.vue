@@ -24,12 +24,12 @@
           color="#239FAB"
           dense
         ></v-text-field>
-        <v-btn
+        <!-- <v-btn
           class="white--text ml-2  rounded-lg"
           color="#2196F3"
           @click="openDialogWithDoctor(), (update = false)"
           ><v-icon left> mdi-plus-box-outline </v-icon></v-btn
-        >
+        > -->
       </v-col>
     </v-row>
     <v-card class="ma-5 dt-container" elevation="0" outlined>
@@ -66,9 +66,13 @@
           <v-btn icon @click="confirmDialog(item)" v-if="item.status == 0">
             <v-icon>mdi-check-decagram</v-icon>
           </v-btn>
-          <!-- <v-btn icon @click="cancelAppointment(item.id)">
+          <v-btn
+            icon
+            @click="cancelAppointment(item.id)"
+            v-if="item.status == 0"
+          >
             <v-icon color="red">mdi-delete</v-icon>
-          </v-btn> -->
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -401,8 +405,8 @@ export default {
         { text: "Name", value: "name", align: "start" },
         { text: "PatientID", value: "unique_patientID", align: "center" },
         { text: "Date", value: "date", align: "center" },
-        { text: "Status", value: "status", align: "center" },
         { text: "Time", value: "time", align: "center" },
+        { text: "Status", value: "status", align: "center" },
         { text: "Actions", value: "actions", sortable: false, align: "end" },
       ],
       options: {},
@@ -584,6 +588,7 @@ export default {
         }
       });
     },
+
     changeSchedule(sched) {
       let newArr = [];
       for (let i = 0; i < this.doctors_schedList1.length; i++) {
@@ -683,9 +688,6 @@ export default {
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
           this.fadeAwayMessage.message = res.data.msg;
-
-          this.addAppointmentDialog = false;
-          this.resetForm();
         } else if (res.data.status == 400) {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
@@ -749,7 +751,16 @@ export default {
     },
     cancelAppointment(id) {
       // this.appointments = this.appointments.filter((a) => a.id !== id);
-      alert("delete optional id:" + id);
+      // alert("delete optional id:" + id);
+      this.axiosCall("/appointment/" + id, "DELETE").then(() => {
+        this.initialize();
+        // this.updateID = null;
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "success";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Deleted successfully!";
+        // this.dialog = false;
+      });
     },
     openDialogWithDoctor() {
       // if (this.selectedDoctor == null) {
