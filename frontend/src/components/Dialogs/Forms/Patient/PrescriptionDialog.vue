@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="dialog"
-      fullscreen
-      eager
-      persistent
-      scrollable
-      max-width="900px"
-    >
+    <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
           <span>Patient Prescription Data Table</span>
@@ -18,94 +11,53 @@
         </v-card-title>
 
         <v-card-text style="max-height: 700px" class="my-4">
-          <v-card>
-            <v-row>
-              <v-col cols="8" class="flex-items mt-2">
-                <!-- <div class="ml-2 text-body-1">
+          <v-container>
+            <v-card>
+              <v-row>
+                <v-col cols="8" class="flex-items mt-2">
+                  <!-- <div class="ml-2 text-body-1">
                   {{ data.title }}
                 </div> -->
-              </v-col>
-              <v-spacer></v-spacer>
-              <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
-                <v-btn
-                  v-if="assignedModuleID == 5"
-                  @click="addPrescription()"
-                  class="white--text rounded-lg"
-                  color="blue"
-                >
-                  Add
-                </v-btn>
-              </v-col>
-              <v-col cols="12" class=" pt-2 px-4">
-                <v-data-table
-                  :headers="headers"
-                  :items="dataItem"
-                  :items-per-page="10"
-                >
-                  <template v-slot:[`item.index`]="{ index }">
-                    {{ index + 1 }}
-                  </template>
-                  <template v-slot:[`item.lab_request`]="{ item }">
-                    {{ item.lab_request == null ? "Doctor/Receptionist" : "" }}
-                  </template>
-                  <template v-slot:[`item.status`]="{ item }">
-                    <v-chip
-                      :color="item.status == 1 ? 'orange' : 'blue'"
-                      dark
-                      small
-                    >
-                      <span>{{
-                        item.status == 1 ? "Pending" : "Done Examination"
-                      }}</span>
-                    </v-chip>
-                  </template>
-                  <template v-slot:[`item.action`]="{ item }">
-                    <v-btn
-                      x-small
-                      class="mt-1"
-                      @click="view(item)"
-                      outlined
-                      color="green"
-                      block
-                      ><v-icon small> mdi-eye</v-icon>View Examine</v-btn
-                    >
-                    <v-btn
-                      v-if="assignedModuleID == 2"
-                      x-small
-                      class="mt-1"
-                      @click="edit(item)"
-                      outlined
-                      color="blue"
-                      block
-                    >
-                      <v-icon small> mdi-pencil</v-icon>Update Examine</v-btn
-                    >
-                    <v-btn
-                      v-if="assignedModuleID == 5 && item.status == 2"
-                      x-small
-                      class="mt-1"
-                      @click="editMedicalInfo(item)"
-                      outlined
-                      color="blue"
-                      block
-                    >
-                      <v-icon small> mdi-pencil</v-icon>Add Medical Info
-                    </v-btn>
-                    <v-btn
-                      x-small
-                      class="mt-1"
-                      @click="print(item)"
-                      outlined
-                      color="blue"
-                      block
-                    >
-                      <v-icon small> mdi-printer</v-icon>Print
-                    </v-btn>
-                  </template>
-                </v-data-table>
-              </v-col>
-            </v-row>
-          </v-card>
+                </v-col>
+                <v-spacer></v-spacer>
+                <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
+                  <v-btn
+                    v-if="assignedModuleID == 5"
+                    @click="addPrescription()"
+                    class="white--text rounded-lg"
+                    color="blue"
+                  >
+                    Add
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" class=" pt-2 px-4">
+                  <v-data-table
+                    :headers="headers"
+                    :items="dataItem"
+                    :items-per-page="10"
+                    :loading="loading"
+                  >
+                    <template v-slot:[`item.index`]="{ index }">
+                      {{ index + 1 }}
+                    </template>
+                    <template v-slot:[`item.date`]="{ item }">
+                      {{ formatDate(item.date) }}
+                    </template>
+                    <template v-slot:[`item.action`]="{ item }">
+                      <v-btn
+                        x-small
+                        class="mt-1"
+                        @click="view(item)"
+                        outlined
+                        color="green"
+                        ><v-icon small> mdi-eye</v-icon>View</v-btn
+                      >
+                    </template>
+                  </v-data-table>
+                </v-col>
+              </v-row>
+            </v-card></v-container
+          >
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions class="pa-5">
@@ -156,66 +108,160 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="prescriptionDialog" eager scrollable max-width="600px">
-      <v-form ref="submitPrescription" @submit.prevent>
-        <v-card>
-          <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-            <span>{{ action }} Prescription</span>
-            <v-spacer></v-spacer>
-            <v-btn icon dark @click="prescriptionDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
+    <v-dialog
+      v-model="prescriptionDialog"
+      eager
+      scrollable
+      max-width="600px"
+      persistent
+    >
+      <v-card>
+        <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
+          <span>{{ action }} Prescription</span>
+          <v-spacer></v-spacer>
+          <v-btn
+            icon
+            dark
+            @click="
+              prescriptionDialog = false;
+              resetForm();
+            "
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
 
-          <v-card-text style="max-height: 700px" class="my-4">
-            <v-container>
-              <v-row>
-                <v-col col="12" md="12">
-                  <label for="finding">
-                    <strong
-                      ><h3>
-                        Prescription
-                      </h3></strong
-                    ></label
-                  >
-                  <vue-editor
-                    v-model="prescription_description"
-                    :readonly="action == 'View'"
-                    :editorToolbar="customToolbar"
-                  ></vue-editor>
-                </v-col>
-                <!-- <v-col cols="12">
-                  <v-text-field
-                    label="Doctors Fee"
-                    v-model="doctors_fee"
-                    :rules="[formRules.required]"
-                    class="text-uppercase"
-                    type="number"
-                    required
-                  />
-                </v-col> -->
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-divider></v-divider>
+        <v-card-text style="max-height: 700px" class="my-4">
+          <!-- Header -->
+          <v-row class="align-center">
+            <v-col cols="12" class="text-center">
+              <h3 class="font-weight-bold mb-0">PARAGON</h3>
+              <h4 class="mb-0">MULTISPECIALTY CLINIC</h4>
+              <div class="text-caption">
+                1F Bluz Building 2, Tadeco Road, Brgy. San Francisco, Panabo
+                City <br />
+                📞 0946-100-3260 | Mon–Sat 8:00am–5:00pm
+              </div>
+              <v-divider class="my-3"></v-divider>
+            </v-col>
+          </v-row>
 
-          <v-card-actions class="pa-5">
-            <v-spacer></v-spacer>
-            <v-btn color="red" outlined @click="prescriptionDialog = false">
-              <v-icon>mdi-close-circle-outline</v-icon>
-              Cancel
-            </v-btn>
-            <!-- <v-btn
-              :color="$vuetify.theme.themes.light.submitBtns"
-              class="white--text"
-              @click="accept()"
-            >
-              <v-icon>mdi-check-circle</v-icon>
-              {{ action == "Verify" ? "Accept" : "Update" }}
-            </v-btn> -->
-          </v-card-actions>
-        </v-card>
-      </v-form>
+          <!-- Patient Info -->
+          <v-row>
+            <v-col cols="8">
+              <v-text-field
+                v-model="patient.name"
+                label="Name"
+                readonly
+                dense
+                hide-details
+                outlined
+              />
+            </v-col>
+            <v-col cols="4">
+              <v-text-field
+                v-model="patient.age"
+                label="Age/Status"
+                dense
+                readonly
+                hide-details
+                outlined
+              />
+            </v-col>
+            <v-col cols="8">
+              <v-text-field
+                v-model="patient.address"
+                label="Address"
+                dense
+                readonly
+                hide-details
+                outlined
+              />
+            </v-col>
+            <v-col cols="4">
+              <v-text-field
+                v-model="patient.date"
+                label="Date"
+                dense
+                readonly
+                hide-details
+                outlined
+              />
+            </v-col>
+          </v-row>
+
+          <!-- RX Section -->
+          <v-row>
+            <v-col cols="12" class="d-flex">
+              <div class="display-1 font-weight-bold mr-4">℞</div>
+
+              <vue-editor
+                v-if="action == 'Update' || action == 'Add'"
+                style="width: 100%;"
+                v-model="prescription"
+                :editorToolbar="customToolbar"
+                class="mb-10"
+              ></vue-editor>
+              <v-textarea
+                v-else
+                outlined
+                readonly
+                name="input-7-4"
+                label="Outlined textarea"
+                value="The Woodman set to work at once, and so sharp was his axe that the tree was soon chopped nearly through."
+              ></v-textarea>
+            </v-col>
+          </v-row>
+
+          <!-- Footer -->
+          <v-row class="mt-6">
+            <v-col cols="8">
+              <!-- <v-text-field
+                  v-model="nextVisit"
+                  label="Your Next Visit is on:"
+                  dense
+                  hide-details
+                  outlined
+                /> -->
+              <div class="text-caption">
+                Your Next Visit is on:__________________
+              </div>
+            </v-col>
+            <v-col cols="4" class="text-right">
+              <div class="text-caption">
+                License No: ______________
+              </div>
+              <div class="text-caption">
+                PTR No: _____________
+              </div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-divider></v-divider>
+
+        <v-card-actions class="pa-5">
+          <v-spacer></v-spacer>
+          <v-btn
+            color="red"
+            outlined
+            @click="
+              prescriptionDialog = false;
+              resetForm();
+            "
+          >
+            <v-icon>mdi-close-circle-outline</v-icon>
+            Cancel
+          </v-btn>
+          <v-btn
+            :color="$vuetify.theme.themes.light.submitBtns"
+            class="white--text"
+            @click="action == 'Add' ? accept() : update()"
+          >
+            <v-icon>mdi-check-circle</v-icon>
+            {{ action == "Add" ? "Save" : "Update" }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
 
     <MedicalInformation :data="medicalData" :action="action" />
@@ -236,7 +282,6 @@ import { VueEditor } from "vue2-editor";
 export default {
   components: {
     MedicalInformation: () => import("./MedicalInformation.vue"),
-    // viewStrategicOutcome: () => import("./ViewStrategicOutcome.vue"),
     VueEditor,
   },
   props: {
@@ -244,6 +289,13 @@ export default {
   },
   data() {
     return {
+      patient: {
+        name: "",
+        age: "",
+        address: "",
+        date: new Date().toLocaleDateString(),
+      },
+      nextVisit: "",
       service_description: "Red Blood Cell",
       input: [],
       input1: [],
@@ -257,7 +309,7 @@ export default {
       options: {},
       strategicData: null,
       action: null,
-      prescription_description: null,
+      prescription: null,
       newPackageData: {},
       service: [],
       desc: null,
@@ -280,6 +332,7 @@ export default {
 
       medicalData: null,
       id: null,
+      loading: false,
       isButtonLoading: false,
       assignedModuleID: null,
       dataItem: [],
@@ -295,16 +348,16 @@ export default {
 
         {
           text: "Doctors Name",
-          value: "Med_name",
+          value: "doctor_name",
           align: "start",
           valign: "start",
           sortable: false,
         },
         {
-          text: "Presciption",
-          value: "prescription",
-          align: "start",
-          valign: "start",
+          text: "Date",
+          value: "date",
+          align: "center",
+          valign: "center",
           sortable: false,
         },
 
@@ -323,8 +376,10 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        // console.log("STRAT", data);
         this.id = data.id;
+        this.patient.name = data.name;
+        this.patient.age = data.age;
+        this.patient.address = data.address;
         this.tab = 1;
         this.initialize();
       },
@@ -349,36 +404,23 @@ export default {
 
   methods: {
     initialize() {
-      this.loading = true;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       let userID = this.$store.state.user.id;
+      this.getAllPatientPrecription();
       console.log(userID);
       // alert(this.assignedModuleID);
     },
-    submitResult() {
-      // console.log(this.input, this.input1, this.updateID);
-      let data = {
-        status: 2,
-        updateID: this.updateID,
-      };
+
+    getAllPatientPrecription() {
+      this.loading = true;
       this.axiosCall(
-        "/appointment/updatePatientStatus/" + this.id,
-        "PATCH",
-        data
+        "/patient/getAllPatientPrecription/" + this.data.id,
+        "GET"
       ).then((res) => {
-        if (res.data.status == 201) {
-          this.initialize();
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-          this.prescriptionDialog = false;
-        } else if (res.data.status == 400) {
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "error";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
+        if (res) {
+          this.dataItem = res.data;
         }
+        this.loading = false;
       });
     },
 
@@ -387,52 +429,103 @@ export default {
       this.dialog = false;
     },
 
-    edit(item) {
-      this.action = "Update";
-      this.updateID = item.id;
-      // console.log(item);
-      this.axiosCall(
-        "/services/getAllServiceToUpdateResult/" + item.id,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          // console.log(res.data);
-          this.service = res.data;
-        }
-      });
-      this.prescriptionDialog = true;
-    },
-    view(item) {
-      // console.log(item);
-      this.action = "View";
-      this.updateID = item.id;
-      // console.log(item);
-      this.axiosCall(
-        "/services/getAllServiceToUpdateResult/" + item.id,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          // console.log(res.data);
-          this.service = res.data;
-        }
-      });
-      this.prescriptionDialog = true;
-    },
-
-    editMedicalInfo(item) {
-      // alert(this.data.id);
-      // console.log(item);
-      this.medicalData = { id: null, userIDd: this.data.id, data: item };
-      this.action = "Add";
-    },
     accept() {
-      if (this.$refs.submitPrescription.validate()) {
-        // console.log("love");
+      if (this.prescription == null) {
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "error";
+        this.fadeAwayMessage.header =
+          "Please add prescription before save, thank you.";
+      } else {
+        let userID = this.$store.state.user.id;
+        let data = {
+          patientID: this.data.id,
+          doctorID: Number(userID),
+          description: this.prescription,
+          age: this.patient.age,
+          date: this.patient.date,
+          name: this.patient.name,
+          address: this.patient.address,
+        };
+        console.log("love", data);
+
+        this.axiosCall("/patient/addPrescription", "POST", data).then((res) => {
+          if (res.data.status == 200) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "Successfully Updated";
+            this.prescriptionDialog = false;
+            this.initialize();
+          } else {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = res.data.msg;
+          }
+        });
       }
+    },
+    update() {
+      if (this.prescription == null) {
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "error";
+        this.fadeAwayMessage.header =
+          "Please add prescription before save, thank you.";
+      } else {
+        let userID = this.$store.state.user.id;
+        let data = {
+          patientID: this.data.id,
+          doctorID: Number(userID),
+          description: this.prescription,
+          age: this.patient.age,
+          date: this.patient.date,
+          name: this.patient.name,
+          address: this.patient.address,
+        };
+        console.log("love", data);
+        this.axiosCall("/patient/" + this.updateID, "PATCH", data).then(
+          (res) => {
+            if (res.data.status == 201) {
+              // alert("updated");
+              this.initialize();
+              this.updateID = null;
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "System Message";
+              this.fadeAwayMessage.message = res.data.msg;
+
+              this.prescriptionDialog = false;
+            } else {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "error";
+              this.fadeAwayMessage.header = "System Message";
+              this.fadeAwayMessage.message = res.data.msg;
+            }
+          }
+        );
+      }
+    },
+    resetForm() {
+      this.patient.date = new Date().toLocaleDateString();
+      this.prescription = null;
     },
 
     addPrescription() {
       this.action = "Add";
+      this.prescriptionDialog = true;
+    },
+    view(item) {
+      let userID = this.$store.state.user.id;
+      if (userID == item.doctorID) {
+        this.action = "Update";
+      } else {
+        this.action = "View";
+      }
+      // alert(this.action);
+      this.updateID = item.id;
+      this.patient.name = item.name;
+      this.patient.address = item.address;
+      this.patient.date = item.date;
+      this.patient.age = item.age;
+      this.prescription = item.description;
       this.prescriptionDialog = true;
     },
   },

@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      fullscreen
-      v-model="dialog"
-      persistent
-      eager
-      scrollable
-      max-width="900px"
-    >
+    <v-dialog v-model="dialog" persistent eager scrollable max-width="1000px">
       <v-form ref="AddPatient" @submit.prevent>
         <v-card>
           <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">

@@ -22,6 +22,7 @@ export class MedicalInfoService {
     return 'This action adds a new medicalInfo';
   }
    async addMedicalInfo(createMedicalInfoDto:CreateMedicalInfoDto){
+    console.log(createMedicalInfoDto)
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
@@ -47,23 +48,27 @@ export class MedicalInfoService {
             treatment: medicalInfo.treatment,
             weight: medicalInfo.weight,
             prevPreg: medicalInfo.prevPreg,
+            Tnumber: medicalInfo.Tnumber,
+            Pnumber: medicalInfo.Pnumber,
+            PAnumber: medicalInfo.PAnumber,
+            Lnumber: medicalInfo.Lnumber,
+            Anumber: medicalInfo.Anumber,
+            Gnumber: medicalInfo.Gnumber,
+            discharge: medicalInfo.discharge,
+            complain: medicalInfo.complain,
+            admitted: medicalInfo.admitted,
           });
   
          const savedCategory = await queryRunner.manager.save(data);
          
-        this.dataSource.manager.update(Patient, medicalInfo.patientID,{
-        status:3,
-     })
-         
-
-        if(medicalInfo.appointmentID != null){
-              this.dataSource.manager.update(Appointment, medicalInfo.appointmentID,{
-        status:3,
-     })
-        }
-
-         
-    
+    //     this.dataSource.manager.update(Patient, medicalInfo.patientID,{
+    //     status:3,
+    //  })
+    //     if(medicalInfo.appointmentID != null){
+    //     this.dataSource.manager.update(Appointment, medicalInfo.appointmentID,{
+    //     status:3,
+    //  })
+    //     }
 
   
           // console.log(savedCategory.id);
@@ -82,13 +87,6 @@ export class MedicalInfoService {
           errorCode: error.code
         };
       }
-  
-  //     catch (error) {
-  //   if (error.code === '23505') { // Postgres unique violation
-  //     throw new ConflictException('Email already exists');
-  //   }
-  //   throw error; // rethrow if not handled
-  // }
       
       finally {
         await queryRunner.release();

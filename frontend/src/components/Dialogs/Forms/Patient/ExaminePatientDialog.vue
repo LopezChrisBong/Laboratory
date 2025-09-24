@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="dialog"
-      fullscreen
-      eager
-      persistent
-      scrollable
-      max-width="900px"
-    >
+    <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
           <span>Patient Examination Data Table</span>
@@ -323,7 +316,7 @@ export default {
           value: "action",
           align: "center",
           valign: "center",
-          width: 200,
+          width: 90,
         },
       ],
     };
@@ -407,11 +400,11 @@ export default {
       ).then((res) => {
         if (res.data.status == 201) {
           this.initialize();
+          this.laboratoryDialog = false;
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
           this.fadeAwayMessage.message = res.data.msg;
-          this.laboratoryDialog = false;
         } else if (res.data.status == 400) {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";

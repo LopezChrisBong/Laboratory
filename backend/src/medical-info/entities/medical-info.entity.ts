@@ -38,8 +38,36 @@ export class MedicalInfo {
     @Column({ type: "longtext",nullable:true })
     finding: string
 
+    @Column({ type: "longtext",nullable:true })
+    complain: string
+
     @Column({ type: "varchar",nullable:true })
     liveBirths: string
+
+    @Column({ type: "varchar",nullable:true })
+    Pnumber: string
+
+     @Column({ type: "varchar",nullable:true })
+    Gnumber: string
+
+     @Column({ type: "varchar",nullable:true })
+    PAnumber: string
+
+     @Column({ type: "varchar",nullable:true })
+    Lnumber: string
+
+     @Column({ type: "varchar",nullable:true })
+    Tnumber: string
+
+     @Column({ type: "varchar",nullable:true })
+    Anumber: string
+
+    
+    @Column({ type: "varchar",nullable:true })
+    admitted: string
+
+    @Column({ type: "varchar",nullable:true })
+    discharge: string
 
     @Column({ type: "varchar",nullable:true })
     menstrual: string

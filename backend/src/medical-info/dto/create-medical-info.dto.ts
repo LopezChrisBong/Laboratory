@@ -56,4 +56,31 @@ export class CreateMedicalInfoDto {
     @ApiProperty()
     prevPreg: string;
 
+    @ApiProperty()
+    complain: string;
+
+    @ApiProperty()
+    Pnumber: string;
+
+    @ApiProperty()
+    PAnumber: string;
+
+    @ApiProperty()
+    Gnumber: string;
+
+    @ApiProperty()
+    Lnumber: string;
+
+    @ApiProperty()
+    Anumber: string;
+
+    @ApiProperty()
+    Tnumber: string;
+
+    @ApiProperty()
+    admitted: string;
+
+    @ApiProperty()
+    discharge: string;
+
 }
