@@ -8,6 +8,7 @@ import { DataSource } from 'typeorm';
 
 import { SendNewEmailDto } from './dto/send-new-email.dto';
 import {
+  Prescription,
   UserDetail,
   Users,
 } from 'src/entities';
@@ -391,81 +392,47 @@ export class PdfGeneratorService {
 
 
 
-  // async getMySchedule(facultyId: number, filter: number) {
-  //   // console.log(facultyId, filter)
-  //   let mySched = await this.dataSource.manager
-  //   .createQueryBuilder(Availability, 'A')
-  //   .select([
-  //     "A.id as id",
-  //     "CONCAT(times_slot_from, ' - ', times_slot_to) AS time",
-  //     "IF (!ISNULL(ud.mname)  AND LOWER(ud.mname) != 'n/a', concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as name",
-  //     "MAX(CASE WHEN day = 'Monday' THEN CONCAT('Subject: ', sub.subject_title, ', Room: ', room.room_section) END) AS Monday",
-  //     "MAX(CASE WHEN day = 'Tuesday' THEN CONCAT('Subject: ', sub.subject_title, ', Room: ',  room.room_section) END) AS Tuesday",
-  //     "MAX(CASE WHEN day = 'Wednesday' THEN CONCAT('Subject: ', sub.subject_title, ', Room: ',  room.room_section) END) AS Wednesday",
-  //     "MAX(CASE WHEN day = 'Thursday' THEN CONCAT('Subject: ', sub.subject_title, ', Room: ',  room.room_section) END) AS Thursday",
-  //     "MAX(CASE WHEN day = 'Friday' THEN CONCAT('Subject: ', sub.subject_title, ', Room: ',  room.room_section) END) AS Friday",
-  //     "MAX(CASE WHEN day = 'Saturday' THEN CONCAT('Subject: ', sub.subject_title, ', Room: ',  room.room_section) END) AS Saturday"
+  async prescription(id: number,) {
+      let prescription = await this.dataSource.manager
+      .createQueryBuilder(Prescription, 'p')
+      .where('p.id = :id', { id })
+      .getOne();
 
-  //   ])
-  //   .leftJoin(UserDetail, 'ud', 'ud.id = A.teacherID')
-  //   .where('A.teacherID = "'+facultyId+'"')
-  //   .andWhere('A.school_yearId = "'+filter+'"')
-  //   .groupBy('A.times_slot_from,A.times_slot_to,A.teacherID')
-  //   .orderBy('A.times_slot_from')
-  //   .getRawMany();
+      console.log(prescription)
+    const data = [
+      {
+        prescription:prescription
+      },
+    ];
 
-  //   let teacherName = mySched[0].name
+    // // console.log(data);
+    try {
+      const browser = await puppeteer.launch({ 
+        headless: 'new',
+        args: ['--no-sandbox']
+      });
+      const page = await browser.newPage();
+      // compile(template_name, data)
+      const content = await this.compile('prescription', data);
+      await page.setContent(content);
 
-
-  //   // let headerImg = join(process.cwd(), '/static/img/header.png');
-  //   let headerImg = join(process.cwd(), '/../static/img/header.png');
-  //   // let footerImg = join(process.cwd(), '/static/img/footer.png');
-  //   let footerImg = join(process.cwd(), '/../static/img/footer.png');
-
-
-  //   const data = [
-  //     {
-  //       header_img: this.base64_encode(headerImg, 'headerfooter'),
-  //       footer_img: this.base64_encode(footerImg, 'headerfooter'),
-  //       mySched:mySched,
-  //       year: filter,
-  //       teacherName:teacherName
-  //       // month:getmonth
-  //     },
-  //   ];
-
-  //   // // console.log(data);
-  //   try {
-  //     const browser = await puppeteer.launch({ 
-  //       headless: 'new',
-  //       args: ['--no-sandbox']
-  //     });
-  //     const page = await browser.newPage();
-  //     // compile(template_name, data)
-  //     const content = await this.compile('my-sched', data);
-  //     await page.setContent(content);
-
-  //     const buffer = await page.pdf({
-  //       format: 'legal',
-  //       margin: {
-  //         top: '0.20in',
-  //         left: '0.50in',
-  //         bottom: '0.20in',
-  //         right: '0.50in',
-  //       },
-  //       landscape: false,
-  //       printBackground: true,
-  //       // displayHeaderFooter: true,
-  //       // footerTemplate:
-  //       //   '<div style="border: 1px solid black; width:100%;z-index:1">  <div style=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=" style="width:30px;height:30px;"/></div><span style="margin-right: 1cm"><span class="pageNumber"></span> of <span class="totalPages"></span></span></div>',
-  //     });
-  //     // // console.log('Applicant generated');
-  //     await browser.close();
-  //     return buffer;
-  //   } catch (e) {
-  //     // console.log(e);
-  //   }
-  // }
+      const buffer = await page.pdf({
+        format: 'letter',
+        margin: {
+          top: '0.20in',
+          left: '0.50in',
+          bottom: '0.20in',
+          right: '0.50in',
+        },
+        landscape: false,
+        printBackground: true,
+      });
+      await browser.close();
+      return buffer;
+    } catch (e) {
+      console.log(e);
+    }
+  }
  
 
   async getQRCode(id: string) {

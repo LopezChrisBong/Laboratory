@@ -27,6 +27,10 @@ export class ServiceAppointment {
     status: number
 
     
+     @Column({ type: "longtext", nullable:true})
+    attachment: string
+
+    
 
     @CreateDateColumn({
         type: 'datetime',

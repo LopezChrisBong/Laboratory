@@ -3,7 +3,7 @@
     <v-container fluid>
       <!-- Top Stats -->
       <v-row>
-        <v-col v-for="stat in stats" :key="stat.title" cols="12" md="3">
+        <v-col v-for="stat in stats" :key="stat.title" cols="12" md="4">
           <v-card>
             <v-card-text
               class="d-flex flex-column align-center justify-center text-center"
@@ -11,9 +11,9 @@
               <v-icon size="40">{{ stat.icon }}</v-icon>
               <h3>{{ stat.value }}</h3>
               <p>{{ stat.title }}</p>
-              <span :class="stat.trend >= 0 ? 'green--text' : 'red--text'">
+              <!-- <span :class="stat.trend >= 0 ? 'green--text' : 'red--text'">
                 {{ stat.trend >= 0 ? "+" : "" }}{{ stat.trend }}%
-              </span>
+              </span> -->
             </v-card-text>
           </v-card>
         </v-col>
@@ -21,14 +21,31 @@
 
       <!-- Patients Overview + Calendar -->
       <v-row>
+        <!-- Chart -->
         <v-col cols="12" md="8">
           <v-card>
-            <v-card-title>Patients overview</v-card-title>
+            <v-card-title class="d-flex align-center justify-space-between">
+              Patients Overview
+
+              <!-- Year selector -->
+              <v-select
+                v-model="selectedYear"
+                :items="yearOptions"
+                label="Select Year"
+                dense
+                outlined
+                style="max-width: 150px"
+                @change="getTotalOverview"
+              ></v-select>
+            </v-card-title>
+
             <v-card-text>
               <canvas id="patients-chart" height="300"></canvas>
             </v-card-text>
           </v-card>
         </v-col>
+
+        <!-- Calendar -->
         <v-col cols="12" md="4">
           <v-card>
             <v-card-title>Calendar</v-card-title>
@@ -37,6 +54,7 @@
                 v-model="selectedDate"
                 :min="minDate"
                 color="primary"
+                style="height: auto;"
               ></v-date-picker>
             </v-card-text>
           </v-card>
@@ -58,31 +76,6 @@
               :loading="loading"
               class="elevation-1"
             >
-              <template v-slot:[`item.status`]="{ item }">
-                <v-chip
-                  :color="
-                    item.status == 0
-                      ? 'orange'
-                      : item.status == 1
-                      ? 'blue'
-                      : 'green'
-                  "
-                  dark
-                  small
-                >
-                  <span>
-                    {{
-                      item.status == 0
-                        ? "Pending"
-                        : item.status == 1
-                        ? "On-Going"
-                        : item.status == 2
-                        ? "Lab-Result Done"
-                        : "Done"
-                    }}
-                  </span>
-                </v-chip>
-              </template>
             </v-data-table>
           </v-card>
         </v-col>
@@ -104,6 +97,11 @@ export default {
       selectedDate: new Date().toISOString().substr(0, 10),
       minDate: "2023-01-01",
       loading: false,
+      selectedYear: new Date().getFullYear(),
+      yearOptions: this.generateYears(),
+      totalAppointment: [],
+      totalLaboratory: [],
+      chartInstance: null,
       stats: [
         {
           title: "Total patients",
@@ -123,48 +121,21 @@ export default {
           trend: -3.5,
           icon: "mdi-doctor",
         },
-        {
-          title: "Last month cost",
-          value: "$22.5K",
-          trend: 0.8,
-          icon: "mdi-currency-usd",
-        },
       ],
       headers: [
         { text: "Name", value: "name" },
         { text: "Identification No.", value: "patientID" },
-        // { text: "Last Visit", value: "lastVisit" },
-        { text: "Status", value: "status" },
-        // { text: "Next Visit", value: "nextVisit" },
-        // { text: "Recent Topic", value: "recentTopic" },
-        // { text: "Recent Doctor", value: "recentDoctor" },
+        { text: "Contact No.", value: "contact_no" },
+        { text: "Age", value: "age" },
       ],
-      patients: [
-        // {
-        //   name: "Courtney Henry",
-        //   id: "21789057",
-        //   lastVisit: "Jan 20, 2020",
-        //   status: "Active",
-        //   nextVisit: "Jan 24, 2020",
-        //   recentTopic: "Radiology",
-        //   recentDoctor: "Dr M. Wagner",
-        // },
-        // {
-        //   name: "Leslie Alexander",
-        //   id: "37890606",
-        //   lastVisit: "Jan 20, 2020",
-        //   status: "Active",
-        //   nextVisit: "Feb 1, 2020",
-        //   recentTopic: "Pediatrics",
-        //   recentDoctor: "Dr R. Green",
-        // },
-      ],
+      patients: [],
     };
   },
 
   mounted() {
-    this.chartData();
     this.getAllPatient();
+    this.getTotalPatient();
+    this.getTotalOverview();
   },
 
   methods: {
@@ -174,52 +145,89 @@ export default {
     },
     chartData() {
       const ctx = document.getElementById("patients-chart").getContext("2d");
-      new Chart(ctx, {
+
+      if (this.chartInstance) {
+        this.chartInstance.destroy(); // destroy old chart before redrawing
+      }
+
+      this.chartInstance = new Chart(ctx, {
         type: "bar",
         data: {
-          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+          labels: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sept",
+            "Oct",
+            "Nov",
+            "Dec",
+          ],
           datasets: [
             {
-              label: "Medical patients",
+              label: "Total Appointment",
               backgroundColor: "#1976d2",
-              data: [1000, 1700, 2500, 3200, 3000, 2200, 1500, 2300],
+              data: this.totalAppointment,
             },
             {
-              label: "Appointed patients",
+              label: "Total Lab Request",
               backgroundColor: "#64b5f6",
-              data: [600, 1100, 1900, 2300, 1780, 1900, 1200, 1900],
+              data: this.totalLaboratory,
             },
           ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          legend: {
-            position: "top",
-          },
-          tooltips: {
-            mode: "index",
-            intersect: false,
-          },
-          scales: {
-            yAxes: [
-              {
-                ticks: {
-                  beginAtZero: true,
-                  max: 4000,
-                },
-              },
-            ],
-          },
         },
       });
     },
+    generateYears() {
+      const current = new Date().getFullYear();
+      const years = [];
+      for (let y = current; y >= current - 5; y--) {
+        years.push(y);
+      }
+      return years;
+    },
+
     getAllPatient() {
       this.loading = true;
       this.axiosCall("/appointment/getAllPatient/" + 1, "GET").then((res) => {
         if (res) {
           this.patients = res.data;
           this.loading = false;
+        }
+      });
+    },
+    getTotalPatient() {
+      this.axiosCall(
+        "/appointment/getAllAppointmentDashboard/DashboardData",
+        "GET"
+      ).then((res) => {
+        if (res) {
+          //   console.log("lslsl", res.data);
+          this.stats[0].value = res.data.totalPatient.length;
+          this.stats[1].value = res.data.totalPatient30Days.length;
+          this.stats[2].value = res.data.totalDoctors.length;
+          //   this.stats[3].value = res.data.totalPatient.length;
+        }
+      });
+    },
+
+    async getTotalOverview() {
+      this.axiosCall(
+        "/appointment/getAllOverview/patientOverview/" + this.selectedYear,
+        "GET"
+      ).then((res) => {
+        if (res) {
+          this.totalAppointment = res.data.totalAppointment.map(Number);
+          this.totalLaboratory = res.data.totalLaboratory.map(Number);
+          this.chartData();
         }
       });
     },

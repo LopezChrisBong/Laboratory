@@ -53,15 +53,6 @@
                   </template>
                   <template v-slot:[`item.action`]="{ item }">
                     <v-btn
-                      x-small
-                      class="mt-1"
-                      @click="view(item)"
-                      outlined
-                      color="green"
-                      block
-                      ><v-icon small> mdi-eye</v-icon>View Examine</v-btn
-                    >
-                    <v-btn
                       v-if="assignedModuleID == 2"
                       x-small
                       class="mt-1"
@@ -70,29 +61,21 @@
                       color="blue"
                       block
                     >
-                      <v-icon small> mdi-pencil</v-icon>Update Examine</v-btn
+                      <v-icon small
+                        >{{ !item.attachment ? "mdi-pencil" : "mdi-eye" }}
+                      </v-icon>
+                      {{ !item.attachment ? "Upload" : "View" }}</v-btn
                     >
                     <v-btn
-                      v-if="assignedModuleID == 5 && item.status == 2"
+                      v-if="assignedModuleID == 5 && item.attachment"
                       x-small
                       class="mt-1"
-                      @click="editMedicalInfo(item)"
+                      @click="edit(item)"
                       outlined
-                      color="blue"
+                      color="green"
                       block
+                      ><v-icon small> mdi-eye</v-icon>View</v-btn
                     >
-                      <v-icon small> mdi-pencil</v-icon>Add Medical Info
-                    </v-btn>
-                    <v-btn
-                      x-small
-                      class="mt-1"
-                      @click="print(item)"
-                      outlined
-                      color="blue"
-                      block
-                    >
-                      <v-icon small> mdi-printer</v-icon>Print
-                    </v-btn>
                   </template>
                 </v-data-table>
               </v-col>
@@ -148,82 +131,44 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="laboratoryDialog" fullscreen>
-      <v-card>
-        <v-card-title>Laboratory Result</v-card-title>
-        <v-card-text>
-          <v-simple-table dense class="text-caption">
-            <thead>
-              <tr>
-                <th class="text-left">Test</th>
-                <th class="text-left">Result</th>
-                <th class="text-center" colspan="2">Reference Range (Male)</th>
-                <th class="text-center" colspan="2">
-                  Reference Range (Female)
-                </th>
-                <th class="text-left">Unit</th>
-                <th class="text-left">Remarks</th>
-              </tr>
-              <tr>
-                <th></th>
-                <th></th>
-                <th>Lower</th>
-                <th>Upper</th>
-                <th>Lower</th>
-                <th>Upper</th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in service" :key="index">
-                <td>{{ item.service_description }}</td>
-
-                <!-- Input field for result -->
-                <td>
-                  <v-text-field
-                    v-model="input[index]"
-                    dense
-                    hide-details
-                    :readonly="action == 'View' ? true : false"
-                    outlined
-                    class="ma-0 pa-0"
-                    style="max-width: 100px"
-                  />
-                </td>
-
-                <!-- Static reference values (replace with dynamic data if available) -->
-                <td>{{ item.male_lower || "-" }} 33</td>
-                <td>{{ item.male_upper || "-" }} 33</td>
-                <td>{{ item.female_lower || "-" }} 33</td>
-                <td>{{ item.female_upper || "-" }} 33</td>
-                <td>{{ item.unit || "-" }}</td>
-                <td>
-                  <v-text-field
-                    dense
-                    hide-details
-                    :readonly="action == 'View' ? true : false"
-                    outlined
-                    class="ma-0 pa-0"
-                    style="max-width: 150px"
-                  ></v-text-field>
-                </td>
-              </tr>
-            </tbody>
-          </v-simple-table>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="laboratoryDialog = false">Close</v-btn>
-          <v-btn text @click="submitResult()" v-if="action == 'Update'"
-            >Submit</v-btn
+    <v-dialog v-model="laboratoryDialog" max-width="600px">
+      <v-card outlined class="pa-4">
+        <v-card-title>
+          {{ !currentFileUrl ? "Upload" : "View" }} Attachment
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            @click="submitFile"
+            :loading="loading"
+            small
+            v-if="!currentFileUrl"
           >
-        </v-card-actions>
+            Save
+          </v-btn>
+        </v-card-title>
+
+        <v-divider></v-divider>
+
+        <v-card-text>
+          <!-- File Picker -->
+          <v-file-input
+            v-if="!currentFileUrl"
+            v-model="selectedFile"
+            label="Choose attachment"
+            outlined
+            dense
+            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
+            prepend-icon="mdi-paperclip"
+          ></v-file-input>
+
+          <!-- Preview existing file -->
+          <div v-if="currentFileUrl" class="mt-4">
+            <strong>Uploaded File:</strong><br />
+            <a :href="currentFileUrl" target="_blank">{{ currentFileName }}</a>
+          </div>
+        </v-card-text>
       </v-card>
     </v-dialog>
-
-    <MedicalInformation :data="medicalData" :action="action" />
 
     <fade-away-message-component
       displayType="variation2"
@@ -238,31 +183,14 @@
 
 <script>
 export default {
-  components: {
-    MedicalInformation: () => import("./MedicalInformation.vue"),
-    // viewStrategicOutcome: () => import("./ViewStrategicOutcome.vue"),
-  },
+  components: {},
   props: {
     data: null,
   },
   data() {
     return {
-      service_description: "Red Blood Cell",
-      input: [],
-      input1: [],
       updateID: null,
-      male_lower: 4.0,
-      male_upper: 5.9,
-      female_lower: 3.8,
-      female_upper: 6.0,
-      unit: "x 10⁶/L",
-      remarks: "",
-      options: {},
-      strategicData: null,
       action: null,
-      newPackageData: {},
-      service: [],
-      desc: null,
       itemToDelete: null,
       confirmDialog: false,
       laboratoryDialog: false,
@@ -319,14 +247,20 @@ export default {
           width: 90,
         },
       ],
+      selectedFile: null, // new file selected
+      currentFileUrl: null, // existing file URL from server
+      currentFileName: null, // existing file name
+      loading: false,
     };
   },
-
+  // created() {
+  //   this.loadExistingFile();
+  // },
   watch: {
     data: {
       handler(data) {
         this.dialog = true;
-        // console.log("STRAT", data);
+        console.log("STRAT", data);
         this.id = data.id;
         this.tab = 1;
         this.initialize();
@@ -340,15 +274,7 @@ export default {
       deep: true,
     },
   },
-  mounted() {
-    this.eventHub.$on("closeMedicalInformation", () => {
-      this.initialize();
-    });
-  },
-
-  beforeDestroy() {
-    this.eventHub.$off("closeMedicalInformation");
-  },
+  mounted() {},
 
   methods: {
     initialize() {
@@ -417,45 +343,78 @@ export default {
     closeD() {
       this.eventHub.$emit("closeExamineDataDialog", false);
       this.dialog = false;
+      this.laboratoryDialog = false;
+      // this.data = null;
+      // this.currentFileName = null;
+      // this.currentFileUrl = null;
     },
-
     edit(item) {
       this.action = "Update";
       this.updateID = item.id;
-      // console.log(item);
-      this.axiosCall(
-        "/services/getAllServiceToUpdateResult/" + item.id,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          // console.log(res.data);
-          this.service = res.data;
-        }
-      });
+      this.loadExistingFile(item.attachment);
       this.laboratoryDialog = true;
     },
-    view(item) {
-      // console.log(item);
-      this.action = "View";
-      this.updateID = item.id;
-      // console.log(item);
-      this.axiosCall(
-        "/services/getAllServiceToUpdateResult/" + item.id,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          // console.log(res.data);
-          this.service = res.data;
+    // view(item) {
+    //   // console.log(item);
+    //   this.action = "View";
+    //   this.updateID = item.id;
+    //   this.loadExistingFile(item.attachment);
+    //   this.laboratoryDialog = true;
+    // },
+    async loadExistingFile(attachment) {
+      try {
+        if (attachment) {
+          this.currentFileUrl =
+            process.env.VUE_APP_SERVER +
+            "/appointment/view/attachment/" +
+            attachment;
+          this.currentFileName = attachment;
         }
-      });
-      this.laboratoryDialog = true;
+      } catch (err) {
+        console.error("Error fetching file:", err);
+      }
     },
 
-    editMedicalInfo(item) {
-      // alert(this.data.id);
-      // console.log(item);
-      this.medicalData = { id: null, userIDd: this.data.id, data: item };
-      this.action = "Add";
+    async submitFile() {
+      if (!this.selectedFile) {
+        this.$emit("notify", "Please select a file.");
+        return;
+      }
+      let userID = this.$store.state.user.id;
+      let data = {
+        patientID: this.data.id,
+        medtechID: userID,
+        updateID: this.updateID,
+      };
+      console.log(data);
+      const formData = new FormData();
+      formData.append("file", this.selectedFile);
+      formData.append("body", JSON.stringify(data));
+
+      try {
+        this.loading = true;
+        let res = await this.axiosCall(
+          "/appointment/upload",
+          "POST",
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        this.$emit("notify", "File uploaded successfully!");
+        this.currentFileUrl =
+          process.env.VUE_APP_SERVER +
+          "/appointment/view/attachment/" +
+          res.data.filePath;
+        this.currentFileName = res.data.originalName;
+        this.selectedFile = null;
+        this.closeD();
+      } catch (err) {
+        console.error("Upload failed:", err);
+        this.$emit("notify", "Upload failed.");
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };
