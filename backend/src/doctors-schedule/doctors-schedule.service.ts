@@ -89,6 +89,7 @@ export class DoctorsScheduleService {
   }
 
   async getAllDoctorsSched(data:string){
+
     const today = new Date();
     let newDocList = JSON.parse(data)
     let newArr = []
@@ -119,15 +120,80 @@ export class DoctorsScheduleService {
         .where('ds.doctorID = :doctorID', {doctorID:data[j].doctorID}).getMany();
         data[j].specialization = newData
       }
-
+      
       newArr.push(data)
     }
    
     const flatData = newArr.flat();
-    //  // console.log(flatData)
+      console.log(flatData)
      return flatData
     
   }
+
+async getAllDoctorsDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+
+  // Get all doctors (moduleID = 5, approved)
+  const doctors = await this.userDetailRepository
+    .createQueryBuilder('ud')
+    .select([
+      'ud.id as doctorID',
+      "IF (!ISNULL(ud.mname), CONCAT(ud.fname, ' ', SUBSTRING(ud.mname,1,1), '. ', ud.lname), CONCAT(ud.fname, ' ', ud.lname)) as name",
+      'ud.profile_img as profile'
+    ])
+    .leftJoin(Users, 'us', 'us.id = ud.userID')
+    .where('us.isAdminApproved = 1')
+    .andWhere('us.assignedModuleID = 5')
+    .getRawMany();
+
+  let result = [];
+
+for (let doc of doctors) {
+  // Get doctor schedules
+  const schedulesRaw = await this.doctorsScheduleRepository
+    .createQueryBuilder('ds')
+    .select([
+      'ds.id as id',
+      'ds.date as date',
+      'ds.day as day',
+      'ds.timeFrom as timeFrom',
+      'ds.timeTo as timeTo'
+    ])
+    .where('ds.doctorID = :id', { id: doc.doctorID })
+    .andWhere('ds.date >= :today', { today })
+    .orderBy('ds.date', 'ASC')
+    .getRawMany();
+
+  // 👉 Format schedule objects so your frontend can use `items.schedule`
+  const schedules = schedulesRaw.map(s => ({
+    id: s.id,
+    schedule: `${s.date} (${s.day}) From: ${s.timeFrom} To: ${s.timeTo}`
+  }));
+
+  // Get doctor specializations
+  const specialization = await this.doctorSpecializationRepository
+    .createQueryBuilder('sp')
+    .select([
+      'sp.specialty as specialty',
+      'sp.specialty_description as specialty_description'
+    ])
+    .where('sp.doctorID = :id', { id: doc.doctorID })
+    .getRawMany();
+
+  result.push({
+    doctorID: doc.doctorID,
+    name: doc.name,
+    profile: doc.profile,
+    specialization,
+    schedules // 👈 now contains `schedule` property
+  });
+}
+
+console.log(result)
+  return result;
+}
+
+  
 
   findAll() {
     return `This action returns all doctorsSchedule`;

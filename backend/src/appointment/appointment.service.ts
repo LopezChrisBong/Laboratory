@@ -26,6 +26,29 @@ export class AppointmentService {
     @InjectRepository(ServiceLabResult) private readonly serviceLabResultRepository: Repository<ServiceLabResult>,
     private dataSource: DataSource,
   ){}
+
+   async upload_lab_attachment( body:any, filename: any){
+    // console.log(body, filename[0].filename)
+    try {
+        this.dataSource.manager.update(ServiceAppointment, body.updateID,{
+        attachment:filename[0].filename,
+        status:2
+     })
+   return {
+        msg:'Successfully Added',
+        status:HttpStatus.OK
+      }
+  } catch (error) {
+  
+    return {
+      msg:'Error:'+error,
+      status:HttpStatus.BAD_REQUEST,
+      filePath:filename[0].filename,
+      originalName:filename[0].originalname,
+    }
+  }
+}
+
   create(createAppointmentDto: CreateAppointmentDto) {
     return 'This action adds a new appointment';
   }
@@ -380,7 +403,7 @@ export class AppointmentService {
   }
 
   async getAllPatient(tabID:number, user:any){
-     console.log('Love',user.userdetail.user.assignedModuleID)
+    //  console.log('Love',user.userdetail.user.assignedModuleID)
     let data
     if(tabID == 1){
 
@@ -596,7 +619,7 @@ export class AppointmentService {
       .leftJoin(UserDetail, 'ud', 'ud.id = sa.doctorID')
       .leftJoin(UserDetail, 'us', 'us.id = sa.medtechID')
       // .where('(pd.doctorID = :doctorID OR pd.medtechID = :id)', { id })
-      .where('sa.doctorID = :id',{id})
+      // .where('sa.doctorID = :id',{id})
       .andWhere('sa.patientID = :patientID',{patientID})
       .getRawMany()
       // // console.log(data)
@@ -674,6 +697,90 @@ let data = await this.appointmentRepository
   return data
   }
 
+  async getAllAppointmentDashboard(){
+  let totalPatient = await this.appointmentRepository
+  .createQueryBuilder('ap')
+  .select([
+    'ap.*',
+    "IF (!ISNULL(p.m_name), concat(p.f_name, ' ',SUBSTRING(p.m_name, 1, 1) ,'. ',p.l_name) ,concat(p.f_name, ' ', p.l_name)) as name",
+    'p.patientID as unique_patientID'
+  ])
+  .leftJoin(Patient, 'p', 'p.id = ap.patientID')
+  .where('ap.medtechID IS NULL')
+  .andWhere('ap.status != 0')
+  .getRawMany();
+
+ let totalPatient30Days = await this.appointmentRepository
+  .createQueryBuilder('ap')
+  .select([
+    'ap.*',
+    "IF (!ISNULL(p.m_name), concat(p.f_name, ' ',SUBSTRING(p.m_name, 1, 1) ,'. ',p.l_name) ,concat(p.f_name, ' ', p.l_name)) as name",
+    'p.patientID as unique_patientID'
+  ])
+  .leftJoin(Patient, 'p', 'p.id = ap.patientID')
+  .where('ap.medtechID IS NULL')
+  .andWhere('ap.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()')
+  .andWhere('ap.status != 0')
+  .getRawMany();
+
+   let totalDoctors = await this.userDetailRepository
+  .createQueryBuilder('ud')
+  .select([
+    'ud.*',
+    "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as name",
+  ])
+  .leftJoin(Users, 'u', 'u.id = ud.userID')
+  .where('u.assignedModuleID = 5')
+  .getRawMany();
+
+
+  return {totalPatient:totalPatient,totalPatient30Days:totalPatient30Days,totalDoctors:totalDoctors}
+  }
+
+async patientOverview(year: number) {
+  let resultLab = await this.serviceAppointmentRepository.query(`
+    SELECT 
+        months.m AS month,
+        COALESCE(COUNT(sa.id), 0) AS total
+    FROM (
+        SELECT 1 AS m UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION
+        SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION
+        SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12
+    ) AS months
+    LEFT JOIN service_appointment sa 
+        ON MONTH(sa.created_at) = months.m
+       AND YEAR(sa.created_at) = ?
+       AND sa.status != 0
+    GROUP BY months.m
+    ORDER BY months.m
+  `, [year]);
+  
+  let resultAppointment = await this.appointmentRepository.query(`
+    SELECT 
+        months.m AS month,
+        COALESCE(COUNT(a.id), 0) AS total
+    FROM (
+        SELECT 1 AS m UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION
+        SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION
+        SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12
+    ) AS months
+    LEFT JOIN appointment a 
+        ON MONTH(a.date) = months.m
+       AND YEAR(a.date) = ?
+       AND a.status != 0
+    GROUP BY months.m
+    ORDER BY months.m
+  `, [year]);
+
+  let totalLaboratory = resultLab.map(r => Number(r.total));
+  let totalAppointment = resultAppointment.map(r => Number(r.total));
+
+  return {
+    totalLaboratory,
+    totalAppointment,
+  };
+}
+
 
 async getAllDoctorsAppointment(id: number) {
   const data = await this.appointmentRepository
@@ -699,6 +806,7 @@ async getAllDoctorsAppointment(id: number) {
 
     return {
       name: item.name,
+      status: item.status,
       start: startDate, 
       end: endDate,    
       color: randomColor,

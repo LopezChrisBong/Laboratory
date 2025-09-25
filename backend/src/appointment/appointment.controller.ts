@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,Headers, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,Headers, UseInterceptors,Request, Res, UploadedFiles, StreamableFile } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -8,10 +8,107 @@ import { CreatePatientMedtechDto } from './dto/create-patient-medtech.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { currentUser } from 'src/shared/jwtDecode';
 import { UpdateServiceResultsDto } from './dto/update-service-result.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { Helper } from 'src/shared/helper';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 @Controller('appointment')
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
+
+  
+    @Post('/upload')
+    @UseInterceptors(
+      FilesInterceptor('file', 10, {
+        storage: diskStorage({
+          destination: Helper.lab_result_attachment,
+          filename: Helper.customFileName,
+        }),
+      }),
+    )
+    upload_lab_attachment(
+      @UploadedFiles()
+      files: Array<Express.Multer.File>,
+      @Request() request,
+    ) {
+      const bodystring = JSON.parse(request.body.body);
+          // console.log(files,bodystring);
+      return this.appointmentService.upload_lab_attachment(
+        bodystring,
+        files,
+      );
+    }
+  
+@Get('view/attachment/:data')
+    getFile(
+      @Param('data') data: string,
+      @Res({ passthrough: true }) res,
+    ): StreamableFile {
+      let content_type = '';
+      const datasplited = data.split('.');
+      const ext = datasplited[datasplited.length - 1].toLowerCase();
+
+      if (ext === 'jpeg') {
+        content_type = 'image/jpeg';
+      } else if (ext === 'jpg') {
+        content_type = 'image/jpg';
+      } else if (ext === 'png') {
+        content_type = 'image/png';
+      } else if (ext === 'pdf') {
+        content_type = 'application/pdf';
+      } else if (ext === 'mp4') {
+        content_type = 'video/mp4';
+      } else if (ext === 'avi') {
+        content_type = 'video/x-msvideo';
+      } else if (ext === 'mov') {
+        content_type = 'video/quicktime';
+      } else if (ext === 'wmv') {
+        content_type = 'video/x-ms-wmv';
+      } else if (ext === '3gp') {
+        content_type = 'video/3gpp';
+      } else if (ext === 'flv') {
+        content_type = 'video/x-flv';
+      } else if (ext === 'doc') {
+        content_type = 'application/msword';
+      } else if (ext === 'docx') {
+        content_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      } else if (ext === 'xls') {
+        content_type = 'application/vnd.ms-excel';
+      } else if (ext === 'xlsx') {
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      } else if (ext === 'ppt') {
+        content_type = 'application/vnd.ms-powerpoint';
+      } else if (ext === 'pptx') {
+        content_type = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      } else if (ext === 'csv') {
+        content_type = 'text/csv';
+      } else if (ext === 'txt') {
+        content_type = 'text/plain';
+      } else if (ext === 'json') {
+        content_type = 'application/json';
+      } else if (ext === 'zip') {
+        content_type = 'application/zip';
+      } else if (ext === 'rar') {
+        content_type = 'application/vnd.rar';
+      } else if (ext === '7z') {
+        content_type = 'application/x-7z-compressed';
+      } else {
+        content_type = 'application/octet-stream'; 
+      }
+
+      // const file = createReadStream(join(process.cwd(), '/lab_result_attachment/' + data));
+      const file = createReadStream(join(process.cwd(), '/../lab_result_attachment/' + data));
+
+      res.set({
+        'Content-Type': content_type,
+      });
+
+      return new StreamableFile(file);
+    }
+
+  
 
   @Post()
   create(@Body() createAppointmentDto: CreateAppointmentDto) {
@@ -92,6 +189,16 @@ export class AppointmentController {
   @Get('getAllScheduleAppointment/AllAppointment')
   getAllScheduleAppointment() {
   return this.appointmentService.getAllScheduleAppointment();
+}
+
+  @Get('getAllAppointmentDashboard/DashboardData')
+  getAllAppointmentDashboard() {
+  return this.appointmentService.getAllAppointmentDashboard();
+}
+
+  @Get('getAllOverview/patientOverview/:year')
+  patientOverview(@Param('year') year: string) {
+  return this.appointmentService.patientOverview(+year);
 }
 
   @Get('getAllDoctorsAppointment/:id')

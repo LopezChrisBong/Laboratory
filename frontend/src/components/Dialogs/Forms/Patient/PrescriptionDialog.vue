@@ -16,8 +16,8 @@
               <v-row>
                 <v-col cols="8" class="flex-items mt-2">
                   <!-- <div class="ml-2 text-body-1">
-                  {{ data.title }}
-                </div> -->
+          {{ data.title }}
+          </div> -->
                 </v-col>
                 <v-spacer></v-spacer>
                 <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
@@ -46,19 +46,30 @@
                     <template v-slot:[`item.action`]="{ item }">
                       <v-btn
                         x-small
-                        class="mt-1"
+                        class="mt-1 mx-2"
                         @click="view(item)"
                         outlined
                         color="green"
-                        ><v-icon small> mdi-eye</v-icon>View</v-btn
                       >
+                        <v-icon small>mdi-eye</v-icon>
+                      </v-btn>
+                      <v-btn
+                        x-small
+                        class="mt-1 mx-2"
+                        @click="print(item)"
+                        outlined
+                        color="green"
+                      >
+                        <v-icon small>mdi-printer</v-icon>
+                      </v-btn>
                     </template>
                   </v-data-table>
                 </v-col>
               </v-row>
-            </v-card></v-container
-          >
+            </v-card>
+          </v-container>
         </v-card-text>
+
         <v-divider></v-divider>
         <v-card-actions class="pa-5">
           <v-spacer></v-spacer>
@@ -378,7 +389,7 @@ export default {
         this.dialog = true;
         this.id = data.id;
         this.patient.name = data.name;
-        this.patient.age = data.age;
+        this.patient.age = data.age + "/" + data.civil_status;
         this.patient.address = data.address;
         this.tab = 1;
         this.initialize();
@@ -528,7 +539,13 @@ export default {
       this.prescription = item.description;
       this.prescriptionDialog = true;
     },
+
+    print(item) {
+      console.log(item);
+      const url =
+        process.env.VUE_APP_SERVER + "/pdf-generator/prescription/" + item.id;
+      window.open(url);
+    },
   },
 };
 </script>
-<style scoped></style>

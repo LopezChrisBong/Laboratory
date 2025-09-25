@@ -26,6 +26,25 @@ import { JWTAuthGuard } from 'src/auth/utils/jwt-auth-guard';
 export class PdfGeneratorController {
   constructor(private readonly pdfGeneratorService: PdfGeneratorService) {}
 
+ @Get('prescription/:id')
+  async prescription(@Res() res, @Param('id') id: string): Promise<void> {
+    const buffer = await this.pdfGeneratorService.prescription(+id);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename=example.pdf',
+      'Content-Length': buffer.length,
+
+      // prevent cache
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: 0,
+    });
+
+    res.end(buffer);
+
+    // // console.log(n)
+  }
 
 
   @Get('getQRCode/:id')

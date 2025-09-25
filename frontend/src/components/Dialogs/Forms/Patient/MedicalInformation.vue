@@ -63,7 +63,7 @@
                 <v-col cols="12">
                   <v-row>
                     <!-- Pregnant Checkbox -->
-                    <v-col cols="12" md="6">
+                    <v-col cols="12" md="6" v-if="action != 'View'">
                       <v-checkbox
                         v-model="pregnant"
                         :readonly="action === 'View'"

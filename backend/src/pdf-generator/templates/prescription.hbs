@@ -1,0 +1,87 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prescription</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .header { text-align: center; margin-bottom: 12px; }
+    .header h3, .header h4 { margin: 0; }
+    .header .info { font-size: 12px; margin-top: 4px; }
+    .patient-info { margin-bottom: 20px; font-size: 14px; }
+    .patient-info div { margin: 6px 0; }
+    .label { font-weight: bold; margin-right: 4px; }
+    .line {
+      display: inline-block;
+      border-bottom: 1px solid #000;
+      min-width: 200px;
+      padding: 0 4px;
+    }
+    .rx-container {
+      display: flex;
+      align-items: flex-start;
+      margin: 20px 0;
+    }
+    .rx-symbol {
+      font-size: 32px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .rx-box {
+      flex: 1;
+      min-height: 250px; 
+      font-size: 14px;
+      line-height: 0.6;
+      padding: 20px;
+      white-space: pre-wrap; 
+      border: 1px solid black;
+    }
+    .footer {
+      margin-top: 40px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .footer .line { min-width: 120px; display: inline-block; border-bottom: 1px solid #000; }
+  </style>
+</head>
+<body>
+  {{#each this}}
+    <div class="header">
+      <h3 style="font-weight: bold;">PARAGON</h3>
+      <h4>MULTISPECIALTY CLINIC</h4>
+      <div class="info">
+        1F Bluz Building 2, Tadeco Road, Brgy. San Francisco, Panabo City <br />
+        📞 0946-100-3260 | Mon–Sat 8:00am–5:00pm
+      </div>
+      <hr />
+    </div>
+
+    <!-- Patient Info -->
+    <div class="patient-info">
+      <div><span class="label">Name:</span> <span class="line">{{prescription.name}}</span></div>
+      <div><span class="label">Age/Status:</span> <span class="line">{{prescription.age}}</span></div>
+      <div><span class="label">Address:</span> <span class="line">{{prescription.address}}</span></div>
+      <div><span class="label">Date:</span> <span class="line">{{prescription.date}}</span></div>
+    </div>
+
+    <!-- RX Section -->
+    <div class="rx-container">
+      <div class="rx-symbol">℞</div>
+      <div class="rx-box">
+        {{{prescription.description}}}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div>
+        Your Next Visit is on: <span class="line"></span>
+      </div>
+      <div>
+        License No: <span class="line"></span><br/>
+        PTR No: <span class="line"></span>
+      </div>
+    </div>
+  {{/each}}
+</body>
+</html>

@@ -25,4 +25,7 @@ export class CreateServiceAppointmentDto {
   @ApiProperty()
   status:number;
 
+  @ApiProperty()
+  attachment:string;
+
 }

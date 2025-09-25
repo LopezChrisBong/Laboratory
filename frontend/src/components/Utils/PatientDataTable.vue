@@ -514,6 +514,11 @@ export default {
   }),
 
   mounted() {
+    this.eventHub.$on("closePrescrioptionDialog", () => {
+      this.initialize();
+      this.dialog = false;
+    });
+
     this.eventHub.$on("closeAddPatient", () => {
       this.initialize();
       this.dialog = false;
@@ -532,11 +537,6 @@ export default {
     });
 
     this.eventHub.$on("closeExamineDataDialog", () => {
-      this.dialog = false;
-      this.initialize();
-    });
-
-    this.eventHub.$on("closePrescrioptionDialog", () => {
       this.dialog = false;
       this.initialize();
     });

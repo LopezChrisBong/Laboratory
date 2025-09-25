@@ -93,6 +93,7 @@
                       >Assign Doctor</v-btn
                     > -->
                     <v-btn
+                      v-if="item.status == 0"
                       x-small
                       class="mt-1"
                       @click="assignMedtech(item)"
@@ -101,7 +102,7 @@
                       block
                       >Assign Med-Tech</v-btn
                     >
-                    <v-btn
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="payLabTest(2, item)"
@@ -109,7 +110,7 @@
                       color="red"
                       block
                       >print</v-btn
-                    >
+                    > -->
 
                     <!-- <v-btn
                       x-small

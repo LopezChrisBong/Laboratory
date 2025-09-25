@@ -27,6 +27,11 @@ export class DoctorsScheduleController {
     return this.doctorsScheduleService.getAllDoctorsSched(data);
   }
 
+        @Get('/getAllDoctorsDashboard')
+  getAllDoctorsDashboard() {
+    return this.doctorsScheduleService.getAllDoctorsDashboard();
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

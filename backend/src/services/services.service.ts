@@ -683,7 +683,7 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
     // console.log(id, dto)
     if(dto.appointmentID){
       // // console.log('naay sulod')
-      let newData: {
+    let newData: {
     patientID: number;
     appointmentID: number;
     service_list: string;
@@ -692,6 +692,7 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
     doctorID: number;
     medtechID: number;
     status:number
+    attachment:string
     } = {
     patientID: dto.patientID,
     appointmentID: dto.appointmentID,
@@ -700,7 +701,8 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
     labID: dto.labID,
     doctorID: dto.doctorID,
     medtechID: dto.medtechID,
-    status:dto.status
+    status:dto.status,
+    attachment:dto.attachment
     };
 
      const existing = await this.servicesAppointmentRepository.findOneBy({ appointmentID:dto.appointmentID });
