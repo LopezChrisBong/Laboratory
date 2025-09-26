@@ -6,7 +6,7 @@
     </div>
     <!-- Receptionist Dashboard -->
     <div v-else-if="assignModule == 3">
-      <ReceptionistDashboard />
+      <Dashboard />
     </div>
 
     <!-- Medtech Dashboard -->
@@ -21,7 +21,8 @@ export default {
   components: {
     DoctorDashboard: () => import("../Pages/DoctorDashboard.vue"),
     MedtechDashboard: () => import("../Pages/MedtechDashboard.vue"),
-    ReceptionistDashboard: () => import("../Pages/ReceptionistDashboard.vue"),
+    // ReceptionistDashboard: () => import("../Pages/ReceptionistDashboard.vue"),
+    Dashboard: () => import("../Pages/Dashboard.vue"),
   },
   data: () => ({
     assignModule: null,

@@ -663,7 +663,7 @@ export class AppointmentService {
       .getRawMany()
       // // console.log(data)
       return data
-  }
+  } 
 
  async getAllScheduleData(){
 let data = await this.appointmentRepository
@@ -810,9 +810,11 @@ async getAllDoctorsAppointment(id: number) {
       start: startDate, 
       end: endDate,    
       color: randomColor,
+      time:item.time,
+      date:item.date
     };
   });
-
+    // console.log(events)
   return events;
 }
 
