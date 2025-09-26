@@ -434,7 +434,7 @@
                           deletable-chips
                           :rules="[(v) => !!v || 'Time is required']"
                           label="Select Time"
-                          :items="allTimes"
+                          :items="allTimes1"
                           class="rounded-lg"
                           color="#6DB249"
                         ></v-autocomplete>
@@ -717,11 +717,37 @@ export default {
   },
   computed: {
     availableTimes() {
-      if (!this.form.date) return this.allTimes;
+      if (!this.form.date) return this.allTimes1;
+
       const bookedTimes = this.bookings
         .filter((b) => b.date === this.form.date)
-        .map((b) => b.time);
-      return this.allTimes.filter((time) => !bookedTimes.includes(time));
+        .map((b) => b.time.trim());
+
+      const uniqueBooked = [...new Set(bookedTimes)];
+
+      const docSchedule = this.doc_profile.find(
+        (d) => d.date === this.form.date
+      );
+
+      let doctorTimes = this.allTimes1;
+
+      if (docSchedule) {
+        const startIndex = this.allTimes1.indexOf(docSchedule.timeFrom);
+        const endIndex = this.allTimes1.indexOf(docSchedule.timeTo);
+
+        if (startIndex !== -1 && endIndex !== -1) {
+          if (startIndex <= endIndex) {
+            doctorTimes = this.allTimes1.slice(startIndex, endIndex + 1);
+          } else {
+            doctorTimes = [
+              ...this.allTimes1.slice(startIndex),
+              ...this.allTimes1.slice(0, endIndex + 1),
+            ];
+          }
+        }
+      }
+
+      return doctorTimes.filter((time) => !uniqueBooked.includes(time));
     },
     minDate() {
       const today = new Date();
@@ -756,15 +782,15 @@ export default {
     // },
   },
   watch: {
-    "form.date": {
-      immediate: true,
-      handler(date) {
-        if (date) this.fetchBookings(date);
-      },
-    },
+    // "form.date": {
+    //   immediate: true,
+    //   handler(date) {
+    //     if (date) this.fetchBookings(date);
+    //   },
+    // },
   },
   mounted() {
-    this.getAllSchedule();
+    // this.getAllSchedule();
     this.getAllServices();
     this.getAllPackages();
     this.getAllClinic();
@@ -795,40 +821,72 @@ export default {
       this.confirmationDialog = false;
       // alert("Please fill all field before booking!");
     },
-    async fetchBookings(date) {
-      console.log(date);
-      // console.log(this.bookings);
-      // try {
-      //   this.axiosCall("/appointment/booking", "POST", date).then((res) => {
-      //     this.bookings = res.data;
-      //   });
-      // } catch (err) {
-      //   console.error("Failed to fetch bookings:", err);
-      // }
+    async fetchBookings(data) {
+      try {
+        this.axiosCall(
+          "/appointment/getAllDoctorsAppointment/" + data[0].doctorID,
+          "GET"
+        ).then((res) => {
+          for (let i = 0; i < res.data.length; i++) {
+            this.bookings.push(res.data[i]);
+          }
+          console.log(" this.bookings.", this.bookings);
+        });
+      } catch (err) {
+        console.error("Failed to fetch bookings:", err);
+      }
     },
+
     submitForm() {
       this.confirmationDialog = true;
     },
     changeSchedule(sched) {
+      // console.log("wdadawdawd", sched);
       let newArr = [];
-      for (let i = 0; i < this.doctors_schedList1.length; i++) {
-        if (this.doctors_schedList1[i].id == sched) {
-          newArr.push(this.doctors_schedList1[i]);
+      for (let i = 0; i < this.doctors_schedList.length; i++) {
+        if (this.doctors_schedList[i].id == sched) {
+          newArr.push(this.doctors_schedList[i]);
         }
       }
-
+      this.allTimes1 = this.getDoctorAvailableTimes(newArr[0]);
+      this.form.date = newArr[0].oldDate;
       this.doc_profile = newArr;
-      // console.log("Scdad", this.doc_profile);
+      this.fetchBookings(newArr);
     },
-    getAllSchedule() {
-      this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
-        (res) => {
-          if (res) {
-            this.bookings = res.data;
-          }
-        }
-      );
+
+    getDoctorAvailableTimes(schedule) {
+      const normalizeTime = (str) => str.trim().toUpperCase();
+
+      const startTime = normalizeTime(schedule.timeFrom);
+      const endTime = normalizeTime(schedule.timeTo);
+
+      const startIndex = this.allTimes1.indexOf(startTime);
+      const endIndex = this.allTimes1.indexOf(endTime);
+
+      if (startIndex === -1 || endIndex === -1) {
+        return []; // if mismatch, return empty
+      }
+
+      if (startIndex <= endIndex) {
+        // Normal case: e.g. 01:00 AM → 11:00 AM
+        return this.allTimes1.slice(startIndex, endIndex + 1);
+      } else {
+        // Overnight case: e.g. 10:00 PM → 02:00 AM
+        return [
+          ...this.allTimes1.slice(startIndex),
+          ...this.allTimes1.slice(0, endIndex + 1),
+        ];
+      }
     },
+    // getAllSchedule() {
+    //   this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
+    //     (res) => {
+    //       if (res) {
+    //         this.bookings = res.data;
+    //       }
+    //     }
+    //   );
+    // },
     getAllServices() {
       this.axiosCall(
         "/services/getAllServicesForBooking/" + this.tab,
@@ -882,9 +940,10 @@ export default {
       ).then((res) => {
         if (res) {
           // console.log(res.data);
+          this.doctors_schedList1 = res.data;
           let data = res.data;
           Object.assign(data, { oldDate: null });
-          this.doctors_schedList1 = res.data;
+
           for (let i = 0; i < data.length; i++) {
             data[i].oldDate = data[i].date;
             data[i].date =
@@ -907,14 +966,6 @@ export default {
       });
     },
     confirmBooking() {
-      // if (
-      //   this.clinicDecription.specialty == "Others" ||
-      //   !this.clinicDecription.doctors
-      // ) {
-      //   alert("Others");
-      // } else {
-      //   alert(this.doc_profile[0].doctorID);
-      // }
       let data = {
         f_name: this.form.f_name,
         l_name: this.form.l_name,

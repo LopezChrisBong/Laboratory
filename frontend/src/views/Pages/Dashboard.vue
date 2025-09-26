@@ -47,7 +47,9 @@
           </v-card-text> -->
         </v-card>
       </v-col>
-
+      <v-col cols="12">
+        <ReceptionistDashboard />
+      </v-col>
       <!-- MIDDLE PANEL: Doctor List -->
       <v-col cols="12" md="12">
         <v-card outlined>
@@ -228,6 +230,9 @@
 
 <script>
 export default {
+  components: {
+    ReceptionistDashboard: () => import("../Pages/ReceptionistDashboard.vue"),
+  },
   data() {
     return {
       selectedDate: new Date().toISOString().substr(0, 10),
