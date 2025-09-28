@@ -384,25 +384,34 @@ export default {
       this.resetForm();
     },
     update(item) {
-      console.log(item.id);
+      console.log(item);
       this.dialog = true;
       this.action = "Update";
       this.form.itemName = item.itemName;
-      this.form.quantity = item.quantity;
+      this.form.quantity = item.totalend_quantity;
       this.form.brand = item.brand;
       this.form.unit = item.unit;
-      this.form.usage = item.usage;
+      this.form.usage = item.usageType;
       this.form.lotNumber = item.lotNumber;
       this.form.expiry = item.expiry;
-      this.form.startingQty = item.startingQty;
-      this.form.usedQty = item.usedQty;
-      this.form.addedQty = item.addedQty;
+      this.form.startingQty = item.starting_quantity;
+      this.form.usedQty = item.used_quantity;
+      this.form.addedQty = item.added_quantity;
       this.form.supplyDate = item.supplyDate;
-      this.form.endingQty = item.endingQty;
+      this.form.endingQty = item.totalend_quantity;
       this.form.supplier = item.supplier;
-      this.form.reorderStatus = item.reorderStatus;
+      this.form.reorderStatus = item.reorder_status;
       this.form.section = item.section;
       this.updateID = item.id;
+      // 
+      axios
+      .get(
+        process.env.VUE_APP_SERVER + "/inventory"  
+      )
+      .then((res) => {
+        // alert(res.data.itemName)
+        console.log(res.data);
+      });
     },
     updateItem() {
       if (!this.$refs.form.validate()) return;
