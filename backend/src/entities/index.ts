@@ -1,5 +1,8 @@
 
 import { Appointment } from 'src/appointment/entities/appointment.entity';
+import { PatientDoctor } from 'src/appointment/entities/patient-doctor.entity';
+import { PatientMedtech } from 'src/appointment/entities/patient-medtech.entity';
+import { MedicalInfo } from 'src/medical-info/entities/medical-info.entity';
 import { AssignedModule } from 'src/assigned-modules/entities/assigned-module.entity';
 import { Users } from 'src/auth/entities/auth.entity';
 import { Category } from 'src/category/entities/category.entity';
@@ -18,6 +21,11 @@ import { TestType } from 'src/test-type/entities/test-type.entity';
 import { UserDetail } from 'src/user-details/entities/user-detail.entity';
 import { UserRole } from 'src/user-role/entities/user-role.entity';
 import { UserType } from 'src/user-type/entities/user-type.entity';
+import { ServiceAppointment } from 'src/services/entities/service-appointment.entity';
+import { ServiceLabResult } from 'src/services/entities/service-lab-result.dto';
+import { Notification } from 'src/notification/entities/notification.entity';
+import { DoctorsSchedule } from 'src/doctors-schedule/entities/doctors-schedule.entity';
+import { Prescription } from 'src/patient/entities/prescription.entity';
 
 const entities = [
   Users,
@@ -36,11 +44,17 @@ const entities = [
   Payment,
   Role,
   TestType,
-
   Service,
   ServicePackages,
-  ServiceCategory
-
+  ServiceCategory,
+  PatientDoctor,
+  PatientMedtech,
+  MedicalInfo,
+  ServiceAppointment,
+  ServiceLabResult,
+  Notification,
+  DoctorsSchedule,
+  Prescription
 ];
 
 export {
@@ -62,7 +76,15 @@ export {
   TestType,
   Service,
   ServicePackages,
-  ServiceCategory
+  ServiceCategory,
+  PatientDoctor,
+  PatientMedtech,
+  MedicalInfo,
+  ServiceAppointment,
+  ServiceLabResult,
+  Notification,
+  DoctorsSchedule,
+  Prescription
 
 };
 

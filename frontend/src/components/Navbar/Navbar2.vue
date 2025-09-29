@@ -11,9 +11,25 @@
         >
           <v-icon>mdi-menu</v-icon>
         </v-btn>
-        {{
+        <!-- {{
           $vuetify.breakpoint.smAndUp ? "Laboratory Information System" : "LIS"
-        }}
+        }} -->
+        <div
+          class="d-flex justify-center align-center"
+          style="margin:0 auto; width:250px"
+          v-if="$vuetify.breakpoint.smAndUp"
+        >
+          <v-img
+            src="../../assets/img/paragon logo website.png"
+            style="width: 2%;"
+          ></v-img>
+          <div v-if="$vuetify.breakpoint.smAndUp" align="center">
+            <h1 style="color: white;">PARAGON</h1>
+            <p style="color: white; margin-top: -15px; font-size: 11px;">
+              Diagnostics And Multi-Specialty Clinic
+            </p>
+          </div>
+        </div>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-menu offset-y>
@@ -34,7 +50,7 @@
               </template> -->
 
               <v-btn icon @click="menu = !menu">
-                <v-icon :color="hasUnread ? 'red' : ''">
+                <v-icon :color="hasUnread ? 'red' : 'black'">
                   {{ hasUnread ? "mdi-bell-ring" : "mdi-bell-outline" }}
                 </v-icon>
               </v-btn>
@@ -160,8 +176,8 @@
             </v-avatar>
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title class="text-uppercase"
-              >{{ $store.state.user.fname }}
+            <v-list-item-title class="text-uppercase">
+              <!-- {{ $store.state.user.fname }} -->
               {{ $store.state.user.lname }}</v-list-item-title
             >
           </v-list-item-content>
@@ -231,8 +247,8 @@
                   </v-avatar>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="text-uppercase"
-                    >{{ $store.state.user.fname }}
+                  <v-list-item-title class="text-uppercase">
+                    <!-- {{ $store.state.user.fname }} -->
                     {{ $store.state.user.lname }}</v-list-item-title
                   >
                 </v-list-item-content>
@@ -306,6 +322,7 @@
         </v-row>
       </v-container>
     </v-main>
+
     <v-dialog v-model="showAllNotifDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">All Notifications</v-card-title>
@@ -409,7 +426,7 @@ export default {
     openNotification(notif) {
       // Example handler – you can route or open a dialog
       notif.read = true;
-      console.log("Open notification:", notif);
+      // console.log("Open notification:", notif);
       if (notif.route) {
         this.$router.push(notif.route);
       }
@@ -683,7 +700,7 @@ export default {
 .sidebar div .sub-item .v-list-item .v-list-item__title {
   color: #3a3b3a !important;
 }
-Teacher .sidebar div .sub-item .v-list-item .v-list-item__icon i {
+.sidebar div .sub-item .v-list-item .v-list-item__icon i {
   color: #3a3b3a !important;
 }
 

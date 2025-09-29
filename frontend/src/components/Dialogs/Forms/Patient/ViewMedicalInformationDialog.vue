@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="dialog"
-      fullscreen
-      eager
-      persistent
-      scrollable
-      max-width="900px"
-    >
+    <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
           <span>Medical Information</span>
@@ -31,13 +24,14 @@
                   @click="AddFunction()"
                   class="white--text rounded-lg"
                   color="blue"
+                  v-if="userRoleID == 3"
                 >
                   Add
                 </v-btn>
               </v-col>
               <v-col cols="12" class=" pt-2 px-4">
                 <v-data-table
-                  :headers="headers"
+                  :headers="userRoleID == 3 ? headers : headers1"
                   :items="dataItem"
                   :items-per-page="10"
                 >
@@ -46,11 +40,20 @@
                   </template>
                   <template v-slot:[`item.pregnant`]="{ item }">
                     {{
-                      item.pregnant == true
+                      item.pregnant != "0"
                         ? " PREGNANCY MEDICATION"
                         : "NORMAL/USUAL MEDICATION"
                     }}.
                   </template>
+
+                  <template v-slot:[`item.finding`]="{ item }">
+                    <div v-html="item.finding"></div>
+                  </template>
+
+                  <template v-slot:[`item.treatment`]="{ item }">
+                    <div v-html="item.treatment"></div>
+                  </template>
+
                   <template v-slot:[`item.action`]="{ item }">
                     <v-btn
                       x-small
@@ -58,10 +61,9 @@
                       @click="view(item)"
                       outlined
                       color="green"
-                      block
                       >View</v-btn
                     >
-                    <v-btn
+                    <!-- <v-btn
                       x-small
                       class="mt-1"
                       @click="edit(item)"
@@ -69,7 +71,7 @@
                       color="blue"
                       block
                       >Update</v-btn
-                    >
+                    > -->
                   </template>
                 </v-data-table>
               </v-col>
@@ -161,7 +163,10 @@ export default {
         message: "",
         top: 10,
       },
+
       dialog: false,
+      loading: false,
+      userRoleID: null,
 
       medicalData: null,
       id: null,
@@ -177,10 +182,26 @@ export default {
           sortable: false,
         },
         {
-          text: "Medical Information ",
+          text: "Medication",
           value: "pregnant",
           align: "start",
           valign: "start",
+          sortable: false,
+        },
+
+        {
+          text: "Finding",
+          value: "finding",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+
+        {
+          text: "Treatment",
+          value: "treatment",
+          align: "start",
+          valign: "center",
           sortable: false,
         },
 
@@ -192,6 +213,40 @@ export default {
           width: 200,
         },
       ],
+
+      headers1: [
+        {
+          text: "No.",
+          value: "index",
+          align: "start",
+          valign: "start",
+          width: 50,
+          sortable: false,
+        },
+        {
+          text: "Pregnant",
+          value: "pregnant",
+          align: "start",
+          valign: "start",
+          sortable: false,
+        },
+
+        {
+          text: "Finding",
+          value: "finding",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+
+        {
+          text: "Treatment",
+          value: "treatment",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+      ],
     };
   },
 
@@ -199,9 +254,8 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("STRAT", data);
+        // console.log("STRAT", data);
         this.id = data.id;
-        this.tab = 1;
         this.initialize();
       },
       deep: true,
@@ -225,37 +279,37 @@ export default {
 
   methods: {
     initialize() {
-      this.loading = true;
-      let patientData = JSON.parse(localStorage.getItem("patientMedicalInfo"));
-
-      this.dataItem = patientData
-        .filter((item) => item.patientId === this.data.id)
-        .reverse();
-
-      this.loading = false;
-
-      //   this.axiosCall("/strategic-planning-goal/" + this.id, "GET").then(
-      //     (res) => {
-      //       if (res) {
-      //         this.dataItem = res.data;
-      //         this.loading = false;
-      //       }
-      //     }
-      //   );
+      // this.dataItem = [{ pregnant: "0" }];
+      this.getAllPatientMedicalInfo();
+      this.userRoleID = this.$store.state.user.user.user_roleID;
     },
-
+    getAllPatientMedicalInfo() {
+      this.loading = true;
+      this.axiosCall(
+        "/medical-info/patientMedicalInfo/" + this.data.id,
+        "GET"
+      ).then((res) => {
+        if (res) {
+          // console.log("Get Data", res.data);
+          this.dataItem = res.data;
+        } else {
+          this.dataItem = null;
+        }
+        this.loading = false;
+      });
+    },
     closeD() {
       this.eventHub.$emit("closeViewMedicalInformationDialog", false);
       this.dialog = false;
     },
 
     edit(item) {
-      console.log(item);
+      // console.log(item);
       this.medicalData = item;
       this.action = "Update";
     },
     view(item) {
-      console.log(item);
+      // console.log(item);
       this.medicalData = item;
       this.action = "View";
     },

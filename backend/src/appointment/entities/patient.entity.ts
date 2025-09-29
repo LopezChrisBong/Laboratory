@@ -8,17 +8,20 @@ export class Patient {
     @Column({ type: "varchar", nullable: true,})
     patientID: string
 
-    @Column({ type: "varchar",unique: true, })
+    @Column({ type: "varchar"})
     // @Column({ type: "varchar" })
     f_name: string
     
-    @Column({ type: "varchar",unique: true, })
+    @Column({ type: "varchar"})
     // @Column({ type: "varchar" })
     l_name: string
 
     
     @Column({ type: "varchar", nullable:true })
     m_name: string
+
+     @Column({ type: "varchar", nullable:true })
+    suffix: string
 
     
     @Column({ type: "int" })
@@ -50,7 +53,12 @@ export class Patient {
        
     @Column({ type: "int", default:0 })
     status: number
+    
+    @Column({ type: "int", nullable:true })
+    doctorID:number
 
+    @Column({ type: "int", nullable:true })
+    medtechID:number
 
 
 

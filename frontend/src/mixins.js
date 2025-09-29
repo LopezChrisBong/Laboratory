@@ -339,7 +339,7 @@ export default {
 
       return axios(options).catch((error) => {
         if (error.response.statusCode == 401) {
-          console.log(error);
+          // console.log(error);
           this.deleteToken();
           this.logout();
           this.$router.push("/");

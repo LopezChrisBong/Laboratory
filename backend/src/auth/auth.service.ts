@@ -40,7 +40,7 @@ export class AuthService {
 
   async create(registerUser: RegisterUserDto) {
 
-    console.log(registerUser)
+    // // console.log(registerUser)
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -84,7 +84,7 @@ export class AuthService {
         status: HttpStatus.BAD_REQUEST,
       };
       return toReturn;
-      // console.log(err)
+      // // console.log(err)
     } finally {
       await queryRunner.release();
     }
@@ -126,36 +126,7 @@ export class AuthService {
           birth_place,
           sex,
           email,
-          civil_status,
-          height,
-          weight,
-          blood_type,
-          GSIS,
-          PAGIBIG,
-          PHILHEALTH,
-          SSS,
-          TIN,
-          agency_employee_num,
-          is_dual_citizen,
-          citizenship,
-          citizenship_type,
-          country,
-          tel_no,
           mobile_no,
-          residential_brgy,
-          residential_city,
-          residential_house_no,
-          residential_prov,
-          residential_street,
-          residential_subd,
-          residential_zip,
-          permanent_brgy,
-          permanent_city,
-          permanent_house_no,
-          permanent_prov,
-          permanent_street,
-          permanent_subd,
-          permanent_zip,
           ...rest
         } = userdetail;
         const payload = { userdetail: rest };

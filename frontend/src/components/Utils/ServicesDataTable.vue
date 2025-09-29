@@ -510,7 +510,7 @@ export default {
           //     this.employee.push(data[i].userID);
           //   }
           this.categoryData = data;
-          console.log("Category", this.categoryData);
+          // console.log("Category", this.categoryData);
         }
       });
     },
@@ -529,7 +529,7 @@ export default {
       } else {
         this.axiosCall("/services", "GET").then((res) => {
           if (res) {
-            console.log(res.data);
+            // console.log(res.data);
             this.data = res.data;
             this.loading = false;
           }
@@ -543,7 +543,7 @@ export default {
         service_price: this.service_price,
         service_type: this.tab,
       };
-      console.log(data);
+      // console.log(data);
       this.axiosCall("/services", "POST", data).then((res) => {
         if (res.data.status == 200) {
           this.fadeAwayMessage.show = true;
@@ -593,7 +593,7 @@ export default {
       this.categoryData.push(...transformed);
       this.category = null;
 
-      console.log("Category Data", this.categoryData);
+      // console.log("Category Data", this.categoryData);
       //   for (let i = 0; i < this.employee_list.length; i++) {
       //     for (let j = 0; j < this.employee.length; j++) {
       //       if (this.employee_list[i].userID == this.employee[j]) {
@@ -609,7 +609,7 @@ export default {
       this.AddCategoryDialog = false;
     },
     deleteItem(item, index) {
-      console.log(item.id, index);
+      // console.log(item.id, index);
       if (item.id) {
         this.remove_item.push(this.categoryData[index]);
         this.categoryData.splice(index, 1);
@@ -627,10 +627,10 @@ export default {
         category_description: JSON.stringify(this.categoryData),
         removed_category: JSON.stringify(this.remove_item),
       };
-      console.log(data);
+      // console.log(data);
       this.axiosCall("/services/addServiceCategory", "POST", data).then(
         (res) => {
-          console.log(res);
+          // console.log(res);
           if (res.data.status == 200) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "success";
@@ -670,7 +670,7 @@ export default {
       this.CategoryDialog = true;
     },
     view(item) {
-      console.log(item);
+      // console.log(item);
       this.service_category =
         item.service_category == "" ? "" : JSON.parse(item.service_category);
       this.updateID = item.id;

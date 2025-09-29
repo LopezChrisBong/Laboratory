@@ -1,215 +1,337 @@
 <template>
-  <v-app>
-    <v-container fluid>
-      <!-- Top Stats -->
-      <v-row>
-        <v-col v-for="stat in stats" :key="stat.title" cols="12" md="3">
-          <v-card>
-            <v-card-text
-              class="d-flex flex-column align-center justify-center text-center"
-            >
-              <v-icon size="40">{{ stat.icon }}</v-icon>
-              <h3>{{ stat.value }}</h3>
-              <p>{{ stat.title }}</p>
-              <span :class="stat.trend >= 0 ? 'green--text' : 'red--text'">
-                {{ stat.trend >= 0 ? "+" : "" }}{{ stat.trend }}%
-              </span>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+  <v-container fluid>
+    <v-row>
+      <!-- LEFT PANEL: Booking Appointment -->
+      <v-col cols="12" md="0">
+        <v-card outlined>
+          <!-- <v-card-title>
+            Booking Appointment
+          </v-card-title> -->
 
-      <!-- Patients Overview + Calendar -->
-      <v-row>
-        <v-col cols="12" md="8">
-          <v-card>
-            <v-card-title>Patients overview</v-card-title>
-            <v-card-text>
-              <canvas id="patients-chart" height="300"></canvas>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-card>
-            <v-card-title>Calendar</v-card-title>
-            <v-card-text>
-              <v-date-picker
-                v-model="selectedDate"
-                :min="minDate"
+          <!-- <v-divider></v-divider> -->
+
+          <!-- Calendar -->
+          <!-- <v-date-picker v-model="selectedDate" scrollable></v-date-picker> -->
+
+          <!-- <v-divider class="my-2"></v-divider> -->
+
+          <!-- <v-card-subtitle>
+            {{ formattedDate }}
+          </v-card-subtitle> -->
+
+          <!-- Time Slots -->
+          <!-- <v-row>
+            <v-col v-for="(slot, i) in timeSlots" :key="i" cols="6">
+              <v-btn
+                block
+                outlined
                 color="primary"
-              ></v-date-picker>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+                :disabled="slot.disabled"
+                @click="selectedTime = slot.time"
+              >
+                {{ slot.time }}
+              </v-btn>
+            </v-col>
+          </v-row> -->
 
-      <!-- Patients Table -->
-      <v-row>
-        <v-col cols="12">
-          <v-card>
-            <v-card-title>
-              <span>Patients</span>
-              <v-spacer></v-spacer>
-              <!-- <v-btn color="primary" @click="addPatient">Add patient</v-btn> -->
-            </v-card-title>
-            <v-data-table
-              :headers="headers"
-              :items="patients"
-              :loading="loading"
-              class="elevation-1"
+          <!-- <v-divider class="my-2"></v-divider> -->
+
+          <!-- Patient Concerns -->
+          <!-- <v-card-text>
+            <v-textarea
+              label="Patient Concerns"
+              outlined
+              v-model="patientConcerns"
+              rows="5"
+            ></v-textarea>
+          </v-card-text> -->
+        </v-card>
+      </v-col>
+      <v-col cols="12">
+        <ReceptionistDashboard />
+      </v-col>
+      <!-- MIDDLE PANEL: Doctor List -->
+      <v-col cols="12" md="12">
+        <v-card outlined>
+          <v-card-title>
+            Doctor List
+            <v-spacer></v-spacer>
+            <v-text-field
+              v-model="search"
+              outlined
+              prepend-inner-icon="search"
+              label="Search"
+              single-line
+              hide-details
+              class="rounded-lg"
+              color="#239FAB"
+              dense
+            ></v-text-field>
+          </v-card-title>
+
+          <v-divider></v-divider>
+
+          <v-container>
+            <v-row>
+              <v-col
+                v-for="doctor in filteredDoctors"
+                :key="doctor.id"
+                cols="12"
+                sm="4"
+              >
+                <v-card outlined>
+                  <v-card-text class="text-center">
+                    <v-avatar size="150" class="mb-2">
+                      <v-img :src="doctor.profile"></v-img>
+                    </v-avatar>
+
+                    <div class="font-weight-medium">{{ doctor.name }}</div>
+                  </v-card-text>
+
+                  <v-card-actions class="pa-2">
+                    <v-btn color="primary" @click="appointmentDoctor(doctor)"
+                      >Appointment</v-btn
+                    >
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="green"
+                      class="white--text"
+                      @click="selectDoctor(doctor)"
+                      >Detail</v-btn
+                    >
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card>
+      </v-col>
+
+      <!-- Doctor Details Dialog -->
+      <v-dialog v-model="dialog" persistent max-width="400px">
+        <v-card v-if="selectedDoctor">
+          <v-card-title class="headline justify-center">
+            DOCTOR DETAILS
+          </v-card-title>
+
+          <v-card-text class="text-center">
+            <v-avatar size="120" class="mb-3">
+              <v-img :src="selectedDoctor.profile"></v-img>
+            </v-avatar>
+            <div class="title">{{ selectedDoctor.name }}</div>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-text>
+            <strong>Specialty:</strong>
+            <div class="grey--text d-flex flex-wrap justify-left mb-3">
+              <v-chip
+                v-for="items in selectedDoctor.specialization"
+                :key="items.id"
+                small
+                outlined
+                color="primary"
+                class="ma-1"
+              >
+                {{ items.specialty }}
+              </v-chip>
+            </div>
+
+            <strong>Schedule:</strong>
+            <div class="grey--text d-flex flex-wrap justify-left">
+              <v-chip
+                v-for="items in selectedDoctor.schedules"
+                :key="items.id"
+                small
+                outlined
+                color="primary"
+                class="ma-1"
+              >
+                {{ items.schedule }}
+              </v-chip>
+            </div>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions class="justify-end">
+            <v-btn
+              text
+              color="red"
+              @click="
+                dialog = false;
+                selectedDoctor = null;
+              "
+              >Close</v-btn
             >
-              <template v-slot:[`item.status`]="{ item }">
-                {{ item.status == 0 ? "Pending" : "Done" }}
+          </v-card-actions>
+        </v-card>
+        <v-card v-else-if="doctorAppointment">
+          <v-card-title class="headline justify-center">
+            DOCTOR APPOINTMENT
+          </v-card-title>
+
+          <v-card-text class="text-center">
+            <v-avatar size="120" class="mb-3">
+              <v-img :src="doctorAppointment.profile"></v-img>
+            </v-avatar>
+            <div class="title">{{ doctorAppointment.name }}</div>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-text>
+            <strong>Appointment:</strong>
+
+            <v-data-table
+              v-if="appointmentData && appointmentData.length"
+              :headers="appointmentHeaders"
+              :items="appointmentData"
+              class="elevation-1"
+              dense
+              fixed-header
+              height="200px"
+            >
+              <!-- Format Start -->
+              <template v-slot:item.start="{ item }">
+                <v-chip small outlined :color="item.color" dark>
+                  {{ formatDate(item.start) }}
+                </v-chip>
               </template>
             </v-data-table>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-app>
+
+            <div v-else class="grey--text d-flex flex-wrap justify-left mb-3">
+              <v-chip color="red" outlined small class="ma-1">
+                No appointment found.
+              </v-chip>
+            </div>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions class="justify-end">
+            <v-btn
+              text
+              color="red"
+              @click="
+                dialog = false;
+                doctorAppointment = null;
+                appointmentData = null;
+              "
+              >Close</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
-// import LineChartVue from "../../components/Charts/LineChart.vue";
-import Chart from "chart.js";
-// import Chart from "vue-chartjs";
 export default {
-  // components: {
-  //   LineChartVue,
-  // },
+  components: {
+    ReceptionistDashboard: () => import("../Pages/ReceptionistDashboard.vue"),
+  },
   data() {
     return {
       selectedDate: new Date().toISOString().substr(0, 10),
-      minDate: "2023-01-01",
-      loading: false,
-      stats: [
-        {
-          title: "Total patients",
-          value: "123K",
-          trend: 23.5,
-          icon: "mdi-account-group",
-        },
-        {
-          title: "Last 30 days patients",
-          value: "2.53K",
-          trend: 4.5,
-          icon: "mdi-account-clock",
-        },
-        {
-          title: "Total doctors",
-          value: "88",
-          trend: -3.5,
-          icon: "mdi-doctor",
-        },
-        {
-          title: "Last month cost",
-          value: "$22.5K",
-          trend: 0.8,
-          icon: "mdi-currency-usd",
-        },
+      selectedTime: null,
+      patientConcerns: "",
+      search: "",
+      dialog: false,
+      action: null,
+      doctors: [],
+      appointmentData: null,
+      selectedDoctor: null,
+      doctorAppointment: null,
+      appointmentHeaders: [
+        { text: "Patient", value: "name", align: "start", sortable: false },
+        { text: "Date", value: "start", align: "end", sortable: false },
       ],
-      headers: [
-        { text: "Name", value: "name" },
-        { text: "Identification No.", value: "id" },
-        { text: "Last Visit", value: "lastVisit" },
-        { text: "Status", value: "status" },
-        { text: "Next Visit", value: "nextVisit" },
-        { text: "Recent Topic", value: "recentTopic" },
-        { text: "Recent Doctor", value: "recentDoctor" },
-      ],
-      patients: [
-        {
-          name: "Courtney Henry",
-          id: "21789057",
-          lastVisit: "Jan 20, 2020",
-          status: "Active",
-          nextVisit: "Jan 24, 2020",
-          recentTopic: "Radiology",
-          recentDoctor: "Dr M. Wagner",
-        },
-        {
-          name: "Leslie Alexander",
-          id: "37890606",
-          lastVisit: "Jan 20, 2020",
-          status: "Active",
-          nextVisit: "Feb 1, 2020",
-          recentTopic: "Pediatrics",
-          recentDoctor: "Dr R. Green",
-        },
+      timeSlots: [
+        { time: "08:00 AM", disabled: false },
+        { time: "09:00 AM", disabled: false },
+        { time: "10:00 AM", disabled: false },
+        { time: "11:00 AM", disabled: true },
+        { time: "12:30 PM", disabled: false },
+        { time: "01:30 PM", disabled: false },
+        { time: "02:30 PM", disabled: false },
+        { time: "03:30 PM", disabled: false },
+        { time: "04:30 PM", disabled: false },
+        { time: "05:30 PM", disabled: false },
       ],
     };
   },
-
   mounted() {
-    this.chartData();
-    this.getAllPatient();
+    this.initialize();
   },
-
+  computed: {
+    formattedDate() {
+      return new Date(this.selectedDate).toDateString();
+    },
+    filteredDoctors() {
+      if (!this.search) return this.doctors;
+      return this.doctors.filter((d) =>
+        d.name.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
+  },
   methods: {
-    addPatient() {
-      // Implement patient addition logic
-      alert("Add patient clicked");
+    selectDoctor(doctor) {
+      this.selectedDoctor = doctor;
+      this.dialog = true;
+      this.action = "Detail";
     },
-    chartData() {
-      const ctx = document.getElementById("patients-chart").getContext("2d");
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-          datasets: [
-            {
-              label: "Medical patients",
-              backgroundColor: "#1976d2",
-              data: [1000, 1700, 2500, 3200, 3000, 2200, 1500, 2300],
-            },
-            {
-              label: "Appointed patients",
-              backgroundColor: "#64b5f6",
-              data: [600, 1100, 1900, 2300, 1780, 1900, 1200, 1900],
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: {
-            position: "top",
-          },
-          tooltips: {
-            mode: "index",
-            intersect: false,
-          },
-          scales: {
-            yAxes: [
-              {
-                ticks: {
-                  beginAtZero: true,
-                  max: 4000,
-                },
-              },
-            ],
-          },
-        },
-      });
+    appointmentDoctor(doctor) {
+      this.doctorAppointment = doctor;
+      this.getAllAppointment(doctor.doctorID);
+      this.dialog = true;
+      this.action = "Appointment";
     },
-    getAllPatient() {
-      this.loading = true;
-      this.axiosCall("/appointment/getAllPatient/", "GET").then((res) => {
-        if (res) {
-          this.patients = res.data;
-          this.loading = false;
+    getAllAppointment(id) {
+      this.axiosCall("/appointment/getAllDoctorsAppointment/" + id, "GET").then(
+        (res) => {
+          if (res) {
+            console.log("Schedule", res.data);
+            this.appointmentData = res.data;
+          }
         }
-      });
+      );
+    },
+    initialize() {
+      this.getAllDoctors();
+    },
+    getAllDoctors() {
+      this.axiosCall("/doctors-schedule/getAllDoctorsDashboard", "GET").then(
+        (res) => {
+          if (res) {
+            // console.log(res.data);
+            let data = res.data;
+            Object.assign(data, { oldDate: null });
+            // this.doctors_schedList1 = res.data;
+            for (let i = 0; i < data.length; i++) {
+              data[i].oldDate = data[i].date;
+              data[i].date =
+                this.formatDate(data[i].date) +
+                " From: " +
+                data[i].timeFrom +
+                " To: " +
+                data[i].timeTo;
+
+              data[i].profile = data[i].profile
+                ? process.env.VUE_APP_SERVER +
+                  "/user-details/getProfileImg/" +
+                  data[i].profile
+                : process.env.VUE_APP_SERVER +
+                  "/user-details/getProfileImg/img_avatar.png";
+            }
+
+            this.doctors = data;
+          }
+        }
+      );
     },
   },
 };
 </script>
-
-<style>
-.green--text {
-  color: green;
-}
-.red--text {
-  color: red;
-}
-</style>

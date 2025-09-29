@@ -28,6 +28,9 @@ import { PaymentModule } from './payment/payment.module';
 import { PatientModule } from './patient/patient.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ServicesModule } from './services/services.module';
+import { MedicalInfoModule } from './medical-info/medical-info.module';
+import { NotificationModule } from './notification/notification.module';
+import { DoctorsScheduleModule } from './doctors-schedule/doctors-schedule.module';
 
 @Module({
   imports: [
@@ -69,6 +72,9 @@ import { ServicesModule } from './services/services.module';
     PatientModule,
     InventoryModule,
     ServicesModule,
+    MedicalInfoModule,
+    NotificationModule,
+    DoctorsScheduleModule,
   ],
 
   controllers: [AppController],

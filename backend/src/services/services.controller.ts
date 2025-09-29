@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -6,6 +6,8 @@ import { CreateServicePackagesDto } from './dto/create-service-packages.dto';
 import { UpdateServicePackagesDto } from './dto/update-service-packages.dto';
 import { UpdateServiceCategoryDto } from './dto/update-service-category.dto';
 import { CreateServiceCategoryDto } from './dto/create-service-category.dto';
+import { CreateServiceAppointmentDto } from './dto/create-service-appointment.dto';
+import { UpdateServiceAppointmentDto } from './dto/update-service-appointment.dto';
 
 @Controller('services')
 export class ServicesController {
@@ -14,6 +16,11 @@ export class ServicesController {
   @Post()
   create(@Body() createServiceDto: CreateServiceDto) {
     return this.servicesService.create(createServiceDto);
+  }
+
+    @Post('createServiceAppointment')
+  createServiceAppointment(@Body() createServiceAppointmentDto: CreateServiceAppointmentDto) {
+    return this.servicesService.createServiceAppointment(createServiceAppointmentDto);
   }
 
   @Post('AddPackages')
@@ -40,7 +47,17 @@ export class ServicesController {
     return this.servicesService.getRemainingModules(+id);
   }
 
-      @Get('getCategoryServiceType/:id')
+  @Get('getSpecificPackages/:id')
+  getSpecificPackages(@Param('id') id: string) {
+    return this.servicesService.getSpecificPackages(+id);
+  }
+
+   @Get('getAllLabRequest/List/:patientID')
+  getAllLabRequest(@Param('patientID') patientID: string) {
+    return this.servicesService.getAllLabRequest(+patientID);
+  }
+
+        @Get('getCategoryServiceType/:id')
   getCategoryServiceType(@Param('id') id: string) {
     return this.servicesService.getCategoryServiceType(+id);
   }
@@ -48,6 +65,21 @@ export class ServicesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.servicesService.findOne(+id);
+  }
+
+    @Get('getAllServiceToUpdateResult/:id')
+  getAllServiceToUpdateResult(@Param('id') id: string) {
+    return this.servicesService.getAllServiceToUpdateResult(+id);
+  }
+
+ @Get('pay-items/:data')
+ async  getItemPaid(
+    @Param('data') data:any
+  ) {
+    const getDatas = JSON.parse(data);  
+    // // console.log(getDatas)
+
+    return this.servicesService.getItemPaid(getDatas);
   }
 
     @Get('getAllServicesByType/:type')
@@ -63,6 +95,11 @@ export class ServicesController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
     return this.servicesService.update(+id, updateServiceDto);
+  }
+
+    @Patch('updateServiceAppointment/:id')
+  updateServiceAppointment(@Param('id') id: string, @Body() updateServiceAppointmentDto: UpdateServiceAppointmentDto) {
+    return this.servicesService.updateServiceAppointment(+id, updateServiceAppointmentDto);
   }
 
     @Patch('updateServicePackagesDto/:id')

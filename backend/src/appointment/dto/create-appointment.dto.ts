@@ -11,11 +11,29 @@ export class CreateAppointmentDto {
     @ApiProperty()
     time: string;
 
-    @ApiProperty()
-    service: string;
+    // @ApiProperty()
+    // service: string;
+
+    // @ApiProperty()
+    // service_package: string;
 
     @ApiProperty()
-    service_package: string;
+    clinic: string;
+
+    @ApiProperty()
+    status: number;
+
+    @ApiProperty()
+    userID: number;
+
+    @ApiProperty()
+    doctorID: number;
+
+    @ApiProperty()
+    medtechID: number;
+
+     @ApiProperty()
+    labID: number;
 
 
 }

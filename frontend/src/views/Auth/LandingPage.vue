@@ -28,11 +28,11 @@
       > -->
       <v-btn text @click="mainData = 2"> <b>Appointment</b></v-btn>
 
-      <v-btn text
+      <!-- <v-btn text
         ><RouterLink to="/login" style="text-decoration: none;">
           <b style="color: black;">Login</b></RouterLink
         ></v-btn
-      >
+      > -->
     </v-app-bar>
 
     <v-main>
@@ -163,19 +163,19 @@ export default {
     slides: [
       {
         src2: require("@/assets/img/mobile1.png"),
-        src: require("@/assets/img/carousel1.jpg"),
+        src: require("@/assets/img/img1.png"),
         // title: "Welcome to PARAGON",
         // subtitle: "",
       },
       {
         src2: require("@/assets/img/mobile2.png"),
-        src: require("@/assets/img/carousel2.jpg"),
+        src: require("@/assets/img/img2.png"),
         // title: "SAmple",
         // subtitle: "",
       },
 
       {
-        src: require("@/assets/img/carousel3.jpg"),
+        src: require("@/assets/img/img3.png"),
         src2: require("@/assets/img/mobile3.png"),
         // title: "SAmple",
         // subtitle: "",

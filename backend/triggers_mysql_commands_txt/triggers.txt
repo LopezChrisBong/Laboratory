@@ -1,0 +1,101 @@
+
+-- SHOW TRIGGERS;
+
+-- DROP TRIGGER IF EXISTS before_insert_patient; dont execute this code this will delete all data
+
+
+
+
+---trigger for adding patientID----------------------
+DELIMITER $$
+
+CREATE TRIGGER before_insert_patient
+BEFORE INSERT ON patient
+FOR EACH ROW
+BEGIN
+  DECLARE lastID INT;
+  DECLARE newID VARCHAR(20);
+
+  -- Get the numeric part of the latest patientID
+  SELECT
+    IFNULL(MAX(CAST(SUBSTRING(patientID, 8) AS UNSIGNED)), 0)
+  INTO lastID
+  FROM patient;
+
+  -- Format new patientID with leading zeros
+  SET newID = CONCAT('PATIENT', LPAD(lastID + 1, 4, '0'));
+
+  -- Assign to the new row
+  SET NEW.patientID = newID;
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+--logs patient INSERT trigeer-----------------------------------
+DELIMITER $$
+
+CREATE TRIGGER trg_log_new_patient
+AFTER INSERT ON patient
+FOR EACH ROW
+BEGIN
+  INSERT INTO logs (action, description)
+  VALUES (
+    'NEW PATIENT',
+    CONCAT('New patient added: ', NEW.f_name, ' ', NEW.l_name, ' (ID: ', NEW.patientID, ')')
+  );
+END$$
+
+DELIMITER ;
+
+
+
+
+--logs patient insert appointement-----
+DELIMITER $$
+
+CREATE TRIGGER trg_log_new_appointment
+AFTER INSERT ON appointment
+FOR EACH ROW
+BEGIN
+  INSERT INTO logs (action, description)
+  VALUES (
+    'NEW APPOINTMENT',
+    CONCAT(
+      'Appointment for patientID: ', NEW.patientID,
+      ' on ', NEW.date,
+      ' at ', NEW.time,
+      ' (Clinic ID: ', NEW.clinic, ')'
+    )
+  );
+END$$
+
+DELIMITER ;
+
+
+
+
+--logs patient insert lab request------------
+
+DELIMITER $$
+
+CREATE TRIGGER trg_log_new_lab_request
+AFTER INSERT ON service_appointment
+FOR EACH ROW
+BEGIN
+  INSERT INTO logs (action, description)
+  VALUES (
+    'NEW LAB REQUEST',
+    CONCAT('Lab request added for patientID: ', NEW.patientID)
+  );
+END$$
+
+DELIMITER ;
+
+

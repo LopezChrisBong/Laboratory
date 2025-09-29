@@ -17,8 +17,8 @@ export default {
   created: function() {
     //VueX set this Vue Variable
     // this.$store.dispatch("setThisVue", this);
-    // console.log("is Expired: " + this.$store.getters.isExpired);
-    // console.log(this.$store.state.expiryDate);
+    // // console.log("is Expired: " + this.$store.getters.isExpired);
+    // // console.log(this.$store.state.expiryDate);
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const token = urlParams.get("token");
@@ -84,7 +84,7 @@ export default {
         }
       } else {
         this.axiosCall("/auth/current_user", "GET").then((res) => {
-          // console.log(res.data);
+          // // console.log(res.data);
           if (res.statusCode != 401) {
             let data = res.data.userdetail;
             this.$store.dispatch("setUser", data);

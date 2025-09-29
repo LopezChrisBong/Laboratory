@@ -1,13 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      fullscreen
-      v-model="dialog"
-      persistent
-      eager
-      scrollable
-      max-width="900px"
-    >
+    <v-dialog v-model="dialog" persistent eager scrollable max-width="1000px">
       <v-form ref="AddPatient" @submit.prevent>
         <v-card>
           <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
@@ -42,10 +35,8 @@
                 <v-col cols="12" md="4">
                   <v-text-field
                     v-model="mname"
-                    :rules="[formRules.required]"
                     dense
                     outlined
-                    required
                     label="Middle Name"
                     class="rounded-lg"
                     color="blue"
@@ -63,10 +54,62 @@
                     color="blue"
                   ></v-text-field>
                 </v-col>
+                <v-col cols="12" md="2">
+                  <v-text-field
+                    v-model="suffix"
+                    dense
+                    outlined
+                    required
+                    label="Suffix"
+                    class="rounded-lg"
+                    color="blue"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-menu
+                    ref="menu"
+                    :close-on-content-click="false"
+                    :return-value.sync="bdate"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        dense
+                        v-model="bdate"
+                        :rules="[formRules.required]"
+                        chips
+                        color="blue"
+                        small-chips
+                        label="Date of Birth"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        @input="calculateAge(bdate)"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      color="blue"
+                      v-model="bdate"
+                      no-title
+                      scrollable
+                      @input="calculateAge"
+                    >
+                      <v-spacer></v-spacer>
+
+                      <v-btn text color="blue" @click="$refs.menu.save(bdate)">
+                        OK
+                      </v-btn>
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
 
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="age"
+                    type="number"
                     :rules="[formRules.required]"
                     dense
                     outlined
@@ -110,6 +153,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    type="number"
                     required
                     label="Contanct Number"
                     class="rounded-lg"
@@ -127,45 +171,6 @@
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
-                </v-col>
-
-                <v-col cols="6">
-                  <v-menu
-                    ref="menu"
-                    :close-on-content-click="false"
-                    :return-value.sync="bdate"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        outlined
-                        dense
-                        v-model="bdate"
-                        :rules="[formRules.required]"
-                        chips
-                        color="blue"
-                        small-chips
-                        label="Date of Birth"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      color="blue"
-                      v-model="bdate"
-                      no-title
-                      scrollable
-                    >
-                      <v-spacer></v-spacer>
-
-                      <v-btn text color="blue" @click="$refs.menu.save(bdate)">
-                        OK
-                      </v-btn>
-                    </v-date-picker>
-                  </v-menu>
                 </v-col>
 
                 <v-col cols="12" md="12">
@@ -194,7 +199,7 @@
             <v-btn
               color="blue"
               class="white--text"
-              v-if="action == 'Add'"
+              v-if="action == 'Add' && assignedModuleID == 3"
               @click="add('ADD')"
             >
               <v-icon>mdi-check-circle</v-icon>
@@ -203,7 +208,7 @@
             <v-btn
               color="blue"
               class="white--text"
-              v-if="action == 'View'"
+              v-if="action == 'View' && assignedModuleID == 3"
               @click="add('UPDATE')"
             >
               <v-icon>mdi-check-circle</v-icon>
@@ -237,11 +242,13 @@ export default {
     return {
       updateID: null,
       //   pregnant: false,
+      assignedModuleID: null,
       dialog: false,
       bdate: null,
       medicalDate: null,
       genderList: [],
       gender: null,
+      suffix: null,
       fname: null,
       lname: null,
       mname: null,
@@ -266,11 +273,12 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("View Data", data);
+        // console.log("View Data", data);
 
         if (data.id) {
           this.initialize();
           this.fname = data.f_name;
+          this.suffix = data.suffix;
           this.lname = data.l_name;
           this.mname = data.m_name;
           this.gender = data.gender;
@@ -284,6 +292,7 @@ export default {
           this.$refs.AddPatient.reset();
           this.initialize();
           this.fname = null;
+          this.suffix = null;
           this.lname = null;
           this.mname = null;
           this.gender = null;
@@ -300,16 +309,34 @@ export default {
 
   methods: {
     initialize() {
+      this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       this.genderList = [
         { id: 1, description: "Male" },
         { id: 2, description: "Female" },
       ];
     },
+    calculateAge(birthDate) {
+      if (!birthDate) return;
 
+      const currentDate = new Date();
+      const date = new Date(birthDate);
+
+      if (date > currentDate) {
+        this.bdate = null;
+        this.age = null;
+        alert("Invalid Date of Birth");
+        return; // <-- You missed this
+      }
+
+      const diffTime = currentDate - date;
+      const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      this.age = Math.floor(totalDays / 365.25);
+    },
     add(type) {
       if (type == "ADD") {
         let data = {
           f_name: this.fname,
+          suffix: this.suffix,
           l_name: this.lname,
           m_name: this.mname,
           age: this.age,
@@ -321,50 +348,58 @@ export default {
           b_date: this.bdate,
         };
         this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
-          if (res.data.status == 200) {
+          let errorCode = res.data.duplicate;
+          if (errorCode == true) {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = "Patient Already Exist!";
+          } else {
+            if (res.data.status == 200) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "Successfully Updated";
+              this.dialog = false;
+              this.closeD();
+            } else if (res.data.status == 400) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "error";
+              this.fadeAwayMessage.header = res.data.msg;
+            }
+          }
+        });
+      } else if (type == "UPDATE") {
+        // alert(this.data.id);
+        let data = {
+          f_name: this.fname,
+          suffix: this.suffix,
+          l_name: this.lname,
+          m_name: this.mname,
+          age: this.age,
+          civil_status: this.cstatus,
+          gender: this.gender,
+          address: this.address,
+          contact_no: this.number,
+          occupation: this.occupation,
+          b_date: this.bdate,
+          //   pregnant: this.pregnant,
+        };
+        this.axiosCall(
+          "/appointment/updatePatientInfo/" + this.data.id,
+          "PATCH",
+          data
+        ).then((res) => {
+          if (res.data.status == 201) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "Successfully Updated";
-            this.dialog = false;
-            this.close();
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = "Successfully Updated";
+            this.closeD();
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "error";
             this.fadeAwayMessage.header = res.data.msg;
           }
         });
-      } else if (type == "UPDATE") {
-        // alert("UPDATED");
-
-        let data = {
-          fname: this.fname,
-          lname: this.lname,
-          mname: this.mname,
-          age: this.age,
-          cstatus: this.cstatus,
-          gender: this.gender,
-          address: this.address,
-          number: this.number,
-          occupation: this.occupation,
-          bdate: this.bdate,
-          //   pregnant: this.pregnant,
-        };
-        let existingData =
-          JSON.parse(localStorage.getItem("patientData")) || [];
-
-        let index = existingData.findIndex((item) => item.id === data.id);
-
-        if (index !== -1) {
-          Object.assign(existingData[index], data);
-        } else {
-          existingData.push(data);
-        }
-        localStorage.setItem("patientData", JSON.stringify(existingData));
-        this.fadeAwayMessage.show = true;
-        this.fadeAwayMessage.type = "success";
-        this.fadeAwayMessage.header = "System Message";
-        this.fadeAwayMessage.message = "Successfully Updated";
-        this.closeD();
       }
     },
     generateUUID() {

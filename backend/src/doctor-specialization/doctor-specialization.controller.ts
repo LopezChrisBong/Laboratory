@@ -11,10 +11,30 @@ export class DoctorSpecializationController {
   create(@Body() createDoctorSpecializationDto: CreateDoctorSpecializationDto) {
     return this.doctorSpecializationService.create(createDoctorSpecializationDto);
   }
+  
+  @Get('getAllClinic')
+  getAllClinic() {
+    return this.doctorSpecializationService.getAllClinic();
+  }
+
+    @Get('getAllDoctorClinic/:id')
+  getAllDoctorClinic(@Param('id') id: string) {
+    return this.doctorSpecializationService.getAllDoctorClinic(+id);
+  }
+
+    @Get('getSpecificClinic/:specialty')
+  getSpecificClinic(@Param('specialty') specialty: string) {
+    return this.doctorSpecializationService.getSpecificClinic(specialty);
+  }
 
   @Get()
   findAll() {
     return this.doctorSpecializationService.findAll();
+  }
+
+    @Get('getMyScpecialty/:id')
+  getMyScpecialty(@Param('id') id: string) {
+    return this.doctorSpecializationService.getMyScpecialty(+id);
   }
 
   @Get(':id')

@@ -8,6 +8,9 @@ export class CreatePatientDto {
   l_name: string;
 
   @ApiProperty()
+  suffix: string;
+
+  @ApiProperty()
   m_name: string;
 
   @ApiProperty()
@@ -26,9 +29,21 @@ export class CreatePatientDto {
   contact_no: number;
 
   @ApiProperty()
+  status: number;
+
+  @ApiProperty()
   b_date: string;
 
   @ApiProperty()
   address: string;
+
+  @ApiProperty()
+    doctorID: number;
+
+   @ApiProperty()
+    medtechID: number;
+
+     @ApiProperty()
+    updateID: number;
 
 }

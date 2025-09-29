@@ -23,6 +23,9 @@ export class CreateUserDetailDto {
     education: string;
 
     @ApiProperty()
+    liscence_no: string;
+
+    @ApiProperty()
     @IsNotEmpty()
     address: string;
 

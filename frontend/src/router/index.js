@@ -26,6 +26,10 @@ import ReuestData from "../views/Pages/RequestData.vue"
 import PatientAppointment from "../views/Auth/PatientAppointment.vue"
 import LandingPage from "../views/Auth/LandingPage.vue"
 import Services from "../views/Pages/Services.vue"
+import PatientDoctor from "../views/Pages/PatientDoctor.vue"
+import PatientEntry from "../views/Auth/PatientEntry.vue";
+import DoctorsUtility from "../views/Pages/DoctorsUtility.vue";
+import MedicalInformation from "../views/Pages/MedicalInformation.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -61,6 +65,12 @@ const routes = [
          {
         path: "patient-appointment",
         component: PatientAppointment,
+        meta: { authRequired: false },
+      },
+
+            {
+        path: "patient-entry",
+        component: PatientEntry,
         meta: { authRequired: false },
       },
  
@@ -253,6 +263,7 @@ const routes = [
         component: ReuestData,
         meta: { title: "Request Data Table", authRequired: true },
       },
+   
 
       
 
@@ -288,21 +299,13 @@ const routes = [
         component: Inventory,
         meta: { title: "Inventory Table", authRequired: true },
       },
-      {
-        path: "appointment",
-        component: Appointment,
-        meta: { title: "Appointment Table", authRequired: true },
-      },
+
       {
         path: "billing",
         component: HospitalBilling,
         meta: { title: "Hospital Billing", authRequired: true },
       },
-      {
-        path: "request",
-        component: LaboratoryRequest,
-        meta: { title: "Laboratory & Imaging Request", authRequired: true },
-      },
+
       {
         path: "billing-data",
         component: BillingData,
@@ -319,6 +322,36 @@ const routes = [
         meta: { title: "Services", authRequired: true },
       },
 
+       {
+        path: "patient-doctor",
+        component: PatientDoctor,
+        meta: { title: "Patient Doctor List", authRequired: true },
+      },
+      
+      {
+        path: "doctors-utility",
+        component: DoctorsUtility,
+        meta: { title: "Doctors Utility", authRequired: true },
+      },
+
+      {
+        path: "medical-information",
+        component: MedicalInformation,
+        meta: { title: "Medical Information", authRequired: true },
+      },
+
+      {
+        path: "request",
+        component: LaboratoryRequest,
+        meta: { title: "Laboratory & Imaging Request", authRequired: true },
+      },
+
+      {
+        path: "appointment",
+        component: Appointment,
+        meta: { title: "Appointment Table", authRequired: true },
+      },
+
     ],
   },
 
@@ -333,7 +366,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   // let user = store.state.user;
   const isAuthenticated = store.getters.getIsAuthenticated;
-  // console.log(to);
+  // // console.log(to);
   if (to.matched.some((record) => record.meta.authRequired == true)) {
     if (isAuthenticated) {
       let pt = to.fullPath;

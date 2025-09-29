@@ -170,7 +170,7 @@ export default {
         this.dialog = true;
         this.initialize();
         this.$refs.ModulesListFormref.resetValidation();
-        // console.log(data);
+        // // console.log(data);
         if (data.id) {
           this.id = data.id;
           this.title = data.title;

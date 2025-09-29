@@ -43,7 +43,7 @@
                   </v-autocomplete>
                 </v-col>
 
-                <v-col cols="12" v-if="userId == 3">
+                <v-col cols="12">
                   <v-autocomplete
                     v-model="verifyModel.assignedModuleID"
                     :rules="userId == 3 ? [formRules.required] : []"
@@ -58,20 +58,16 @@
                   </v-autocomplete>
                 </v-col>
 
-                <!-- <v-col cols="12" v-if="userId == 3">
-                  <v-autocomplete
-                    v-model="verifyModel.newStatus"
-                    :rules="userId == 3 ? [formRules.required] : []"
+                <v-col cols="12" v-if="verifyModel.assignedModuleID == 2">
+                  <v-text-field
+                    v-model="verifyModel.liscence_no"
                     dense
                     class="rounded-lg"
-                    item-text="description"
-                    item-value="id"
-                    label="School Level"
+                    label="Liscence No."
                     color="#93CB5B"
-                    :items="statusList"
                   >
-                  </v-autocomplete>
-                </v-col> -->
+                  </v-text-field>
+                </v-col>
               </v-row>
             </v-container>
           </v-card-text>
@@ -130,7 +126,7 @@ export default {
         usertypeID: null,
         assignedModuleID: null,
         user_roleID: null,
-        newStatus: null,
+        liscence_no: null,
       },
       userRoleList: [],
       usertypeList: [],
@@ -151,7 +147,7 @@ export default {
         this.initialize();
         this.$refs.UserVerifyFormref.resetValidation();
         if (data.id) {
-          console.log("Love", data);
+          // console.log("Love", data);
           this.verifyModel.id = data.id;
           this.verifyModel.userID = data.user_id;
           this.verifyModel.name = data.name;
@@ -176,13 +172,24 @@ export default {
     getUserType() {
       this.axiosCall("/user-type/getAllUsertype", "GET").then((res) => {
         if (res.data) {
-          console.log("UserList", res.data);
+          // console.log("UserList", res.data);
           this.usertypeList = res.data;
         }
       });
     },
     closeD() {
       this.eventHub.$emit("closeAccountsVerificationDialog", true);
+      this.verifyModel = {
+        id: null,
+        userID: null,
+        name: null,
+        empID: null,
+        date_hired: null,
+        usertypeID: null,
+        assignedModuleID: null,
+        user_roleID: null,
+        liscence_no: null,
+      };
       this.dialog = false;
     },
     accept() {
@@ -199,7 +206,7 @@ export default {
           usertypeID: this.verifyModel.usertypeID,
           user_roleID: this.verifyModel.user_roleID,
           assignedModuleID: this.verifyModel.assignedModuleID,
-          status: this.verifyModel.newStatus,
+          liscence_no: this.verifyModel.liscence_no,
           update_type: this.action == "Verify" ? 1 : 2,
         };
 
@@ -228,7 +235,8 @@ export default {
 
     getAssignedModules() {
       this.axiosCall("/assigned-modules", "GET").then((res) => {
-        this.assignedModulesList = res.data;
+        let data = (res.data = res.data.filter((item) => item.id !== 4));
+        this.assignedModulesList = data;
       });
     },
     getUseRoles() {

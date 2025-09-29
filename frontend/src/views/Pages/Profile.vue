@@ -164,7 +164,7 @@
                         min-width="auto"
                         :readonly="readonly"
                       >
-                        <template v-slot:activator="{ on, attrs }">
+                        <!-- <template v-slot:activator="{ on, attrs }">
                           <v-text-field
                             dense
                             v-model="data.hired"
@@ -176,7 +176,7 @@
                             v-bind="attrs"
                             v-on="on"
                           ></v-text-field>
-                        </template>
+                        </template> -->
                         <v-date-picker
                           color="blue"
                           v-model="data.hired"
@@ -577,7 +577,7 @@ export default {
   created() {
     this.initialize();
     this.totalYearService();
-    // console.log("created");
+    // // console.log("created");
     if (this.$store.state.expiryDate < Date.now()) {
       this.$store.dispatch("setUser", null);
       this.$store.dispatch("setIsAuthenticated", 0);
