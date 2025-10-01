@@ -1,36 +1,68 @@
 
 import { ApiProperty } from "@nestjs/swagger";
+import { IsOptional, IsNumber, IsDateString, IsString } from 'class-validator';
+
 export class CreateInventoryDto {
-                  // hahahahhaha
         @ApiProperty()
+        @IsString()
         itemName: string;
         @ApiProperty()
+        @IsString()
         brand: string;
         @ApiProperty()
+        @IsString()
         unit: string;
         @ApiProperty()
+        @IsString()
         usageType: string;
-        @ApiProperty()
-        lotNumber: string;
-        @ApiProperty()
+        @ApiProperty({ required: false, type: String, format: 'date' })
+        @IsOptional()
+        @IsDateString()
         expiry: Date; 
         @ApiProperty()
+        @IsString()
+        lotNumber: string;
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsNumber()
         starting_quantity: number;
-        @ApiProperty()
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsNumber()
         used_quantity: number;
-        @ApiProperty()
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsNumber()
         added_quantity: number;
-        @ApiProperty()
+        @ApiProperty({ required: false, type: String, format: 'date' })
+        @IsOptional()
+        @IsDateString()
         supply_date: Date;
-        @ApiProperty()
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsNumber()
         totalend_quantity: number;
         @ApiProperty()
+        @IsString()
         reorder_status: string;
         @ApiProperty()
+        @IsString()
         supplier: string;
-        @ApiProperty()
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsString()
+        transactionType: string;
+        @ApiProperty({ required: false, type: String, format: 'date' })
+        @IsOptional()
+        @IsDateString()
+        transaction_date: Date;
+        @ApiProperty({ required: false, type: String, format: 'date-time' })
+        @IsOptional()
+        @IsDateString()
         created_at: Date;
-        @ApiProperty()
+        @ApiProperty({ required: false, type: String, format: 'date-time' })
+        @IsOptional()
+        @IsDateString()
         updated_at: Date;
 }
 

@@ -13,24 +13,28 @@ export class Inventory {
   unit: string;
   @Column({ default: null}) 
   usageType: string;
-  @CreateDateColumn({ name: 'expiry', type: 'timestamp' })
+  @Column({ name: 'expiry', type: 'timestamp', nullable: true })
   expiry: Date;
   @Column({ default: null })
   lotNumber: string;
-  @Column({default: null}) 
+  @Column({default: null, nullable: true}) 
   starting_quantity: number;
-  @Column({default: null}) 
+  @Column({default: null, nullable: true}) 
   used_quantity: number;
-  @Column({default: null}) 
+  @Column({default: null, nullable: true}) 
   added_quantity: number;
-  @CreateDateColumn({ name: 'date_supplied', type: 'timestamp' })
+  @CreateDateColumn({ name: 'date_supplied', type: 'timestamp', nullable: true })
   supply_date: Date;
-  @Column({ default: null })
+  @Column({ default: null, nullable: true }) 
   totalend_quantity: number;
   @Column({ default: null })
   reorder_status: string;
   @Column({ default: null })
   supplier: string;
+  @Column({ default: null, nullable: true })
+  transactionType: string;
+  @Column({ name: 'transaction_date', type: 'timestamp', nullable: true })
+  transaction_date: Date;
   @CreateDateColumn({ name: 'created_at', type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
 
