@@ -142,7 +142,7 @@ const routes = [
       {
         path: "inventory",
         component: Inventory,
-        meta: { title: "Inventory Table", authRequired: true },
+        meta: { title: "", authRequired: true },
       },
       {
         path: "appointment",
@@ -236,7 +236,7 @@ const routes = [
       {
         path: "inventory",
         component: Inventory,
-        meta: { title: "Inventory Table", authRequired: true },
+        meta: { title: "", authRequired: true },
       },
       {
         path: "appointment",
@@ -297,7 +297,7 @@ const routes = [
       {
         path: "inventory",
         component: Inventory,
-        meta: { title: "Inventory Table", authRequired: true },
+        meta: { title: "", authRequired: true },
       },
 
       {

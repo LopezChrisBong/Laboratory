@@ -356,7 +356,7 @@
                           </v-card>
                           <v-card class="ma-1">
                             <v-card-title>
-                              <p class="">Doctor/s Encharge:</p>
+                              <p class="">Doctor/s Incharge:</p>
                             </v-card-title>
                             <div class="mb-2">
                               <ul class="pb-2">
