@@ -356,7 +356,7 @@
                           </v-card>
                           <v-card class="ma-1">
                             <v-card-title>
-                              <p class="">Doctor/s Encharge:</p>
+                              <p class="">Doctor/s Incharge:</p>
                             </v-card-title>
                             <div class="mb-2">
                               <ul class="pb-2">
@@ -480,6 +480,12 @@
                                 <v-img
                                   style="width: 200px; height: 150px;"
                                   :src="item.profile"
+                                  @error="
+                                    (e) =>
+                                      (e.target.src =
+                                        process.env.VUE_APP_SERVER +
+                                        '/user-details/getProfileImg/img_avatar.png')
+                                  "
                                 ></v-img>
                               </div>
                               <div>
@@ -945,6 +951,11 @@ export default {
           Object.assign(data, { oldDate: null });
 
           for (let i = 0; i < data.length; i++) {
+            const url =
+              process.env.VUE_APP_SERVER +
+              "/user-details/getProfileImg/" +
+              data[i].profile;
+
             data[i].oldDate = data[i].date;
             data[i].date =
               this.formatDate(data[i].date) +
@@ -953,7 +964,7 @@ export default {
               " To: " +
               data[i].timeTo;
 
-            data[i].profile = data[i].profile
+            data[i].profile = url
               ? process.env.VUE_APP_SERVER +
                 "/user-details/getProfileImg/" +
                 data[i].profile

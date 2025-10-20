@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row class="my-4" align="center">
-      <v-col cols="12" md="6" class="pa-0">
+      <v-col cols="12" md="6" class="pa-3">
         <v-text-field
           v-model="search"
           outlined
@@ -16,22 +16,6 @@
         ></v-text-field>
       </v-col>
       <v-spacer></v-spacer>
-      <v-col cols="12" md="6" class="d-flex justify-space-between">
-        <v-select
-          v-model="selectedSection"
-          :items="sections"
-          @change="changeSelected()"
-          label="Select Lab Section"
-        ></v-select>
-        <v-btn
-          class="white--text ml-2 mt-3 rounded-lg"
-          color="#2196F3"
-          @click="addNewItem"
-        >
-          <v-icon left> mdi-plus-box-outline </v-icon>
-          Add New Item
-        </v-btn>
-      </v-col>
     </v-row>
     <v-card class="ma-5 dt-container" elevation="0" outlined>
       <v-data-table
@@ -41,8 +25,6 @@
         :search="search"
         :options.sync="options"
         :loading="loading"
-        @pagination="pagination"
-        hide-default-footer
       >
         <template v-slot:top>
           <v-toolbar flat>
@@ -168,7 +150,7 @@
                 large
                 persistent
               >
-                <div>{{ item.expiry ? item.expiry.substring(0, 10) : '' }}</div>
+                <div>{{ item.expiry ? item.expiry.substring(0, 10) : "" }}</div>
                 <template v-slot:input>
                   <v-text-field
                     v-model="item.expiry"
@@ -290,7 +272,11 @@
                 large
                 persistent
               >
-                <div>{{ item.supply_date ? item.supply_date.substring(0, 10) : '' }}</div>
+                <div>
+                  {{
+                    item.supply_date ? item.supply_date.substring(0, 10) : ""
+                  }}
+                </div>
                 <template v-slot:input>
                   <v-text-field
                     v-model="item.supply_date"
@@ -311,7 +297,13 @@
                 large
                 persistent
               >
-                <div>{{ item.transaction_date ? item.transaction_date.substring(0, 10) : '' }}</div>
+                <div>
+                  {{
+                    item.transaction_date
+                      ? item.transaction_date.substring(0, 10)
+                      : ""
+                  }}
+                </div>
                 <template v-slot:input>
                   <v-text-field
                     v-model="item.transaction_date"
@@ -332,7 +324,11 @@
                 persistent
               >
                 <div>
-                  <v-chip :color="getStatusColor(item.reorder_status)" dark small>
+                  <v-chip
+                    :color="getStatusColor(item.reorder_status)"
+                    dark
+                    small
+                  >
                     <span v-if="item.reorder_status === 'Consumed'">©</span>
                     <span v-else>{{ item.reorder_status }}</span>
                   </v-chip>
@@ -367,6 +363,141 @@
       :timeout="3000"
     ></fade-away-message-component>
 
+    <v-dialog v-model="dialog" persistent eager scrollable max-width="500">
+      <v-card>
+        <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
+          <span>Add Item</span>
+          <v-spacer></v-spacer>
+          <v-btn icon dark @click="closeD()">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-card-text style="max-height: 700px" class="my-4">
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="editedItem.itemName"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  required
+                  label="Item Name"
+                  class="rounded-lg"
+                  color="blue"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-autocomplete
+                  v-model="editedItem.brand"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  label="Edit Brand"
+                  class="rounded-lg"
+                  color="#96CB5B"
+                  :items="brands"
+                >
+                </v-autocomplete>
+              </v-col>
+              <v-col cols="12">
+                <v-autocomplete
+                  v-model="editedItem.unit"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  label="Edit Unit"
+                  class="rounded-lg"
+                  color="#96CB5B"
+                  :items="brands"
+                >
+                </v-autocomplete>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="editedItem.usageType"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  required
+                  label="Edit Kind of Usage"
+                  class="rounded-lg"
+                  color="blue"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="editedItem.lotNumber"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  required
+                  type="number"
+                  label="Edit Lot Number"
+                  class="rounded-lg"
+                  color="blue"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="editedItem.expiry"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  type="date"
+                  label="Edit Expiry Date"
+                  required
+                  class="rounded-lg"
+                  color="blue"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model.number="editedItem.starting_quantity"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  required
+                  label="Edit Starting Quantity"
+                  class="rounded-lg"
+                  color="blue"
+                  type="number"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="editedItem.supplier"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  required
+                  label="Suplier"
+                  class="rounded-lg"
+                  color="blue"
+                  type="number"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions class="pa-5">
+          <v-spacer></v-spacer>
+          <v-btn color="red" outlined @click="closeD()">
+            <v-icon>mdi-close-circle-outline</v-icon>
+            Cancel
+          </v-btn>
+          <v-btn color="blue" class="white--text" @click="add()">
+            <v-icon>mdi-check-circle</v-icon>
+            Add
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
         <v-card-title class="headline">Confirm Delete</v-card-title>
@@ -378,7 +509,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </v-container>
 </template>
 
@@ -387,9 +517,11 @@ import axios from "axios";
 import { debounce } from "lodash";
 
 export default {
-  data() { // eslint-disable-line no-unused-vars
+  data() {
+    // eslint-disable-line no-unused-vars
     return {
       search: "",
+      dialog: false,
       selectedSection: "Hematology",
       selectedTransactionType: "Resupply", // Default to Resupply
       sections: [
@@ -474,13 +606,11 @@ export default {
         "Near Expiry",
         "Consumed",
       ],
-      transactionTypes: [
-        "Resupply",
-        "Consumed"
-      ],
+      transactionTypes: ["Resupply", "Consumed"],
       formRules: {
         required: (value) => !!value || "Required.",
-        number: (value) => !isNaN(parseFloat(value)) && isFinite(value) || "Must be a number.",
+        number: (value) =>
+          (!isNaN(parseFloat(value)) && isFinite(value)) || "Must be a number.",
       },
       fadeAwayMessage: {
         show: false,
@@ -504,11 +634,16 @@ export default {
   },
 
   methods: {
-    searchInventory: debounce(async function (event) {
+    closeD() {
+      this.dialog = false;
+    },
+    searchInventory: debounce(async function(event) {
       const name = event.target.value;
       if (name) {
         try {
-          const res = await axios.get(process.env.VUE_APP_SERVER + `/inventory/name/${name}`);
+          const res = await axios.get(
+            process.env.VUE_APP_SERVER + `/inventory/name/${name}`
+          );
           this.itemData = res.data ? [res.data] : [];
         } catch (error) {
           console.error("Error searching inventory by name:", error);
@@ -518,17 +653,66 @@ export default {
         this.getData();
       }
     }, 500),
-    // pagination(data) {
-    //   this.paginationData = data; // This line was removed as per the edit hint
-    // },
+
     addNewItem() {
-      const newItem = Object.assign({}, this.defaultItem);
-      newItem.section = this.selectedSection;
-      newItem.transactionType = this.selectedTransactionType; // Set default transaction type
-      this.itemData.unshift(newItem);
+      this.dialog = true;
+      // const newItem = Object.assign({}, this.defaultItem);
+      // newItem.section = this.selectedSection;
+      // newItem.transactionType = this.selectedTransactionType;
+      // this.itemData.unshift(newItem);
+    },
+    async add() {
+      try {
+        const dataToSend = {
+          itemName: this.editedItem.itemName,
+          brand: this.editedItem.brand,
+          unit: this.editedItem.unit,
+          usageType: this.editedItem.usageType,
+          lotNumber: this.editedItem.lotNumber,
+          expiry: this.editedItem.expiry || null,
+          starting_quantity: this.editedItem.starting_quantity || 0,
+          used_quantity:
+            this.selectedTransactionType === "Consumed"
+              ? this.editedItem.used_quantity || 0
+              : 0,
+          added_quantity:
+            this.selectedTransactionType === "Resupply"
+              ? this.editedItem.added_quantity || 0
+              : 0,
+          supply_date:
+            this.selectedTransactionType === "Resupply"
+              ? this.editedItem.supply_date || null
+              : null,
+          supplier: this.editedItem.supplier,
+          reorder_status: "Sufficient",
+          section: this.selectedSection,
+          transactionType: this.selectedTransactionType || null,
+          transaction_date:
+            this.selectedTransactionType === "Consumed"
+              ? this.editedItem.transaction_date || null
+              : null,
+        };
+        console.log(dataToSend);
+        await axios.post(process.env.VUE_APP_SERVER + "/inventory", dataToSend);
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "success";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Successfully Added";
+        this.getData();
+        this.closeD();
+      } catch (error) {
+        console.error("Error adding inventory item:", error);
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "error";
+        this.fadeAwayMessage.header = "Error";
+        this.fadeAwayMessage.message =
+          error.response.data.message || "An error occurred";
+        this.itemData.shift(); // Remove the new item row on error
+      }
     },
     async saveInlineItem(item) {
-      if (item.id) { // Existing item, update
+      if (item.id) {
+        // Existing item, update
         try {
           const dataToSend = {
             itemName: item.itemName,
@@ -538,16 +722,31 @@ export default {
             lotNumber: item.lotNumber,
             expiry: item.expiry || null,
             starting_quantity: item.starting_quantity || 0,
-            used_quantity: this.selectedTransactionType === 'Consumed' ? (item.used_quantity || 0) : 0,
-            added_quantity: this.selectedTransactionType === 'Resupply' ? (item.added_quantity || 0) : 0,
-            supply_date: this.selectedTransactionType === 'Resupply' ? (item.supply_date || null) : null,
+            used_quantity:
+              this.selectedTransactionType === "Consumed"
+                ? item.used_quantity || 0
+                : 0,
+            added_quantity:
+              this.selectedTransactionType === "Resupply"
+                ? item.added_quantity || 0
+                : 0,
+            supply_date:
+              this.selectedTransactionType === "Resupply"
+                ? item.supply_date || null
+                : null,
             supplier: item.supplier,
             reorder_status: item.reorder_status,
             section: item.section,
             transactionType: this.selectedTransactionType || null,
-            transaction_date: this.selectedTransactionType === 'Consumed' ? (item.transaction_date || null) : null,
+            transaction_date:
+              this.selectedTransactionType === "Consumed"
+                ? item.transaction_date || null
+                : null,
           };
-          await axios.patch(process.env.VUE_APP_SERVER + `/inventory/${item.id}`, dataToSend);
+          await axios.patch(
+            process.env.VUE_APP_SERVER + `/inventory/${item.id}`,
+            dataToSend
+          );
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
@@ -558,10 +757,12 @@ export default {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
           this.fadeAwayMessage.header = "Error";
-          this.fadeAwayMessage.message = error.response.data.message || "An error occurred";
+          this.fadeAwayMessage.message =
+            error.response.data.message || "An error occurred";
           this.getData(); // Revert to original data on error
         }
-      } else { // New item, create
+      } else {
+        // New item, create
         try {
           const dataToSend = {
             itemName: item.itemName,
@@ -571,16 +772,31 @@ export default {
             lotNumber: item.lotNumber,
             expiry: item.expiry || null,
             starting_quantity: item.starting_quantity || 0,
-            used_quantity: this.selectedTransactionType === 'Consumed' ? (item.used_quantity || 0) : 0,
-            added_quantity: this.selectedTransactionType === 'Resupply' ? (item.added_quantity || 0) : 0,
-            supply_date: this.selectedTransactionType === 'Resupply' ? (item.supply_date || null) : null,
+            used_quantity:
+              this.selectedTransactionType === "Consumed"
+                ? item.used_quantity || 0
+                : 0,
+            added_quantity:
+              this.selectedTransactionType === "Resupply"
+                ? item.added_quantity || 0
+                : 0,
+            supply_date:
+              this.selectedTransactionType === "Resupply"
+                ? item.supply_date || null
+                : null,
             supplier: item.supplier,
             reorder_status: item.reorder_status,
             section: this.selectedSection,
             transactionType: this.selectedTransactionType || null,
-            transaction_date: this.selectedTransactionType === 'Consumed' ? (item.transaction_date || null) : null,
+            transaction_date:
+              this.selectedTransactionType === "Consumed"
+                ? item.transaction_date || null
+                : null,
           };
-          await axios.post(process.env.VUE_APP_SERVER + "/inventory", dataToSend);
+          await axios.post(
+            process.env.VUE_APP_SERVER + "/inventory",
+            dataToSend
+          );
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
@@ -591,7 +807,8 @@ export default {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
           this.fadeAwayMessage.header = "Error";
-          this.fadeAwayMessage.message = error.response.data.message || "An error occurred";
+          this.fadeAwayMessage.message =
+            error.response.data.message || "An error occurred";
           this.itemData.shift(); // Remove the new item row on error
         }
       }
@@ -603,7 +820,9 @@ export default {
     async confirmDelete() {
       if (this.itemToDelete) {
         try {
-          await axios.delete(process.env.VUE_APP_SERVER + `/inventory/${this.itemToDelete.id}`);
+          await axios.delete(
+            process.env.VUE_APP_SERVER + `/inventory/${this.itemToDelete.id}`
+          );
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
@@ -614,7 +833,8 @@ export default {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
           this.fadeAwayMessage.header = "Error";
-          this.fadeAwayMessage.message = error.response.data.message || "An error occurred";
+          this.fadeAwayMessage.message =
+            error.response.data.message || "An error occurred";
         } finally {
           this.cancelDelete();
         }
@@ -640,6 +860,7 @@ export default {
         this.loading = false;
       }
     },
+
     resetForm() {
       this.editedItem = Object.assign({}, this.defaultItem);
     },
