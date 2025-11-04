@@ -457,7 +457,7 @@ async invoice(id: number) {
     
     console.log(invoiceData)
 
-  const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
+  const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
   const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
 
   const data = {
