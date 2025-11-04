@@ -120,7 +120,7 @@ export class ServicesService {
             );
 
             // // console.log(cleanedArray)
-
+            let newArrays = []
             for (let i = 0; i < cleanedArray.length; i++) {
               // // console.log(cleanedArray[i].id)
               const data = queryRunner.manager.create(ServiceLabResult, {
@@ -130,13 +130,18 @@ export class ServicesService {
               service_description:cleanedArray[i].service_description,
               service_price:cleanedArray[i].service_price,
             });
-            await queryRunner.manager.save(data);
+            let saveDatas =  await queryRunner.manager.save(data);
+            newArrays.push(saveDatas)
             }
-          
+
           await queryRunner.commitTransaction();
           return {
             msg: 'Saved successfully!',
             status: HttpStatus.OK,
+            saveService: {
+              id:saveService.id,
+              labData:newArrays 
+            }
           };
 
           
@@ -361,7 +366,7 @@ export class ServicesService {
   }
 
   async getItemPaid(data:any){
-    // // console.log(JSON.parse(data.service_list),JSON.parse(data.package_list))
+    console.log(JSON.parse(data.service_list),JSON.parse(data.package_list))
 
     let service_data = JSON.parse(data.service_list)
     let package_data = JSON.parse(data.package_list)
@@ -707,18 +712,9 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
 
      const existing = await this.servicesAppointmentRepository.findOneBy({ appointmentID:dto.appointmentID });
         if(!existing){
-          // // console.log("wala sa data")
            return await this.createServiceAppointment(newData)
-          //     return {
-          //   msg: 'Saved successfully!',
-          //   status: HttpStatus.OK,
-          // };
-            
         }
         else{
-          // // console.log("naa sa data")
-          // // console.log(existing)
-
           try{
     const newServiceList = JSON.parse(dto.service_list);
     const oldServiceList = JSON.parse(existing.service_list);
@@ -791,7 +787,7 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
     await this.dataSource.manager.save(resultsToInsert);
 
     //33333 === Update Appointment ===55555
-    await this.dataSource.manager.update(ServiceAppointment, id, {
+   let updateDatas = await this.dataSource.manager.update(ServiceAppointment, id, {
       service_list: dto.service_list,
       package_list: dto.package_list,
     });

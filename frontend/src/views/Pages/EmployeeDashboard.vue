@@ -13,6 +13,11 @@
     <div v-else-if="assignModule == 2">
       <MedtechDashboard />
     </div>
+
+    <!-- Medtech Dashboard -->
+    <div v-else-if="assignModule == 7">
+      <CashierDashboard />
+    </div>
   </div>
 </template>
 
@@ -21,7 +26,7 @@ export default {
   components: {
     DoctorDashboard: () => import("../Pages/DoctorDashboard.vue"),
     MedtechDashboard: () => import("../Pages/MedtechDashboard.vue"),
-    // ReceptionistDashboard: () => import("../Pages/ReceptionistDashboard.vue"),
+    CashierDashboard: () => import("../Pages/CashierDashboard.vue"),
     Dashboard: () => import("../Pages/Dashboard.vue"),
   },
   data: () => ({

@@ -46,6 +46,28 @@ export class PdfGeneratorController {
     // // console.log(n)
   }
 
+   @Get('invoice/:id')
+  async invoice(@Res() res, @Param('id') id: string): Promise<void> {
+    const buffer = await this.pdfGeneratorService.invoice(+id);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename=example.pdf',
+      'Content-Length': buffer.length,
+
+      // prevent cache
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: 0,
+    });
+
+    res.end(buffer);
+
+    // // console.log(n)
+  }
+
+
+
 
   @Get('getQRCode/:id')
   async getQRCode(@Res() res, @Param('id') id: string): Promise<void> {

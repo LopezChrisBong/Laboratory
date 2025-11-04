@@ -12,6 +12,28 @@ export class PaymentController {
     return this.paymentService.create(createPaymentDto);
   }
 
+  @Post('invoice')
+  invoice(@Body() createPaymentDto: CreatePaymentDto) {
+    return this.paymentService.invoice(createPaymentDto);
+  }
+
+  
+
+  @Get('/findAllPendingPayment')
+  findAllPendingPayment() {
+    return this.paymentService.findAllPendingPayment();
+  }
+
+    @Get('/fullyPaid')
+  fullyPaid() {
+    return this.paymentService.fullyPaid();
+  }
+
+    @Get('/findOnePatientPayment/:id')
+  findOnePatientPayment(@Param('id') id: string) {
+    return this.paymentService.findOnePatientPayment(+id);
+  }
+ 
   @Get()
   findAll() {
     return this.paymentService.findAll();

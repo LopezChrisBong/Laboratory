@@ -446,7 +446,7 @@ export class AppointmentService {
         " pt.*",
       ])
       .leftJoin(ServiceAppointment, 'ap', 'ap.patientID = pt.id')
-      .where('ap.status = 0')
+      .where('ap.status = 0 OR ap.status = 1')
       // .andWhere('ap.medtechID != :empty', { empty: '' })
       .groupBy('pt.patientID')
       .getRawMany()
@@ -683,7 +683,7 @@ let data = await this.appointmentRepository
       return data
   }
 
-   async getAllScheduleAppointment(){
+   async getAllScheduleAppointment(tab:number){
   let data = await this.appointmentRepository
   .createQueryBuilder('ap')
   .select([
@@ -693,8 +693,11 @@ let data = await this.appointmentRepository
   ])
   .leftJoin(Patient, 'p', 'p.id = ap.patientID')
   .where('ap.medtechID IS NULL')
-  .getRawMany();
-  return data
+  if(tab == 1){
+    data.andWhere('ap.status = 0')
+  }
+  let newData = await data.getRawMany();
+  return newData
   }
 
   async getAllAppointmentDashboard(){
@@ -939,44 +942,19 @@ async getAllMedtechAppointment(id: number) {
 
 
 
-      async updateAppointmentStatus(id: number, updateAppointmentDto: UpdateAppointmentDto) {
-      // // console.log('Data ID',id)
-      // // console.log('Data',updateAppointmentDto)
+ async updateAppointmentStatus(id: number, updateAppointmentDto: UpdateAppointmentDto) {
+  // console.log('Data ID',id)
+      console.log('Data',updateAppointmentDto)
       
        try {
-          if(updateAppointmentDto.labID){
-            // // console.log('naay sulod')
-                  this.dataSource.manager.update(Appointment, id,{
-        status:updateAppointmentDto.status,
-     })
-
-         this.dataSource.manager.update(Patient, updateAppointmentDto.patientID,{
-        status:updateAppointmentDto.status,
-     })
-     
-       this.dataSource.manager.update(ServiceAppointment, updateAppointmentDto.labID,{
-        status:updateAppointmentDto.status,
-     })
-     
-     return{
-       msg:'Updated successfully!', status:HttpStatus.CREATED
-     }
-          }else{
-            // // console.log('walay sulod')
-
-                     this.dataSource.manager.update(Patient, updateAppointmentDto.patientID,{
-        status:updateAppointmentDto.status,
-     })
-     
+         
        this.dataSource.manager.update(ServiceAppointment, id,{
-        status:updateAppointmentDto.status,
-     })
+            status:updateAppointmentDto.status,
+        })
      
-     return{
-       msg:'Updated successfully!', status:HttpStatus.CREATED
-     }
-          }
-
+      return{
+        msg:'Updated successfully!', status:HttpStatus.CREATED
+      }
  
    } catch (error) {
      return{
@@ -986,13 +964,16 @@ async getAllMedtechAppointment(id: number) {
   }
 
     async confirmAppointment(id: number, updateAppointmentDto: UpdateAppointmentDto){
-        // // console.log(id,updateAppointmentDto)
+       
         try {
-           this.dataSource.manager.update(Appointment, id,{
+          await this.dataSource.manager.update(Appointment, id,{
           status:updateAppointmentDto.status,
           })
        return{
-       msg:'Updated successfully!', status:HttpStatus.CREATED
+       msg:'Updated successfully!', status:HttpStatus.CREATED,
+       updateAppointment:{
+        id:id,
+       }
      }
        
         } catch (error) {
@@ -1026,9 +1007,6 @@ async getAllMedtechAppointment(id: number) {
      }
    }
   }
-
-
-
 
 
   async remove(id: number) {

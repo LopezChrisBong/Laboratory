@@ -1,18 +1,15 @@
 <template>
   <v-container fluid>
-    <v-row class="my-4" align="center">
-      <!-- <v-autocomplete
-          v-model="selectedDoctor"
-          class="rounded-lg"
-          item-text="name"
-          item-value="id"
-          label="Select Doctor"
-          color="#6DB249"
-          :items="doctors"
-        >
-        </v-autocomplete> -->
+    <v-row class="mx-2" align="center">
+      <v-col cols="12" md="6" class="pa-0">
+        <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
+          <v-tab v-for="tab in tabList" :key="tab.id" @click="changeTab(tab)"
+            >{{ tab.name }}
+          </v-tab>
+        </v-tabs>
+      </v-col>
       <v-spacer></v-spacer>
-      <v-col cols="12" md="12" class="d-flex justify-space-between">
+      <v-col cols="12" md="6" class="d-flex justify-space-between">
         <v-text-field
           v-model="search"
           outlined
@@ -394,6 +391,12 @@ export default {
       appointments: [],
       doctors_date: null,
       doctor_time: null,
+      activeTab: { id: 1, name: "Pending" },
+      tab: 1,
+      tabList: [
+        { id: 1, name: "Pending" },
+        { id: 2, name: "Confirmed" },
+      ],
       form: {
         id: null,
         doctorId: null,
@@ -588,6 +591,11 @@ export default {
         }
       });
     },
+    changeTab(tab) {
+      this.activeTab = tab;
+      this.tab = tab.id;
+      this.initialize();
+    },
 
     changeSchedule(sched) {
       let newArr = [];
@@ -604,7 +612,7 @@ export default {
       this.loading = true;
 
       this.axiosCall(
-        "/appointment/getAllScheduleAppointment/AllAppointment",
+        "/appointment/getAllScheduleAppointment/AllAppointment/" + this.tab,
         "GET"
       ).then((res) => {
         if (res) {
