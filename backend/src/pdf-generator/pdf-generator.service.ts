@@ -8,6 +8,9 @@ import { DataSource } from 'typeorm';
 
 import { SendNewEmailDto } from './dto/send-new-email.dto';
 import {
+  Invoice,
+  Patient,
+  Payment,
   Prescription,
   UserDetail,
   Users,
@@ -89,8 +92,12 @@ hbs.registerHelper('getPresentDate', function () {
 });
 
 hbs.registerHelper('formatDate', function (value) {
-  return moment(value).format('MM/DD/YY');
+  if (!value) return "";
+  return moment(value).isValid() 
+    ? moment(value).format('MM-DD-YYYY') 
+    : "";
 });
+
 
 hbs.registerHelper('sexFormat', function (value) {
   if (value) {
@@ -404,8 +411,6 @@ export class PdfGeneratorService {
         prescription:prescription
       },
     ];
-
-    // // console.log(data);
     try {
       const browser = await puppeteer.launch({ 
         headless: 'new',
@@ -433,6 +438,149 @@ export class PdfGeneratorService {
       console.log(e);
     }
   }
+
+async invoice(id: number) {
+  let items= await this.findInvoicePayments(id)
+  const invoiceData = await this.dataSource.manager
+    .createQueryBuilder(Invoice, 'inv')
+    .select([
+      `IF (
+          !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
+          CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
+          CONCAT(p.f_name, ' ', p.l_name)
+      ) AS name`,
+      'inv.*',
+    ])
+    .leftJoin(Patient, 'p', 'inv.patientId = p.id')
+    .where('inv.id = :id', { id })  
+    .getRawOne();     
+    
+    console.log(invoiceData)
+
+  const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
+  const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
+
+  const data = {
+    invoice: invoiceData,
+    headerImg: headerImg,
+    items
+  };
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox'],
+    });
+
+    const page = await browser.newPage();
+
+    const content = await this.compile('invoice', data);
+    await page.setContent(content);
+
+    const buffer = await page.pdf({
+      format: 'letter',
+      margin: {
+        top: '0.20in',
+        left: '0.50in',
+        bottom: '0.20in',
+        right: '0.50in',
+      },
+      landscape: false,
+      printBackground: true,
+    });
+
+    await browser.close();
+    return buffer;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async findInvoicePayments(invoiceId: number) {
+  const invoice = await this.dataSource.manager.findOne(Invoice, {
+    where: { id: invoiceId }
+  });
+
+  if (!invoice) return [];
+  let payedIds = [];
+  try {
+    payedIds = JSON.parse(invoice.payedId || '[]');
+  } catch (e) {
+    return [];
+  }
+
+  if (!Array.isArray(payedIds) || !payedIds.length) {
+    return [];
+  }
+  const payments = await this.dataSource.manager
+    .createQueryBuilder(Payment, "pay")
+    .select([
+      "pay.*",
+      `IF (
+        !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
+        CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
+        CONCAT(p.f_name, ' ', p.l_name)
+      ) AS name`
+    ])
+    .leftJoin(Patient, "p", "pay.patientId = p.id")
+    .where("pay.id IN (:...ids)", { ids: payedIds })
+    .getRawMany();
+
+    let allLabData: any[] = [];
+let totalAmount = 0;
+
+payments.forEach((pay: any) => {
+  let services: any[] = [];
+
+  try {
+    let parsed = pay.data ? JSON.parse(pay.data) : null;
+
+    if (parsed && parsed.labData && parsed.labData.length > 0) {
+      services = parsed.labData.map(item => ({
+        service_description: item.service_description,
+        service_price: item.service_price || 0,
+      }));
+    } else {
+      services = [
+        {
+          service_description: 'General Consultation',
+          service_price: pay.amount || 0,
+        },
+      ];
+    }
+  } catch (err) {
+    console.error(`Invalid JSON in payment ${pay.id}:`, err);
+
+    services = [
+      {
+        service_description: 'General Consultation',
+        service_price: pay.amount || 0,
+      },
+    ];
+  }
+
+  allLabData.push(...services);
+
+  totalAmount += services.reduce(
+    (sum, s) => sum + (s.service_price || 0),
+    0
+  );
+});
+
+const result = [
+  {
+    patientId: payments[0].patientId,
+    name: payments[0].name,
+    labData: allLabData,
+    total_amount: totalAmount,
+  },
+];
+
+
+  return result[0];
+}
+
+
  
 
   async getQRCode(id: string) {

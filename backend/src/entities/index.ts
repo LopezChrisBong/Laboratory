@@ -26,6 +26,7 @@ import { ServiceLabResult } from 'src/services/entities/service-lab-result.dto';
 import { Notification } from 'src/notification/entities/notification.entity';
 import { DoctorsSchedule } from 'src/doctors-schedule/entities/doctors-schedule.entity';
 import { Prescription } from 'src/patient/entities/prescription.entity';
+import { Invoice } from 'src/payment/entities/invoice.entity';
 
 const entities = [
   Users,
@@ -54,7 +55,8 @@ const entities = [
   ServiceLabResult,
   Notification,
   DoctorsSchedule,
-  Prescription
+  Prescription,
+  Invoice
 ];
 
 export {
@@ -84,7 +86,8 @@ export {
   ServiceLabResult,
   Notification,
   DoctorsSchedule,
-  Prescription
+  Prescription,
+  Invoice
 
 };
 

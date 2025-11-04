@@ -338,10 +338,25 @@
 
     <v-dialog v-model="dialogConfirmDone" max-width="500">
       <v-card>
-        <v-card-title class="text-h5"> Confirmation </v-card-title>
+        <v-card-title class="text-h5"> Service Fee </v-card-title>
 
         <v-card-text style="font-size: 17px">
-          Are you sure you want to done check-up this patient?
+          <v-row>
+            <!-- <v-col cols="12"><b>Service Fee</b></v-col> -->
+            <v-col cols="12">
+              <v-text-field
+                v-model="service_fee"
+                :rules="[formRules.required]"
+                dense
+                outlined
+                required
+                type="number"
+                label="Civil Status"
+                class="rounded-lg"
+                color="blue"
+              ></v-text-field>
+            </v-col>
+          </v-row>
         </v-card-text>
 
         <v-card-actions>
@@ -358,6 +373,7 @@
           <v-btn
             :color="$vuetify.theme.themes.light.submitBtns"
             class="white--text"
+            :disabled="service_fee != null ? false : true"
             @click="
               confirmDialog();
               dialogConfirmDone = false;
@@ -372,7 +388,7 @@
     <MedicalInformation :data="medicalInfo" />
     <ViewPatientAppointmentDialog :data="patientAppointement" />
     <ExaminePatientDialog :data="patientExamine" />
-    <VIewPatientLabRequestDialog :data="patientLabRequestData" />
+    <VIewPatientLabRequestDialog :data="patientLabRequestData" :tabulet="tab" />
     <PrescriptionDialog :data="prescriptionData" />
     <fade-away-message-component
       displayType="variation2"
@@ -419,6 +435,7 @@ export default {
   data: () => ({
     search: "",
     dialog: false,
+    service_fee: null,
     patientItem: [],
     deadline_date: null,
     resetDeadlineDialog: false,
@@ -484,12 +501,7 @@ export default {
       { text: "250", value: 250 },
       { text: "500", value: 500 },
     ],
-    // activeTab: { id: 1, name: "For Verification" },
-    // tab: 1,
-    // tabList: [
-    //   { id: 1, name: "To Approve" },
-    //   { id: 2, name: "Approved" },
-    // ],
+
     totalCount: 0,
     checkupData: null,
     deleteData: null,
@@ -582,24 +594,36 @@ export default {
       console.log(item);
     },
     confirmDialog() {
-      // console.log(item);
       let data = {
         status: 3,
       };
       this.axiosCall(
-        "/appointment/confirmAppointment/" + this.checkupData.id,
+        "/appointment/confirmAppointment/" + this.checkupData.appointmentID,
         "PATCH",
         data
       ).then((res) => {
         if (res.data.status == 201) {
-          // alert("updated");
-          this.initialize();
-          this.updateID = null;
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-          location.reload();
+          let newData = {
+            patientId: this.checkupData.id,
+            amount: this.service_fee,
+          };
+          this.axiosCall("/payment", "POST", newData).then((res) => {
+            console.log(res.data);
+            if (res.data.status == 200) {
+              this.initialize();
+              this.updateID = null;
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "System Message";
+              this.fadeAwayMessage.message = res.data.msg;
+              location.reload();
+            } else if (res.data.status == 400) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "error";
+              this.fadeAwayMessage.header = "System Message";
+              this.fadeAwayMessage.message = res.data.msg;
+            }
+          });
         } else if (res.data.status == 400) {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";

@@ -186,9 +186,9 @@ export class AppointmentController {
   return this.appointmentService.getAllScheduleData();
 }
 
-  @Get('getAllScheduleAppointment/AllAppointment')
-  getAllScheduleAppointment() {
-  return this.appointmentService.getAllScheduleAppointment();
+  @Get('getAllScheduleAppointment/AllAppointment/:tab')
+  getAllScheduleAppointment(@Param('tab') tab: string) {
+  return this.appointmentService.getAllScheduleAppointment(+tab);
 }
 
   @Get('getAllAppointmentDashboard/DashboardData')

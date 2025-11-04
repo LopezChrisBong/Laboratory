@@ -39,11 +39,23 @@
                   </template>
                   <template v-slot:[`item.status`]="{ item }">
                     <v-chip
-                      :color="item.status == 0 ? 'orange' : 'blue'"
+                      :color="
+                        item.status == 0
+                          ? 'orange'
+                          : item.status == 1
+                          ? 'green'
+                          : 'blue'
+                      "
                       dark
                       small
                     >
-                      <span>{{ item.status == 0 ? "Pending" : "Done" }}</span>
+                      <span>{{
+                        item.status == 0
+                          ? "Pending"
+                          : item.status == 1
+                          ? "Paid"
+                          : "Done"
+                      }}</span>
                     </v-chip>
                   </template>
                   <template v-slot:[`item.medtech_name`]="{ item }">
@@ -65,7 +77,7 @@
                     >
                     <v-btn
                       x-small
-                      v-if="item.status == 0"
+                      v-if="tabulet == 2 && item.status == 0"
                       class="mt-1"
                       @click="edit(item)"
                       outlined
@@ -93,7 +105,7 @@
                       >Assign Doctor</v-btn
                     > -->
                     <v-btn
-                      v-if="item.status == 0"
+                      v-if="tabulet == 2 && item.status != 2"
                       x-small
                       class="mt-1"
                       @click="assignMedtech(item)"
@@ -104,12 +116,13 @@
                     >
                     <!-- <v-btn
                       x-small
+                      v-if="tabulet == 2 && item.status == 0"
                       class="mt-1"
                       @click="payLabTest(2, item)"
                       outlined
-                      color="red"
+                      color="blue"
                       block
-                      >print</v-btn
+                      >pay</v-btn
                     > -->
 
                     <!-- <v-btn
@@ -143,8 +156,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <!-- <MedicalInformation :data="medicalData" :action="action" /> -->
 
     <v-dialog v-model="laboratoryDialog" max-width="800" persistent>
       <v-card>
@@ -363,7 +374,7 @@
     <v-dialog v-model="confirmationDialog" max-width="600">
       <v-card>
         <v-card-title>{{
-          action == "Pay" ? "Confirm Payment" : "Print Receipt"
+          action == "Pay" ? "Confirm Payment" : "Receipt"
         }}</v-card-title>
         <v-card-text>
           <label> <strong>Services Availed:</strong></label>
@@ -406,11 +417,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn text @click="confirmationDialog = false">Cancel</v-btn>
-          <v-btn
-            v-if="action == 'Pay'"
-            color="green darken-1"
-            text
-            @click="submitServicePayment()"
+          <v-btn color="green darken-1" text @click="submitServicePayment()"
             >Confirm</v-btn
           >
         </v-card-actions>
@@ -492,12 +499,10 @@
 
 <script>
 export default {
-  components: {
-    // MedicalInformation: () => import("./MedicalInformation.vue"),
-    // viewStrategicOutcome: () => import("./ViewStrategicOutcome.vue"),
-  },
+  components: {},
   props: {
     data: null,
+    tabulet: null,
   },
   data() {
     return {
@@ -574,14 +579,6 @@ export default {
           sortable: false,
         },
 
-        // {
-        //   text: "Doctor",
-        //   value: "doctor_name",
-        //   align: "center",
-        //   valign: "center",
-        //   sortable: false,
-        // },
-
         {
           text: "Med-Tech",
           value: "medtech_name",
@@ -602,23 +599,6 @@ export default {
   },
 
   computed: {
-    // availableTimes() {
-    //   if (!this.date) return this.allTimes;
-    //   const bookedTimes = this.bookings
-    //     .filter((b) => b.date === this.date)
-    //     .map((b) => b.time);
-    //   return this.allTimes.filter((time) => !bookedTimes.includes(time));
-    // },
-    // minDate() {
-    //   const today = new Date();
-    //   today.setMonth(today.getMonth());
-    //   return today.toISOString().substr(0, 10);
-    // },
-    // maxDate() {
-    //   const today = new Date();
-    //   today.setMonth(today.getMonth() + 1);
-    //   return today.toISOString().substr(0, 10);
-    // },
     totalPrice() {
       let data = this.selected
         .reduce((sum, item) => sum + parseFloat(item.service_price || 0), 0)
@@ -662,21 +642,12 @@ export default {
       deep: true,
     },
   },
-  mounted() {
-    this.eventHub.$on("closeMedicalInformation", () => {
-      this.initialize();
-    });
-  },
-
-  beforeDestroy() {
-    this.eventHub.$off("closeMedicalInformation");
-  },
+  mounted() {},
 
   methods: {
     initialize() {
       this.loading = true;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
-      //   this.getAllSchedule();
       this.getAllServices();
       this.getAllPackages();
       this.getAllDoctors();
@@ -684,8 +655,6 @@ export default {
       this.axiosCall("/services/getAllLabRequest/List/" + this.id, "GET").then(
         (res) => {
           if (res) {
-            // alert(res.data.data);
-            // console.log("Data", res.data.data);
             this.dataItem = res.data;
             this.loading = false;
           }
@@ -826,32 +795,40 @@ export default {
         status: 1,
         patientID: this.id,
       };
-      this.axiosCall(
-        "/appointment/updateAppointmentStatus/" + this.updateID,
-        "PATCH",
-        data
-      ).then((res) => {
-        if (res.data.status == 201) {
-          // alert("updated");
-          this.initialize();
-          this.updateID = null;
-          this.oldSelected = [];
-          this.selected = [];
-          this.oldSelectedPackage = [];
-          this.selectedPackage = [];
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-          this.confirmationDialog = false;
-          this.resetForm();
-        } else if (res.data.status == 400) {
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "error";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-        }
-      });
+      console.log(
+        data,
+        "Package",
+        this.selectedPackage,
+        "Selected",
+        this.selected
+      );
+
+      // this.axiosCall(
+      //   "/appointment/updateAppointmentStatus/" + this.updateID,
+      //   "PATCH",
+      //   data
+      // ).then((res) => {
+      //   if (res.data.status == 201) {
+      //     // alert("updated");
+      //     this.initialize();
+      //     this.updateID = null;
+      //     this.oldSelected = [];
+      //     this.selected = [];
+      //     this.oldSelectedPackage = [];
+      //     this.selectedPackage = [];
+      //     this.fadeAwayMessage.show = true;
+      //     this.fadeAwayMessage.type = "success";
+      //     this.fadeAwayMessage.header = "System Message";
+      //     this.fadeAwayMessage.message = res.data.msg;
+      //     this.confirmationDialog = false;
+      //     this.resetForm();
+      //   } else if (res.data.status == 400) {
+      //     this.fadeAwayMessage.show = true;
+      //     this.fadeAwayMessage.type = "error";
+      //     this.fadeAwayMessage.header = "System Message";
+      //     this.fadeAwayMessage.message = res.data.msg;
+      //   }
+      // });
     },
     deleteItem(item) {
       console.log(item);
@@ -874,33 +851,40 @@ export default {
     },
 
     addLabRequest() {
-      // console.log(
-      //   "selected",
-      //   this.selected,
-      //   "Selected Packages",
-      //   this.selectedPackage
-      // );
-
       let data = {
         patientID: this.id,
         service_list: JSON.stringify(this.selected),
         package_list: JSON.stringify(this.selectedPackage),
       };
+      console.log(data);
       this.axiosCall("/services/createServiceAppointment/", "POST", data).then(
         (res) => {
           if (res.data.status == 200) {
-            // alert("updated");
-            this.initialize();
-            this.updateID = null;
-            this.oldSelected = [];
-            this.selected = [];
-            this.oldSelectedPackage = [];
-            this.selectedPackage = [];
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "System Message";
-            this.fadeAwayMessage.message = res.data.msg;
-            this.resetForm();
+            let data = {
+              patientId: this.id,
+              data: JSON.stringify(res.data.saveService),
+            };
+            this.axiosCall("/payment", "POST", data).then((res) => {
+              // console.log(res.data);
+              if (res.data.status == 200) {
+                this.initialize();
+                this.updateID = null;
+                this.oldSelected = [];
+                this.selected = [];
+                this.oldSelectedPackage = [];
+                this.selectedPackage = [];
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "success";
+                this.fadeAwayMessage.header = "System Message";
+                this.fadeAwayMessage.message = res.data.msg;
+                this.resetForm();
+              } else if (res.data.status == 400) {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "error";
+                this.fadeAwayMessage.header = "System Message";
+                this.fadeAwayMessage.message = res.data.msg;
+              }
+            });
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "error";
@@ -919,10 +903,18 @@ export default {
     },
     assignMedtech(item) {
       // console.log(item);
-      this.updateID = item.id;
-      this.assignAppointmentDialog = true;
-      this.action = "Update";
-      this.assignPerson = "Med-Tech";
+      if (item.status == 1) {
+        this.updateID = item.id;
+        this.assignAppointmentDialog = true;
+        this.action = "Update";
+        this.assignPerson = "Med-Tech";
+      } else {
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "error";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message =
+          "Patient is not paid yet, Pleas confirm to cashier if patient is fully paid!";
+      }
     },
     updateLabRequest() {
       this.confirmDialog = true;
