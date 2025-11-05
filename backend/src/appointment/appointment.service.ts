@@ -548,7 +548,7 @@ export class AppointmentService {
     ])
     .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
     .where('ap.medtechID = :doctorID', { doctorID })
-    .andWhere('ap.status = 0')
+    .andWhere('(ap.status = 0 OR ap.status = 1)')
     .groupBy('pt.patientID')
   } 
   else if (role === 5) {

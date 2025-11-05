@@ -42,12 +42,22 @@
                   </template>
                   <template v-slot:[`item.status`]="{ item }">
                     <v-chip
-                      :color="item.status == 0 ? 'orange' : 'blue'"
+                      :color="
+                        item.status == 0
+                          ? 'orange'
+                          : item.status == 1
+                          ? 'green'
+                          : 'blue'
+                      "
                       dark
                       small
                     >
                       <span>{{
-                        item.status == 0 ? "Pending" : "Done Examination"
+                        item.status == 0
+                          ? "Pending"
+                          : item.status == 1
+                          ? "Paid"
+                          : "Done Examination"
                       }}</span>
                     </v-chip>
                   </template>

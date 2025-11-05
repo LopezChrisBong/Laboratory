@@ -351,7 +351,7 @@
                 outlined
                 required
                 type="number"
-                label="Civil Status"
+                label="Service Fee"
                 class="rounded-lg"
                 color="blue"
               ></v-text-field>
