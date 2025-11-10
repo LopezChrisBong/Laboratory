@@ -62,6 +62,7 @@ export class AuthService {
       const newUserSaved = await queryRunner.manager.save(newUser);
 
       const newUserDetail = queryRunner.manager.create(UserDetail, {
+        liscence_no:registerUser.liscence_no,
         fname: registerUser.fname,
         mname: registerUser.mname,
         lname: registerUser.lname,

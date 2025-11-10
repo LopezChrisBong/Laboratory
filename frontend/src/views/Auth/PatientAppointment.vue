@@ -1037,12 +1037,29 @@ export default {
                 data2
               ).then((res) => {
                 if (res.data.status == 200) {
-                  this.fadeAwayMessage.show = true;
-                  this.fadeAwayMessage.type = "success";
-                  this.fadeAwayMessage.header = "Successfully Saved";
-                  this.info = 1;
-                  this.confirmationDialog = false;
-                  this.resetForm();
+                  let notif_data = {
+                    title: "Patient Appointment",
+                    message: "View patient appointment!",
+                    route: "/appointment",
+                    assignedID: 1,
+                  };
+                  this.axiosCall("/notification", "POST", notif_data).then(
+                    (res) => {
+                      if (res.data.status == 200) {
+                        this.fadeAwayMessage.show = true;
+                        this.fadeAwayMessage.type = "success";
+                        this.fadeAwayMessage.header = "Successfully Saved";
+                        this.info = 1;
+                        this.confirmationDialog = false;
+                        this.resetForm();
+                      } else {
+                        this.fadeAwayMessage.show = true;
+                        this.fadeAwayMessage.type = "error";
+                        this.fadeAwayMessage.message = res.data.message;
+                        this.fadeAwayMessage.header = "System Message";
+                      }
+                    }
+                  );
                 } else if (res.data.status == 400) {
                   this.fadeAwayMessage.show = true;
                   this.fadeAwayMessage.type = "error";
@@ -1077,12 +1094,29 @@ export default {
           this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
             (res) => {
               if (res.data.status == 200) {
-                this.fadeAwayMessage.show = true;
-                this.fadeAwayMessage.type = "success";
-                this.fadeAwayMessage.header = "Successfully Saved";
-                this.info = 1;
-                this.confirmationDialog = false;
-                this.resetForm();
+                let notif_data = {
+                  title: "Patient Appointment",
+                  message: "View patient appointment!",
+                  route: "/appointment",
+                  assignedID: 1,
+                };
+                this.axiosCall("/notification", "POST", notif_data).then(
+                  (res) => {
+                    if (res.data.status == 200) {
+                      this.fadeAwayMessage.show = true;
+                      this.fadeAwayMessage.type = "success";
+                      this.fadeAwayMessage.header = "Successfully Saved";
+                      this.info = 1;
+                      this.confirmationDialog = false;
+                      this.resetForm();
+                    } else {
+                      this.fadeAwayMessage.show = true;
+                      this.fadeAwayMessage.type = "error";
+                      this.fadeAwayMessage.message = res.data.message;
+                      this.fadeAwayMessage.header = "System Message";
+                    }
+                  }
+                );
               } else if (res.data.status == 400) {
                 this.fadeAwayMessage.show = true;
                 this.fadeAwayMessage.type = "error";

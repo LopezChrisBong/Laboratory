@@ -39,15 +39,4 @@ export class CreateUserDetailDto {
 
 
 
-    // @ApiProperty()
-    // @IsNotEmpty()
-    // @IsNumber()
-    // statusID: number;
-
-    // @ApiProperty()
-    // @IsNotEmpty()
-    // @IsNumber()
-    // user: number;
-
-
 }

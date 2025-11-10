@@ -68,6 +68,19 @@ export class NotificationService {
         return data
   }
 
+   async getAllReceptionistNotif(){
+        let id = 1
+        let data = await this.dataSource.manager.createQueryBuilder(Notification, 'nt')
+        .select([
+         "nt.*"
+        ])
+        .where('nt.assignedID = :id', {id})
+        .orderBy('nt.createdAt', 'DESC')
+        .getRawMany()
+        console.log('loveddddssd',data)
+        return data
+  }
+
   update(id: number, updateNotificationDto: UpdateNotificationDto) {
 
     // // console.log(id, updateNotificationDto)

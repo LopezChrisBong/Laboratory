@@ -17,9 +17,18 @@ export class PaymentController {
     return this.paymentService.invoice(createPaymentDto);
   }
 
-  
 
-  @Get('/findAllPendingPayment')
+    @Get('/getAnalyticsIncome')
+  getAnalyticsIncome() {
+    return this.paymentService.getAnalyticsIncome();
+  }
+
+  @Get('/getIncomeInvoice')
+  getIncomeInvoice() {
+    return this.paymentService.getIncomeInvoice();
+  }
+
+    @Get('/findAllPendingPayment')
   findAllPendingPayment() {
     return this.paymentService.findAllPendingPayment();
   }

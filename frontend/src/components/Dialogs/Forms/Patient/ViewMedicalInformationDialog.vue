@@ -13,10 +13,15 @@
         <v-card-text style="max-height: 700px" class="my-4">
           <v-card>
             <v-row>
-              <v-col cols="8" class="flex-items mt-2">
-                <!-- <div class="ml-2 text-body-1">
-                  {{ data.title }}
-                </div> -->
+              <v-col cols="" class="flex-items ">
+                <!-- <v-btn
+                  @click="AddFunction()"
+                  class="white--text rounded-lg"
+                  color="blue"
+                  v-if="userRoleID == 3"
+                >
+                  Add
+                </v-btn> -->
               </v-col>
               <v-spacer></v-spacer>
               <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
@@ -63,15 +68,14 @@
                       color="green"
                       >View</v-btn
                     >
-                    <!-- <v-btn
+                    <v-btn
                       x-small
-                      class="mt-1"
-                      @click="edit(item)"
+                      class="mt-1 mx-2"
+                      @click="print(item)"
                       outlined
                       color="blue"
-                      block
-                      >Update</v-btn
-                    > -->
+                      >Print</v-btn
+                    >
                   </template>
                 </v-data-table>
               </v-col>

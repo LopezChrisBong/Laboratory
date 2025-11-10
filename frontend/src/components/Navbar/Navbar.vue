@@ -436,12 +436,24 @@ export default {
       return role;
     },
     getAllNotifications() {
-      let userID = this.$store.state.user.id;
-      this.axiosCall("/notification/getAllNotifications/" + userID, "GET").then(
-        (res) => {
+      let assignedModule = this.$store.state.user.user.assignedModuleID;
+
+      if (assignedModule == 3) {
+        this.axiosCall(
+          "/notification/getAllReceptionist/Notification",
+          "GET"
+        ).then((res) => {
           this.notifications = res.data;
-        }
-      );
+        });
+      } else {
+        let userID = this.$store.state.user.id;
+        this.axiosCall(
+          "/notification/getAllNotifications/" + userID,
+          "GET"
+        ).then((res) => {
+          this.notifications = res.data;
+        });
+      }
     },
 
     openMobileNav() {

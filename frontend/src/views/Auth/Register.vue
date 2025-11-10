@@ -58,6 +58,16 @@
                     label="Suffix"
                   ></v-text-field>
                 </v-col>
+                <v-col cols="12" class="pa-0 px-4">
+                  <v-text-field
+                    outlined
+                    dense
+                    color="#93CB5B"
+                    class="font-size-14"
+                    v-model="liscence"
+                    label="Liscence No."
+                  ></v-text-field>
+                </v-col>
                 <v-col cols="12" class="pa-0 px-4 mt-2">
                   <v-text-field
                     outlined
@@ -181,6 +191,7 @@ export default {
     suffix: "",
     email: "",
     password: "",
+    liscence: null,
     confirmPassword: "",
     positionID: null,
     instituteID: null,
@@ -258,6 +269,7 @@ export default {
       if (this.$refs.Step1Formref.validate()) {
         this.isLoading = true;
         let data = {
+          liscence_no: this.liscence,
           fname: this.firstname,
           mname: this.middlename,
           lname: this.lastname,
