@@ -31,6 +31,7 @@ import { ServicesModule } from './services/services.module';
 import { MedicalInfoModule } from './medical-info/medical-info.module';
 import { NotificationModule } from './notification/notification.module';
 import { DoctorsScheduleModule } from './doctors-schedule/doctors-schedule.module';
+import { SupplierModule } from './supplier/supplier.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { DoctorsScheduleModule } from './doctors-schedule/doctors-schedule.modul
     MedicalInfoModule,
     NotificationModule,
     DoctorsScheduleModule,
+    SupplierModule,
   ],
 
   controllers: [AppController],

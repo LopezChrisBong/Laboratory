@@ -30,6 +30,7 @@ import PatientDoctor from "../views/Pages/PatientDoctor.vue"
 import PatientEntry from "../views/Auth/PatientEntry.vue";
 import DoctorsUtility from "../views/Pages/DoctorsUtility.vue";
 import MedicalInformation from "../views/Pages/MedicalInformation.vue";
+import Supplier from "../views/Pages/Supplier.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -173,6 +174,11 @@ const routes = [
         path: "services",
         component: Services,
         meta: { title: "Services", authRequired: true },
+      },
+      {
+        path: "supplier",
+        component: Supplier,
+        meta: { title: "Supplier Management", authRequired: true },
       },
 
       // {

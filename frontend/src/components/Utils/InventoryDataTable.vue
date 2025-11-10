@@ -39,7 +39,23 @@
               outlined
               hide-details
               class="shrink mr-2"
+              style="max-width: 200px;"
             ></v-select>
+            <v-autocomplete
+              v-model="selectedSupplier"
+              :items="suppliers"
+              item-text="supplierName"
+              item-value="supplierName"
+              label="Filter by Supplier"
+              dense
+              outlined
+              hide-details
+              clearable
+              class="shrink mr-2"
+              style="max-width: 200px;"
+              :loading="loadingSuppliers"
+              @change="filterBySupplier"
+            ></v-autocomplete>
             <v-btn color="primary" dark class="mb-2" @click="addNewItem">
               New Item
             </v-btn>
@@ -466,17 +482,22 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-text-field
+                <v-autocomplete
                   v-model="editedItem.supplier"
                   :rules="[formRules.required]"
                   dense
                   outlined
                   required
-                  label="Suplier"
+                  label="Supplier"
                   class="rounded-lg"
                   color="blue"
-                  type="number"
-                ></v-text-field>
+                  :items="suppliers"
+                  item-text="supplierName"
+                  item-value="supplierName"
+                  :loading="loadingSuppliers"
+                  no-data-text="No suppliers available"
+                >
+                </v-autocomplete>
               </v-col>
             </v-row>
           </v-container>
@@ -524,6 +545,7 @@ export default {
       dialog: false,
       selectedSection: "Hematology",
       selectedTransactionType: "Resupply", // Default to Resupply
+      selectedSupplier: null, // Filter by supplier
       sections: [
         "Hematology",
         "Chemistry",
@@ -597,7 +619,9 @@ export default {
       ],
       options: {},
       loading: false,
+      loadingSuppliers: false,
       itemData: [],
+      suppliers: [],
       units: ["Bottle", "Box", "Piece", "Pack"],
       reorderStatuses: [
         "Sufficient",
@@ -656,10 +680,47 @@ export default {
 
     addNewItem() {
       this.dialog = true;
+      this.getSuppliers();
       // const newItem = Object.assign({}, this.defaultItem);
       // newItem.section = this.selectedSection;
       // newItem.transactionType = this.selectedTransactionType;
       // this.itemData.unshift(newItem);
+    },
+    async getSuppliers() {
+      this.loadingSuppliers = true;
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(process.env.VUE_APP_SERVER + "/supplier", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        this.suppliers = res.data || [];
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+        this.suppliers = [];
+      } finally {
+        this.loadingSuppliers = false;
+      }
+    },
+    async filterBySupplier() {
+      if (this.selectedSupplier) {
+        this.loading = true;
+        try {
+          const res = await axios.get(process.env.VUE_APP_SERVER + "/inventory");
+          this.itemData = res.data.filter(
+            item => item.supplier === this.selectedSupplier
+          ).reverse();
+        } catch (error) {
+          console.error("Error filtering inventory by supplier:", error);
+          this.itemData = [];
+        } finally {
+          this.loading = false;
+        }
+      } else {
+        // If no supplier selected, show all items
+        this.getData();
+      }
     },
     async add() {
       try {
@@ -883,6 +944,7 @@ export default {
   },
   mounted() {
     this.getData();
+    this.getSuppliers();
   },
 };
 </script>

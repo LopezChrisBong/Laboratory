@@ -304,6 +304,24 @@
             </v-list-item>
           </v-list-group>
         </div>
+
+        <!-- Hardcoded Supplier Menu for Admin Only -->
+        <div v-if="userType === 'admin'">
+          <v-list-item
+            :to="'/' + userType + '/supplier'"
+            router
+            class="rounded-lg mx-2"
+            active-class="active-link"
+          >
+            <v-list-item-icon>
+              <v-icon>mdi-truck-delivery</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Supplier</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </div>
       </v-list>
     </v-navigation-drawer>
 
