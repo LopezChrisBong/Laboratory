@@ -27,6 +27,7 @@ import { Notification } from 'src/notification/entities/notification.entity';
 import { DoctorsSchedule } from 'src/doctors-schedule/entities/doctors-schedule.entity';
 import { Prescription } from 'src/patient/entities/prescription.entity';
 import { Invoice } from 'src/payment/entities/invoice.entity';
+import { Supplier } from 'src/supplier/entities/supplier.entity';
 
 const entities = [
   Users,
@@ -56,7 +57,8 @@ const entities = [
   Notification,
   DoctorsSchedule,
   Prescription,
-  Invoice
+  Invoice,
+  Supplier
 ];
 
 export {
@@ -87,7 +89,8 @@ export {
   Notification,
   DoctorsSchedule,
   Prescription,
-  Invoice
+  Invoice,
+  Supplier
 
 };
 
