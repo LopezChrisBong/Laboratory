@@ -225,6 +225,23 @@
             </div>
           </v-list-group>
         </div>
+
+        <!-- Hardcoded Supplier Menu for Admin Only -->
+        <div v-if="userType === 'admin'" style="background: white">
+          <v-list-item
+            router
+            :to="'/' + userType + '/supplier'"
+            color="#808191"
+          >
+            <v-list-item-icon>
+              <v-icon>mdi-truck-delivery</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>Supplier</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </div>
       </v-list>
     </v-navigation-drawer>
 
@@ -299,6 +316,23 @@
                     </v-list-item>
                   </div>
                 </v-list-group>
+              </div>
+
+              <!-- Hardcoded Supplier Menu for Admin Only -->
+              <div v-if="userType === 'admin'" style="background: white">
+                <v-list-item
+                  router
+                  :to="'/' + userType + '/supplier'"
+                  color="#808191"
+                >
+                  <v-list-item-icon>
+                    <v-icon>mdi-truck-delivery</v-icon>
+                  </v-list-item-icon>
+
+                  <v-list-item-content>
+                    <v-list-item-title>Supplier</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
               </div>
             </v-list>
           </v-col>
