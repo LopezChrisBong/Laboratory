@@ -17,7 +17,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { MailService } from 'src/mail/mail.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { ConfirmOTPDto } from './dto/confirm-otp.dto';
-import { UserDetail, UserType } from 'src/entities';
+import { UserDetail, UserLogs, UserType } from 'src/entities';
 @Injectable()
 export class AuthService {
   constructor(
@@ -62,6 +62,7 @@ export class AuthService {
       const newUserSaved = await queryRunner.manager.save(newUser);
 
       const newUserDetail = queryRunner.manager.create(UserDetail, {
+        liscence_no:registerUser.liscence_no,
         fname: registerUser.fname,
         mname: registerUser.mname,
         lname: registerUser.lname,
@@ -92,9 +93,11 @@ export class AuthService {
 
   async login(loginUser: LoginDto) {
     const res_user = await this.findUser(loginUser.email.toString());
-
+ 
+   
     if (res_user) {
       // comparing hashed password in the database with the user's password
+ 
       const isMatch = comparePassword(
         loginUser.password.toString(),
         res_user.password,
@@ -130,7 +133,11 @@ export class AuthService {
           ...rest
         } = userdetail;
         const payload = { userdetail: rest };
-
+        let saveLogs = await  this.dataSource.manager.create(UserLogs, {
+          email:res_user.email,
+          userID:res_user.id
+        })
+        await this.dataSource.manager.save(saveLogs);
         return {
           status: HttpStatus.OK,
           token: this.jwtService.sign(payload),
@@ -161,39 +168,39 @@ export class AuthService {
     return isExist ? true : false;
   }
 
-  async confirmOTP(conOTP: ConfirmOTPDto) {
-    const user = await this.usersRepository.findOneBy({ email: conOTP.email });
-    try {
-      const isMatch = comparePassword(conOTP.otp, user.otp);
-      if (isMatch) {
-        const toConfirm = await this.usersRepository.update(user.id, {
-          isValidated: true,
-        });
-        if (toConfirm.affected == 1) {
-          const dataForEmail = {
-            email: conOTP.email,
-          };
+  // async confirmOTP(conOTP: ConfirmOTPDto) {
+  //   const user = await this.usersRepository.findOneBy({ email: conOTP.email });
+  //   try {
+  //     const isMatch = comparePassword(conOTP.otp, user.otp);
+  //     if (isMatch) {
+  //       const toConfirm = await this.usersRepository.update(user.id, {
+  //         isValidated: true,
+  //       });
+  //       if (toConfirm.affected == 1) {
+  //         const dataForEmail = {
+  //           email: conOTP.email,
+  //         };
 
-          await this.mailService.sendConfirmation(dataForEmail);
+  //         await this.mailService.sendConfirmation(dataForEmail);
 
-          return {
-            msg: 'OTP matched.',
-            status: HttpStatus.OK,
-          };
-        }
-      } else {
-        return {
-          msg: 'OTP do not match.',
-          status: HttpStatus.BAD_REQUEST,
-        };
-      }
-    } catch (error) {
-      return {
-        msg: error,
-        status: HttpStatus.BAD_REQUEST,
-      };
-    }
-  }
+  //         return {
+  //           msg: 'OTP matched.',
+  //           status: HttpStatus.OK,
+  //         };
+  //       }
+  //     } else {
+  //       return {
+  //         msg: 'OTP do not match.',
+  //         status: HttpStatus.BAD_REQUEST,
+  //       };
+  //     }
+  //   } catch (error) {
+  //     return {
+  //       msg: error,
+  //       status: HttpStatus.BAD_REQUEST,
+  //     };
+  //   }
+  // }
 
   getDecoded(token: string) {
     // const decodedJwtAccessToken = this.jwtService.decode(signedJwtAccessToken);
@@ -206,6 +213,15 @@ export class AuthService {
       .addSelect('user.password')
       .where('user.email = :email', { email })
       .getOne();
+  }
+
+  async getAllUserLogs() {
+    const data = await this.dataSource.manager
+      .createQueryBuilder(UserLogs, 'ul')
+      .select('ul.*')
+      .getRawMany();
+    console.log(data)
+    return data
   }
 
   // UPDATE THE USERS PASSWORD ONLY
@@ -353,4 +369,41 @@ export class AuthService {
       };
     }
   }
+
+   async sendNewPassword(email: string) {
+    const tempPassword = await this.generateRandomPassword(12); 
+          const user = await this.findUser(email);
+       
+
+    if (user) {
+   
+      const token = Math.floor(100000 + Math.random() * 9000);
+      const emailUser = { email: email, OTP: token , userID:user.id,tempPassword:tempPassword};
+      const hashToken = hashPassword(token.toString());
+      await this.usersRepository.update(user.id, { otp: hashToken });
+      await this.mailService.sendMail(emailUser);
+      let pass = hashPassword(tempPassword);
+      await this.usersRepository.update(user.id, { password: pass });
+      return {
+        user: user.email,
+        msg: 'Email send successful. Password successfully updated!',
+        status: HttpStatus.OK,
+      };
+    } else {
+      return {
+        msg: 'Email not registered',
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+  }
+
+  async generateRandomPassword(length = 10) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    password += chars[randomIndex];
+  }
+  return password;
+}
 }

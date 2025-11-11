@@ -357,6 +357,11 @@ const routes = [
         component: Appointment,
         meta: { title: "Appointment Table", authRequired: true },
       },
+      {
+        path: "supplier",
+        component: Supplier,
+        meta: { title: "", authRequired: true },
+      },
 
     ],
   },

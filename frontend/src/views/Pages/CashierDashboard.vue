@@ -1,5 +1,47 @@
 <template>
   <v-container fluid class="pa-6 dashboard">
+    <!--Invoice-->
+    <v-row>
+      <v-col cols="12" md="4">
+        <v-card @click="openIncome()">
+          <v-card-text
+            class="d-flex flex-column align-center justify-center text-center"
+            ><div class="d-flex align-center justify-center">
+              <v-icon size="40">mdi-currency-php</v-icon>
+              <h1>{{ invoice_income.daily_average_income }}</h1>
+            </div>
+            <p>Total Income Daily</p>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-card @click="openIncome()">
+          <v-card-text
+            class="d-flex flex-column align-center justify-center text-center"
+          >
+            <div class="d-flex align-center justify-center">
+              <v-icon size="40">mdi-currency-php</v-icon>
+              <h1>{{ invoice_income.total_month_income }}</h1>
+            </div>
+
+            <p>Total Income of this Month: {{ currentMonthIndex }}</p>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-card @click="openIncome()">
+          <v-card-text
+            class="d-flex flex-column align-center justify-center text-center"
+          >
+            <div class="d-flex align-center justify-center">
+              <v-icon size="40">mdi-currency-php</v-icon>
+              <h1>{{ invoice_income.total_year_income }}</h1>
+            </div>
+            <p>Total Income of Year {{ currentYear }}</p>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
     <!-- Appointment Request & Recent Patients -->
     <v-row class="mt-6" dense>
       <v-col cols="12" md="6" class="pa-0">
@@ -193,6 +235,45 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="dialog" max-width="900px">
+      <v-card>
+        <v-card-title class="headline">Income Analytics</v-card-title>
+
+        <v-card-text>
+          <v-tabs
+            v-model="tabIncome"
+            background-color="primary"
+            dark
+            show-arrows
+            @change="changeIncome"
+          >
+            <v-tab>Daily (This Month)</v-tab>
+            <v-tab>Monthly (This Year)</v-tab>
+            <v-tab>Yearly (Past 5 Years)</v-tab>
+          </v-tabs>
+
+          <v-tabs-items v-model="tabIncome">
+            <v-tab-item>
+              <canvas id="dailyChart"></canvas>
+            </v-tab-item>
+
+            <v-tab-item>
+              <canvas id="monthlyChart"></canvas>
+            </v-tab-item>
+
+            <v-tab-item>
+              <canvas id="yearlyChart"></canvas>
+            </v-tab-item>
+          </v-tabs-items>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red" text @click="dialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -205,16 +286,26 @@
 </template>
 
 <script>
+import Chart from "chart.js";
 export default {
   name: "CashierDashboard",
   data() {
     return {
+      dialog: false,
+      tabIncome: 0,
+      dailyData: [],
+      monthlyData: [],
+      yearlyData: [],
+      dailyChart: null,
+      monthlyChart: null,
+      yearlyChart: null,
       patientHeaders: [
         { text: "Name", value: "name", align: "start" },
         { text: "Total Amount", value: "total_amount", align: "center" },
         { text: "Total Payments", value: "total_payments", align: "center" },
         { text: "Action", value: "action", align: "end" },
       ],
+
       patientHeaders2: [
         { text: "Name", value: "name", align: "start" },
         { text: "Invoice #", value: "invoice_no", align: "center" },
@@ -224,6 +315,7 @@ export default {
       patients: [],
       dialogConfirmDone: false,
       loading: true,
+      invoice_income: [],
       search: "",
       date: null,
       payPatient: [],
@@ -234,6 +326,8 @@ export default {
         message: "",
         top: 10,
       },
+      currentMonthIndex: null,
+      currentYear: null,
 
       selectedDiscount: null,
       discountList: [
@@ -274,7 +368,190 @@ export default {
       this.tab = tab.id;
       this.initialize();
     },
+    changeIncome() {
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.fetchIncomeData();
+
+          if (this.tabIncome === 0) {
+            this.renderDailyChart();
+          } else if (this.tabIncome === 1) {
+            this.renderMonthlyChart();
+          } else if (this.tabIncome === 2) {
+            this.renderYearlyChart();
+          }
+        }, 150);
+      });
+    },
+    openIncome() {
+      this.dialog = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.loadCharts();
+        }, 200);
+      });
+    },
+    async loadCharts() {
+      await this.fetchIncomeData();
+      this.renderDailyChart();
+      this.renderMonthlyChart();
+      this.renderYearlyChart();
+    },
+
+    async fetchIncomeData() {
+      // this.dailyData = [
+      //   { day: 4, amount: 1100 },
+      //   { day: 5, amount: 900 },
+      //   { day: 6, amount: 700 },
+      // ];
+      // this.monthlyData = [
+      //   { month: 4, amount: 1100 },
+      //   { month: 5, amount: 900 },
+      //   { month: 6, amount: 700 },
+      // ];
+      // this.yearlyData = [
+      //   { year: 4, amount: 1100 },
+      //   { year: 5, amount: 900 },
+      //   { year: 6, amount: 700 },
+      // ];
+      this.axiosCall("/payment/getAnalyticsIncome/", "GET").then((res) => {
+        if (res) {
+          this.dailyData = res.data.dailyData;
+          this.monthlyData = res.data.monthlyData;
+          this.yearlyData = res.data.yearlyData;
+        }
+      });
+    },
+    renderDailyChart() {
+      const ctx = document.getElementById("dailyChart");
+      if (this.dailyChart) this.dailyChart.destroy();
+
+      this.dailyChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: this.dailyData.map((item) => item.day),
+          datasets: [
+            {
+              label: "Daily Income",
+              data: this.dailyData.map((item) => item.amount),
+              fill: false,
+              borderColor: "blue",
+              tension: 0.3,
+            },
+          ],
+        },
+      });
+    },
+
+    renderMonthlyChart() {
+      const ctx = document.getElementById("monthlyChart");
+      if (this.monthlyChart) this.monthlyChart.destroy();
+
+      // ✅ Create array of 12 months initialized to 0
+      const monthlyArray = new Array(12).fill(0);
+
+      // ✅ Fill the array with your data
+      this.monthlyData.forEach((item) => {
+        monthlyArray[item.month] = item.amount;
+      });
+
+      this.monthlyChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ],
+          datasets: [
+            {
+              label: "Monthly Income",
+              data: monthlyArray, // ✅ Correct data format
+              backgroundColor: "orange",
+            },
+          ],
+        },
+      });
+    },
+
+    renderYearlyChart() {
+      const ctx = document.getElementById("yearlyChart");
+      if (this.yearlyChart) this.yearlyChart.destroy();
+
+      this.yearlyData = this.yearlyData.map((item) => ({
+        year: Number(item.year ?? item.YEAR),
+        amount: Number(item.amount ?? item.AMOUNT),
+      }));
+
+      const years = this.yearlyData.map((i) => Number(i.year));
+
+      const currentYear = Math.max(...years);
+
+      const yearRange = [
+        currentYear - 4,
+        currentYear - 3,
+        currentYear - 2,
+        currentYear - 1,
+        currentYear,
+      ];
+
+      const yearlyArray = yearRange.map((y) => {
+        const match = this.yearlyData.find((item) => Number(item.year) === y);
+        return match ? Number(match.amount) : 0;
+      });
+
+      this.yearlyChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["Year -4", "Year -3", "Year -2", "Last Year", "This Year"],
+          datasets: [
+            {
+              label: "Yearly Income",
+              data: yearlyArray,
+              borderColor: "green",
+              fill: false,
+            },
+          ],
+        },
+      });
+    },
+    getIncomeInvoice() {
+      const currentDate = new Date();
+      this.currentYear = currentDate.getFullYear();
+      const currentMonthIndex = currentDate.getMonth();
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      this.currentMonthIndex = monthNames[currentMonthIndex];
+      this.axiosCall("/payment/getIncomeInvoice/", "GET").then((res) => {
+        if (res) {
+          this.invoice_income = res.data;
+        }
+      });
+    },
+
     initialize() {
+      this.getIncomeInvoice();
       if (this.tab == 1) {
         this.loading = true;
         this.axiosCall("/payment/findAllPendingPayment/", "GET").then((res) => {

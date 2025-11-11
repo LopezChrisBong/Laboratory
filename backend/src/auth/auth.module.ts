@@ -13,7 +13,8 @@ import { MailModule } from 'src/mail/mail.module';
   imports: [ConfigModule.forRoot(), JwtModule.register({
     secret: process.env.JWT_SECRET,
     signOptions: { expiresIn: process.env.JWT_TOKEN_EXPIRATION }
-  }), TypeOrmModule.forFeature([Users]), MailModule],
+  }), 
+  TypeOrmModule.forFeature([Users]), MailModule],
   controllers: [AuthController],
   providers: [AuthService, JWTAuthStrategy, MailService]
 })

@@ -31,6 +31,9 @@ export class RegisterUserDto {
     @ApiProperty()
     designationID: string;
 
+    @ApiProperty()
+    liscence_no: string;
+
 
 
     @ApiProperty()

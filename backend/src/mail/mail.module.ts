@@ -5,31 +5,35 @@ import { ConfigModule } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [ConfigModule.forRoot(), MailerModule.forRoot({
-    transport: {
-      host: process.env.MAIL_HOST,
-      secure: false,
-      port: parseInt(process.env.MAIL_PORT),
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD
-      },
-    },
-    defaults: {
-      from: process.env.MAIL_FROM,
-    },
-    template: {
+  imports: [ConfigModule.forRoot(),  
+     MailerModule.forRoot({
+        transport: {
+          host: process.env.MAIL_HOST,
+          secure: false,
+          port: parseInt(process.env.MAIL_PORT),
+          auth: {
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASSWORD
+          },
+        },
+        defaults: {
+          from: process.env.MAIL_FROM,
+        },
+
+      template: {
       dir: join(__dirname, 'templates'),
-      adapter: new HandlebarsAdapter(),
+      adapter: undefined,
       options: {
         strict: true,
 
       },
     },
-  }),
-  ],
+  }),   
+
+],
   controllers: [MailController],
   providers: [MailService],
 })

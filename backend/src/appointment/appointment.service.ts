@@ -695,6 +695,8 @@ let data = await this.appointmentRepository
   .where('ap.medtechID IS NULL')
   if(tab == 1){
     data.andWhere('ap.status = 0')
+  }else{
+    data.andWhere('ap.status != 0')
   }
   let newData = await data.getRawMany();
   return newData
