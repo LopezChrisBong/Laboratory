@@ -238,6 +238,10 @@
                     <v-icon>mdi-check-circle</v-icon>
                     Save
                   </v-btn>
+                  <v-btn color="blue" class="white--text" @click="openDialog()">
+                    <v-icon>mdi-pencil-circle</v-icon>
+                    Change Password
+                  </v-btn>
                 </v-card-actions>
               </v-container>
             </v-tab-item>
@@ -347,6 +351,104 @@
         :toAdd="toAdd"
       /> -->
     </v-card>
+    <v-dialog v-model="dialog" max-width="600px" persistent>
+      <v-card class="rounded-lg elevation-3">
+        <!-- Header -->
+        <v-card-title class="d-flex align-center justify-space-between py-3">
+          <span class="text-h6 font-weight-bold">Change login credentials</span>
+          <v-btn icon variant="text" color="red" @click="dialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <!-- Body -->
+        <v-card-text>
+          <v-container class="mt-10">
+            <v-form ref="loginInfo" @submit.prevent>
+              <v-row class="ml-2 mr-2 mt-1">
+                <v-col cols="12">
+                  <v-text-field
+                    placeholder="************"
+                    class="font-size-14"
+                    color="#93CB5B"
+                    dense
+                    :disabled="credentialReadonly"
+                    v-model="oldPass"
+                    :append-icon="showOldPass ? 'mdi-eye' : 'mdi-eye-off'"
+                    :rules="[formRules.required]"
+                    :type="showOldPass ? 'text' : 'password'"
+                    name="input-10-1"
+                    label="Old Password"
+                    @click:append="showOldPass = !showOldPass"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    placeholder="************"
+                    class="font-size-14"
+                    color="#93CB5B"
+                    dense
+                    :disabled="credentialReadonly"
+                    v-model="password"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :rules="[formRules.required, formRules.password]"
+                    :type="show1 ? 'text' : 'password'"
+                    name="input-10-1"
+                    label="New Password"
+                    @click:append="show1 = !show1"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    placeholder="************"
+                    class="font-size-14"
+                    color="#93CB5B"
+                    :disabled="credentialReadonly"
+                    dense
+                    v-model="confirmPassword"
+                    :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :rules="[
+                      formRules.required,
+                      formRules.confirmPassword(confirmPassword, password),
+                    ]"
+                    :type="show2 ? 'text' : 'password'"
+                    name="input-10-1"
+                    label="Confirm Password"
+                    @click:append="show2 = !show2"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-card-actions v-if="credentialReadonly == true" class="pa-5">
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="blue"
+                  class="white--text"
+                  @click="credentialReadonly = false"
+                >
+                  <v-icon>mdi-pencil</v-icon>
+                  Edit
+                </v-btn>
+              </v-card-actions>
+              <v-card-actions v-if="credentialReadonly == false" class="pa-5">
+                <v-spacer></v-spacer>
+                <v-btn color="red" outlined @click="credentialReadonly = true">
+                  <v-icon>mdi-close-circle-outline</v-icon>
+                  Cancel
+                </v-btn>
+                <v-btn
+                  color="blue"
+                  class="white--text"
+                  @click="updateCredential()"
+                >
+                  <v-icon>mdi-check-circle</v-icon>
+                  Save
+                </v-btn>
+              </v-card-actions>
+            </v-form>
+          </v-container>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -372,6 +474,7 @@ export default {
       selectFile: null,
       previewImg: null,
       tagGrade: null,
+      dialog: false,
       tab: null,
       // items: ["Personal Information", "Login Info"],
       items: ["Personal Information"],
@@ -510,6 +613,7 @@ export default {
             this.password = null;
             this.confirmPassword = null;
             this.credentialReadonly = true;
+            this.dialog = false;
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.message = res.data.msg;
             this.fadeAwayMessage.type = "error";
@@ -572,6 +676,9 @@ export default {
 
       this.previewImg = URL.createObjectURL(uploadedimg);
       this.isSelecting = true;
+    },
+    openDialog() {
+      this.dialog = true;
     },
   },
   created() {

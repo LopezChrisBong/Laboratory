@@ -30,6 +30,7 @@ import {
   getCurrentDateTimeString,
   trimString,
 } from 'src/shared/global-function';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserDetailsService {
@@ -39,6 +40,7 @@ export class UserDetailsService {
     private authService: AuthService,
     private usertypeService: UserTypeService,
     private dataSource: DataSource,
+    private mailService: MailService,
   ) {}
 
   async getAllUsersToVerify(curr_user:any) {
@@ -286,7 +288,8 @@ export class UserDetailsService {
           status: updateVU.status,
           liscence_no: updateVU.liscence_no,
         });
-
+        const user = await this.findUser(updateVU.userID);
+        await this.mailService.confirmVerifyuser(user);
         await queryRunner.commitTransaction();
         return {
           msg: updateVU.update_type == 1 ? 'User verified.' : 'User updated.',
@@ -303,6 +306,19 @@ export class UserDetailsService {
       await queryRunner.release();
     }
   }
+
+    async findUser(id: number) {
+      let data = await this.dataSource
+        .createQueryBuilder(Users, 'u')
+        .select([
+          'u.*',
+          "IF (!ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a', concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as name",
+        ])
+        .leftJoin(UserDetail, 'ud', 'u.id = ud.userID')
+        .where('u.id = :id', { id })
+        .getRawOne();
+        return data
+    }
 
   async findAll() {
    

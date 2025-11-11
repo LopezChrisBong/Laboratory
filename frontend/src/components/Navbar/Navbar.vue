@@ -306,7 +306,7 @@
         </div>
 
         <!-- Hardcoded Supplier Menu for Admin Only -->
-        <div v-if="userType === 'admin'">
+        <!-- <div v-if="userType === 'admin'">
           <v-list-item
             :to="'/' + userType + '/supplier'"
             router
@@ -321,7 +321,7 @@
               <v-list-item-title>Supplier</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-        </div>
+        </div> -->
       </v-list>
     </v-navigation-drawer>
 

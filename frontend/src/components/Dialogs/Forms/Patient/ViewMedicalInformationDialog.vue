@@ -322,6 +322,13 @@ export default {
       this.medicalData = { id: null, data: this.data };
       this.action = "Add";
     },
+
+    print(item) {
+      console.log(item);
+      //   const url =
+      //     process.env.VUE_APP_SERVER + "/pdf-generator/invoice/" + item.id;
+      //   window.open(url);
+    },
   },
 };
 </script>

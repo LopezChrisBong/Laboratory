@@ -4,9 +4,9 @@
       <!-- LEFT PANEL: Booking Appointment -->
       <v-col cols="12" md="0">
         <v-card outlined>
-          <!-- <v-card-title>
-            Booking Appointment
-          </v-card-title> -->
+          <v-card-title>
+            Users Logs
+          </v-card-title>
 
           <!-- <v-divider></v-divider> -->
 
@@ -20,31 +20,20 @@
           </v-card-subtitle> -->
 
           <!-- Time Slots -->
-          <!-- <v-row>
-            <v-col v-for="(slot, i) in timeSlots" :key="i" cols="6">
-              <v-btn
-                block
-                outlined
-                color="primary"
-                :disabled="slot.disabled"
-                @click="selectedTime = slot.time"
+          <v-row>
+            <v-col>
+              <v-data-table
+                :headers="headers"
+                :items="userLogs"
+                :items-per-page="5"
+                class="elevation-1"
               >
-                {{ slot.time }}
-              </v-btn>
+                <template v-slot:item.created_at="{ item }">
+                  {{ formatDate(item.created_at) }}
+                </template>
+              </v-data-table>
             </v-col>
-          </v-row> -->
-
-          <!-- <v-divider class="my-2"></v-divider> -->
-
-          <!-- Patient Concerns -->
-          <!-- <v-card-text>
-            <v-textarea
-              label="Patient Concerns"
-              outlined
-              v-model="patientConcerns"
-              rows="5"
-            ></v-textarea>
-          </v-card-text> -->
+          </v-row>
         </v-card>
       </v-col>
       <v-col cols="12">
@@ -240,6 +229,7 @@ export default {
       patientConcerns: "",
       search: "",
       dialog: false,
+      userLogs: [],
       action: null,
       doctors: [],
       appointmentData: null,
@@ -248,6 +238,10 @@ export default {
       appointmentHeaders: [
         { text: "Patient", value: "name", align: "start", sortable: false },
         { text: "Date", value: "start", align: "end", sortable: false },
+      ],
+      headers: [
+        { text: "User name", value: "email", align: "start", sortable: false },
+        { text: "Logs", value: "created_at", align: "center", sortable: false },
       ],
       timeSlots: [
         { time: "08:00 AM", disabled: false },
@@ -299,8 +293,16 @@ export default {
         }
       );
     },
+    getAllLogs() {
+      this.axiosCall("/auth/getAllUserLogs/", "GET").then((res) => {
+        if (res) {
+          this.userLogs = res.data;
+        }
+      });
+    },
     initialize() {
       this.getAllDoctors();
+      this.getAllLogs();
     },
     getAllDoctors() {
       this.axiosCall("/doctors-schedule/getAllDoctorsDashboard", "GET").then(
