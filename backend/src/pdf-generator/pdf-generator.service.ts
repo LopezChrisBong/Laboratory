@@ -9,6 +9,7 @@ import { DataSource } from 'typeorm';
 import { SendNewEmailDto } from './dto/send-new-email.dto';
 import {
   Invoice,
+  MedicalInfo,
   Patient,
   Payment,
   Prescription,
@@ -244,6 +245,11 @@ hbs.registerHelper('isNotNullAndNotNAandNotEmpty', function (v1, options) {
     return options.fn(this);
   }
   return options.inverse(this);
+});
+
+hbs.registerHelper('stripTags', function (text) {
+  if (!text) return '';
+  return text.replace(/<[^>]*>/g, ''); // removes anything between < and >
 });
 
 hbs.registerHelper('formatName', function (fname, mname, lname) {
@@ -579,6 +585,64 @@ const result = [
 
   return result[0];
 }
+
+async patientMedicalRecord(id: number) {
+  console.log(id)
+  const patientData = await this.dataSource.manager
+    .createQueryBuilder(MedicalInfo, 'mid')
+    .select([
+      `IF (
+          !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
+          CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
+          CONCAT(p.f_name, ' ', p.l_name)
+      ) AS name`,
+      'mid.*',
+    ])
+    .leftJoin(Patient, 'p', 'mid.patientId = p.id')
+    .where('mid.id = :id', { id })  
+    .getRawOne();     
+    
+    console.log(patientData)
+
+  const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
+  // const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
+  const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
+
+  const data = {
+    patientData: patientData,
+    headerImg: headerImg,
+  };
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox'],
+    });
+
+    const page = await browser.newPage();
+
+    const content = await this.compile('medical-info', data);
+    await page.setContent(content);
+
+    const buffer = await page.pdf({
+      format: 'letter',
+      margin: {
+        top: '0.20in',
+        left: '0.50in',
+        bottom: '0.20in',
+        right: '0.50in',
+      },
+      landscape: false,
+      printBackground: true,
+    });
+
+    await browser.close();
+    return buffer;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 
 
  
