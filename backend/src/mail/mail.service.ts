@@ -106,10 +106,10 @@ export class MailService {
               <img src="https://imgur.com/1Ne61vn.png" alt="Paragon Logo">
             </div>
             <h1>Welcome to PARAGON!</h1>
-            <p>Hi ${user.name || 'User'},</p>
+            <p>Hi ${user.email || 'User'},</p>
             <p>Your temporary password is: <strong>${user.tempPassword}</strong></p>
             <p>Please click the button below to login and change your password immediately:</p>
-            <a href="http://localhost:8080/login" class="btn">Login Now</a>
+            <a href="http://localhost:8080/login" class="btn" >Login Now</a>
             <div class="footer">
               &copy; ${new Date().getFullYear()} PARAGON. All rights reserved.
             </div>

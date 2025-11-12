@@ -325,9 +325,11 @@ export default {
 
     print(item) {
       console.log(item);
-      //   const url =
-      //     process.env.VUE_APP_SERVER + "/pdf-generator/invoice/" + item.id;
-      //   window.open(url);
+      const url =
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/patientMedicalRecord/" +
+        item.id;
+      window.open(url);
     },
   },
 };
