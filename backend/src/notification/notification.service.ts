@@ -12,12 +12,13 @@ export class NotificationService {
   ){}
 
  async create(createNotificationDto: CreateNotificationDto) {
-  // // console.log(createNotificationDto)
+  // console.log(createNotificationDto)
         const queryRunner = this.dataSource.createQueryRunner();
             await queryRunner.connect();
             await queryRunner.startTransaction();
             try {
               let notification = createNotificationDto;
+              
         
                 const data = queryRunner.manager.create(Notification, {
                   patientID:notification.patientID,

@@ -966,20 +966,21 @@ async getAllMedtechAppointment(id: number) {
   }
 
     async confirmAppointment(id: number, updateAppointmentDto: UpdateAppointmentDto){
-       
+        
         try {
+          const isExist = await this.appointmentRepository.findOneBy({id});
           await this.dataSource.manager.update(Appointment, id,{
           status:updateAppointmentDto.status,
           })
-       return{
-       msg:'Updated successfully!', status:HttpStatus.CREATED,
-       updateAppointment:{
-        id:id,
-       }
-     }
+        return{
+        msg:'Updated successfully!', status:HttpStatus.OK,
+        updateAppointment:{
+        id:isExist.doctorID,
+        }
+        }
        
         } catch (error) {
-     return{
+        return{
        msg:'Something went wrong!'+ error, status:HttpStatus.BAD_REQUEST
      }
    }
