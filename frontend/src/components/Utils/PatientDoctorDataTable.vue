@@ -374,7 +374,7 @@ export default {
 
     headers1: [
       { text: "Name", value: "name" },
-      { text: "Identification No.", value: "patientID" },
+      // { text: "Identification No.", value: "patientID" },
       // { text: "Last Visit", value: "lastVisit" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },

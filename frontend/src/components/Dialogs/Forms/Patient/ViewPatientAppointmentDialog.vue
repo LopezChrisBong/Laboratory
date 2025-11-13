@@ -179,7 +179,8 @@
               <v-row
                 v-if="
                   !clinicDecription.doctors ||
-                    clinicDecription.specialty == 'Others'
+                    clinicDecription.specialty == 'Others' ||
+                    assignModule == 5
                 "
               >
                 <v-col cols="12" md="4" sm="12">
@@ -523,6 +524,7 @@ export default {
         "11:00 PM",
         "12:00 AM",
       ],
+      assignModule: null,
       search: "",
       loading: false,
       paginationData: {},
@@ -547,7 +549,7 @@ export default {
     },
     maxDate() {
       const today = new Date();
-      today.setMonth(today.getMonth() + 1);
+      today.setMonth(today.getMonth() + 12);
       return today.toISOString().substr(0, 10);
     },
   },
@@ -583,7 +585,9 @@ export default {
       deep: true,
     },
   },
-  mounted() {},
+  mounted() {
+    this.assignModule = this.$store.state.user.user.assignedModuleID;
+  },
 
   beforeDestroy() {},
 

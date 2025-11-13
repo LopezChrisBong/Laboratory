@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row>
       <!-- LEFT PANEL: Booking Appointment -->
-      <v-col cols="12" md="0">
+      <v-col cols="12" md="0" v-if="assignModule == 1">
         <v-card outlined>
           <v-card-title>
             Users Logs
@@ -227,6 +227,7 @@ export default {
       selectedDate: new Date().toISOString().substr(0, 10),
       selectedTime: null,
       patientConcerns: "",
+      assignModule: null,
       search: "",
       dialog: false,
       userLogs: [],
@@ -258,6 +259,7 @@ export default {
     };
   },
   mounted() {
+    this.assignModule = this.$store.state.user.user.assignedModuleID;
     this.initialize();
   },
   computed: {

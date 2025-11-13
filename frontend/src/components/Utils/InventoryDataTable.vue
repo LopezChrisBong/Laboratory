@@ -707,10 +707,12 @@ export default {
       if (this.selectedSupplier) {
         this.loading = true;
         try {
-          const res = await axios.get(process.env.VUE_APP_SERVER + "/inventory");
-          this.itemData = res.data.filter(
-            item => item.supplier === this.selectedSupplier
-          ).reverse();
+          const res = await axios.get(
+            process.env.VUE_APP_SERVER + "/inventory"
+          );
+          this.itemData = res.data
+            .filter((item) => item.supplier === this.selectedSupplier)
+            .reverse();
         } catch (error) {
           console.error("Error filtering inventory by supplier:", error);
           this.itemData = [];

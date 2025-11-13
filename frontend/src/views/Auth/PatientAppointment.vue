@@ -434,7 +434,7 @@
                           deletable-chips
                           :rules="[(v) => !!v || 'Time is required']"
                           label="Select Time"
-                          :items="allTimes1"
+                          :items="filteredTimes"
                           class="rounded-lg"
                           color="#6DB249"
                         ></v-autocomplete>
@@ -494,7 +494,7 @@
                                 </p>
                               </div>
                               <div>
-                                <p>Field of experties:</p>
+                                <p>Field of expertise:</p>
                                 <ul>
                                   <li
                                     v-for="items in item.specialization"
@@ -518,7 +518,10 @@
                     :disabled="valid"
                     color="primary"
                     class="mt-4"
-                    @click="info == 2 ? (info = 1) : (info = 2)"
+                    @click="
+                      info == 2 ? (info = 1) : (info = 2);
+                      changeTime();
+                    "
                   >
                     Return
                   </v-btn>
@@ -722,8 +725,46 @@ export default {
     };
   },
   computed: {
+    filteredTimes() {
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+      // Convert time like "02:00 PM" → total minutes
+      const timeToMinutes = (t) => {
+        const [time, modifier] = t.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (modifier === "PM" && hours !== 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
+
+      if (this.form.date === todayStr) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return this.allTimes1.filter((t) => timeToMinutes(t) > nowMinutes);
+      }
+      return this.allTimes1;
+    },
+    remainingTimes() {
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+      // Convert time like "02:00 PM" → total minutes
+      const timeToMinutes = (t) => {
+        const [time, modifier] = t.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (modifier === "PM" && hours !== 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
+
+      if (this.doctors_date === todayStr) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return this.allTimes1.filter((t) => timeToMinutes(t) > nowMinutes);
+      }
+      return this.allTimes1;
+    },
     availableTimes() {
-      if (!this.form.date) return this.allTimes1;
+      if (!this.form.date) return this.remainingTimes;
 
       const bookedTimes = this.bookings
         .filter((b) => b.date === this.form.date)
@@ -735,19 +776,19 @@ export default {
         (d) => d.date === this.form.date
       );
 
-      let doctorTimes = this.allTimes1;
+      let doctorTimes = this.remainingTimes;
 
       if (docSchedule) {
-        const startIndex = this.allTimes1.indexOf(docSchedule.timeFrom);
-        const endIndex = this.allTimes1.indexOf(docSchedule.timeTo);
+        const startIndex = this.remainingTimes.indexOf(docSchedule.timeFrom);
+        const endIndex = this.remainingTimes.indexOf(docSchedule.timeTo);
 
         if (startIndex !== -1 && endIndex !== -1) {
           if (startIndex <= endIndex) {
-            doctorTimes = this.allTimes1.slice(startIndex, endIndex + 1);
+            doctorTimes = this.remainingTimes.slice(startIndex, endIndex + 1);
           } else {
             doctorTimes = [
-              ...this.allTimes1.slice(startIndex),
-              ...this.allTimes1.slice(0, endIndex + 1),
+              ...this.remainingTimes.slice(startIndex),
+              ...this.remainingTimes.slice(0, endIndex + 1),
             ];
           }
         }
@@ -1107,6 +1148,7 @@ export default {
                       this.fadeAwayMessage.type = "success";
                       this.fadeAwayMessage.header = "Successfully Saved";
                       this.info = 1;
+                      window.location.reload();
                       this.confirmationDialog = false;
                       this.resetForm();
                     } else {
@@ -1178,6 +1220,36 @@ export default {
       this.doctors_schedList = [];
       this.doctors_schedList1 = [];
       this.selected = [];
+    },
+    changeTime() {
+      this.doctors_date = null;
+      this.form.date = null;
+      this.allTimes1 = [
+        "01:00 AM",
+        "02:00 AM",
+        "03:00 AM",
+        "04:00 AM",
+        "05:00 AM",
+        "06:00 AM",
+        "07:00 AM",
+        "08:00 AM",
+        "09:00 AM",
+        "10:00 AM",
+        "11:00 AM",
+        "12:00 PM",
+        "01:00 PM",
+        "02:00 PM",
+        "03:00 PM",
+        "04:00 PM",
+        "05:00 PM",
+        "06:00 PM",
+        "07:00 PM",
+        "08:00 PM",
+        "09:00 PM",
+        "10:00 PM",
+        "11:00 PM",
+        "12:00 AM",
+      ];
     },
   },
 };
