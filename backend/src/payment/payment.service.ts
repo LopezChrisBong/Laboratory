@@ -10,6 +10,7 @@ export class PaymentService {
     let patientID = createPaymentDto.patientId
    
     if(createPaymentDto.data){
+      console.log('dria')
     const parsedData = JSON.parse(createPaymentDto.data);
     const labData = parsedData.labData || [];
     const totalPrice = labData.reduce((sum, item) => sum + (item.service_price || 0), 0).toFixed(2);

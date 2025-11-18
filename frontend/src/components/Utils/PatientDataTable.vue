@@ -602,7 +602,7 @@ export default {
         "PATCH",
         data
       ).then((res) => {
-        if (res.data.status == 201) {
+        if (res.data.status == 200) {
           let newData = {
             patientId: this.checkupData.id,
             amount: this.service_fee,
@@ -616,15 +616,17 @@ export default {
               this.fadeAwayMessage.type = "success";
               this.fadeAwayMessage.header = "System Message";
               this.fadeAwayMessage.message = res.data.msg;
-              location.reload();
-            } else if (res.data.status == 400) {
+              setTimeout(() => {
+                location.reload();
+              }, 1000);
+            } else {
               this.fadeAwayMessage.show = true;
               this.fadeAwayMessage.type = "error";
               this.fadeAwayMessage.header = "System Message";
               this.fadeAwayMessage.message = res.data.msg;
             }
           });
-        } else if (res.data.status == 400) {
+        } else {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
           this.fadeAwayMessage.header = "System Message";
