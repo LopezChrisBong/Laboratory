@@ -426,21 +426,32 @@
                   label="Edit Unit"
                   class="rounded-lg"
                   color="#96CB5B"
-                  :items="brands"
+                  :items="[
+                    'PC',
+                    'Pack',
+                    'Container',
+                    'Bottle',
+                    'Roll',
+                    'Bag',
+                    'Box',
+                    'Gallon',
+                    'Liter',
+                  ]"
                 >
                 </v-autocomplete>
               </v-col>
               <v-col cols="12">
-                <v-text-field
+                <v-autocomplete
                   v-model="editedItem.usageType"
                   :rules="[formRules.required]"
                   dense
                   outlined
-                  required
                   label="Edit Kind of Usage"
                   class="rounded-lg"
-                  color="blue"
-                ></v-text-field>
+                  color="#96CB5B"
+                  :items="['Disposable', 'Reusable']"
+                >
+                </v-autocomplete>
               </v-col>
               <v-col cols="12">
                 <v-text-field

@@ -120,7 +120,7 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" md="6">
-                  <v-text-field
+                  <!-- <v-text-field
                     v-model="cstatus"
                     :rules="[formRules.required]"
                     dense
@@ -129,7 +129,23 @@
                     label="Civil Status"
                     class="rounded-lg"
                     color="blue"
-                  ></v-text-field>
+                  ></v-text-field> -->
+                  <v-autocomplete
+                    v-model="cstatus"
+                    :rules="[formRules.required]"
+                    dense
+                    outlined
+                    label="Civil Status"
+                    class="rounded-lg"
+                    item-text="description"
+                    item-value="description"
+                    color="#96CB5B"
+                    :items="[
+                      { id: 1, description: 'Single' },
+                      { id: 2, description: 'Married' },
+                    ]"
+                  >
+                  </v-autocomplete>
                 </v-col>
 
                 <v-col cols="12" md="6">

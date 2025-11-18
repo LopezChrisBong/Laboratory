@@ -1093,6 +1093,9 @@ export default {
                         this.info = 1;
                         this.confirmationDialog = false;
                         this.resetForm();
+                        setTimeout(() => {
+                          location.reload();
+                        }, 1000);
                       } else {
                         this.fadeAwayMessage.show = true;
                         this.fadeAwayMessage.type = "error";
@@ -1148,9 +1151,11 @@ export default {
                       this.fadeAwayMessage.type = "success";
                       this.fadeAwayMessage.header = "Successfully Saved";
                       this.info = 1;
-                      window.location.reload();
                       this.confirmationDialog = false;
                       this.resetForm();
+                      setTimeout(() => {
+                        location.reload();
+                      }, 1000);
                     } else {
                       this.fadeAwayMessage.show = true;
                       this.fadeAwayMessage.type = "error";
