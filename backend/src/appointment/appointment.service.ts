@@ -798,7 +798,7 @@ async getAllDoctorsAppointment(id: number) {
     .leftJoin(Patient, 'p', 'p.id = ap.patientID')
     .where('ap.medtechID IS NULL')
     .andWhere('ap.doctorID = :id', { id })
-    .andWhere('ap.status = 1')
+    .andWhere('ap.status != 3')
     .getRawMany();
 
   const colors = ['blue', 'green', 'orange', 'red', 'purple', 'indigo', 'teal'];

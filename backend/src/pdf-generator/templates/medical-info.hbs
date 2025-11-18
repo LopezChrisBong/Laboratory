@@ -105,13 +105,18 @@
    <img src="data:image/png;base64,{{headerImg}}"style="max-width:100px; max-height: 100px;" />
     <div class="clinic-info">
       <h1 class="clinic-name">PARAGON MULTISPECIALTY CLINIC</h1>
-      <p class="clinic-sub">Personal Details</p>
+      {{!-- <p class="clinic-sub">Personal Details</p> --}}
     </div>
   </div>
 
   <!-- BODY CONTENT -->
   <div class="section">
     <table>
+      <tr>
+        <td>
+          <span class="label">Patient Name:</span> <span class="value">{{ patientData.name}}</span>
+        </td>
+      </tr>
     {{#ifCond patientData.pregnant '1'}}
       <tr>
         <td><span class="label">Date:</span> <span class="value">{{ formatDate patientData.date}}</span></td>

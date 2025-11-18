@@ -123,10 +123,10 @@
 
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-select
-                      label="Gender"
+                      label="Sex"
                       :items="genderList"
                       v-model="form.gender"
-                      :rules="[(v) => !!v || 'Gender is required']"
+                      :rules="[(v) => !!v || 'Sex is required']"
                       required
                       class="text-uppercase"
                     />
