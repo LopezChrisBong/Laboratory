@@ -292,9 +292,12 @@ export default {
                 this.$store.dispatch("setEmail", this.email);
                 this.fadeAwayMessage.show = true;
                 this.fadeAwayMessage.type = "success";
-                this.fadeAwayMessage.message = res.data.message;
+                this.fadeAwayMessage.message =
+                  "Registration successful. We will send you an email once your registration has been confirmed.";
                 this.fadeAwayMessage.header = "System Message";
-                this.$router.push("/login");
+                setTimeout(() => {
+                  this.$router.push("/login");
+                }, 5000);
               } else {
                 this.isLoading = false;
                 this.fadeAwayMessage.show = true;
