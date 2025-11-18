@@ -154,7 +154,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
-                    label="Gender"
+                    label="Sex"
                     class="rounded-lg"
                     item-text="description"
                     item-value="description"

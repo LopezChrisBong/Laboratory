@@ -59,6 +59,7 @@ export class UserDetailsService {
         'UD.mname as mname',
         'UD.lname as lname',
         'UD.status as status',
+        'UD.liscence_no as liscence_no',
       ])
       .leftJoinAndMapOne('UD.user', Users, 'user', 'UD.userID = user.id')
       .where('user.isValidated = 1')
@@ -77,6 +78,7 @@ export class UserDetailsService {
         'UD.mname as mname',
         'UD.lname as lname',
         'UD.status as status',
+        'UD.liscence_no as liscence_no',
       ])
       .leftJoinAndMapOne('UD.user', Users, 'user', 'UD.userID = user.id')
       .where('user.isValidated = 1')

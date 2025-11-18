@@ -147,7 +147,7 @@ export default {
         this.initialize();
         this.$refs.UserVerifyFormref.resetValidation();
         if (data.id) {
-          // console.log("Love", data);
+          console.log("Love", data);
           this.verifyModel.id = data.id;
           this.verifyModel.userID = data.user_id;
           this.verifyModel.name = data.name;
@@ -156,6 +156,7 @@ export default {
           this.verifyModel.user_roleID = data.user_user_roleID;
           this.verifyModel.assignedModuleID = data.user_assignedModuleID;
           this.verifyModel.newStatus = data.status;
+          this.verifyModel.liscence_no = data.liscence_no;
           // this.verifyModel.date_hired = data.emp_date_hired;
         }
       },
