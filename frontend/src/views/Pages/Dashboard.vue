@@ -2,29 +2,39 @@
   <v-container fluid>
     <v-row>
       <!-- LEFT PANEL: Booking Appointment -->
-      <v-col cols="12" md="0" v-if="assignModule == 1">
+      <v-col cols="12" md="6" v-if="assignModule == 1">
         <v-card outlined>
           <v-card-title>
             Users Logs
           </v-card-title>
 
-          <!-- <v-divider></v-divider> -->
-
-          <!-- Calendar -->
-          <!-- <v-date-picker v-model="selectedDate" scrollable></v-date-picker> -->
-
-          <!-- <v-divider class="my-2"></v-divider> -->
-
-          <!-- <v-card-subtitle>
-            {{ formattedDate }}
-          </v-card-subtitle> -->
-
-          <!-- Time Slots -->
           <v-row>
             <v-col>
               <v-data-table
                 :headers="headers"
                 :items="userLogs"
+                :items-per-page="5"
+                class="elevation-1"
+              >
+                <template v-slot:item.created_at="{ item }">
+                  {{ formatDate(item.created_at) }}
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6" v-if="assignModule == 1">
+        <v-card outlined>
+          <v-card-title>
+            Entry Logs
+          </v-card-title>
+
+          <v-row>
+            <v-col>
+              <v-data-table
+                :headers="entryHeaders"
+                :items="entryLogs"
                 :items-per-page="5"
                 class="elevation-1"
               >
@@ -230,6 +240,7 @@ export default {
       assignModule: null,
       search: "",
       dialog: false,
+      entryLogs: [],
       userLogs: [],
       action: null,
       doctors: [],
@@ -239,6 +250,16 @@ export default {
       appointmentHeaders: [
         { text: "Patient", value: "name", align: "start", sortable: false },
         { text: "Date", value: "start", align: "end", sortable: false },
+      ],
+      entryHeaders: [
+        { text: "action", value: "action", align: "start", sortable: false },
+        {
+          text: "description",
+          value: "description",
+          align: "center",
+          sortable: false,
+        },
+        { text: "Date", value: "created_at", align: "end", sortable: false },
       ],
       headers: [
         { text: "User name", value: "email", align: "start", sortable: false },
@@ -302,9 +323,18 @@ export default {
         }
       });
     },
+
+    getAllEntryLogs() {
+      this.axiosCall("/auth/getAllEntryLogs/", "GET").then((res) => {
+        if (res) {
+          this.entryLogs = res.data;
+        }
+      });
+    },
     initialize() {
       this.getAllDoctors();
       this.getAllLogs();
+      this.getAllEntryLogs();
     },
     getAllDoctors() {
       this.axiosCall("/doctors-schedule/getAllDoctorsDashboard", "GET").then(

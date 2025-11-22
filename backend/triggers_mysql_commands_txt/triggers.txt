@@ -99,3 +99,21 @@ END$$
 DELIMITER ;
 
 
+DELIMITER $$
+
+CREATE TRIGGER after_invoice_insert
+AFTER INSERT ON invoice
+FOR EACH ROW
+BEGIN
+    INSERT INTO logs (action, description, created_at)
+    VALUES (
+        'NEW INVOICE',
+        CONCAT('Invoice added for patientID: ', NEW.patientId, ' (Invoice No: ', NEW.invoice_no, ')'),
+        NOW()
+    );
+END$$
+
+DELIMITER ;
+
+
+

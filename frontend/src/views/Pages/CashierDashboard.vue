@@ -255,7 +255,69 @@
 
           <v-tabs-items v-model="tabIncome">
             <v-tab-item>
-              <canvas id="dailyChart"></canvas>
+              <v-row class="mt-4" align="center" justify="start">
+                <v-col cols="12" md="4">
+                  <v-menu
+                    v-model="menuDate"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    max-width="290px"
+                    min-width="290px"
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="selectedDate"
+                        label="Select Date"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        outlined
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+
+                    <v-date-picker
+                      v-model="selectedDate"
+                      @input="updateDailyDate"
+                      color="primary"
+                    ></v-date-picker>
+                  </v-menu>
+                </v-col>
+              </v-row>
+
+              <!-- Hourly Breakdown -->
+              <v-card class="pa-4 mt-4" elevation="2">
+                <h3 class="text-h6 mb-4">
+                  Tolal income of: {{ formatDate(selectedDate) }}
+                </h3>
+
+                <div
+                  v-if="dailyData.length === 0"
+                  class="text-center text-grey"
+                >
+                  No records found for this date.
+                </div>
+
+                <div
+                  v-for="(item, index) in dailyData"
+                  :key="index"
+                  class="mb-4"
+                >
+                  <div class="d-flex justify-space-between">
+                    <strong>{{ item.hour }}:00</strong>
+                    <span>₱ {{ item.amount.toLocaleString() }}</span>
+                  </div>
+
+                  <v-progress-linear
+                    :model-value="(item.amount / peakHourAmount) * 100"
+                    height="10"
+                    rounded
+                  ></v-progress-linear>
+                </div>
+              </v-card>
+
+              <!-- <canvas id="dailyChart"></canvas> -->
             </v-tab-item>
 
             <v-tab-item>
@@ -274,6 +336,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -298,6 +361,12 @@ export default {
       yearlyData: [],
       dailyChart: null,
       monthlyChart: null,
+      menuDate: false,
+      selectedDate: new Date().toISOString().substr(0, 10),
+      dailyTotal: 0,
+      dailyTransactions: 0,
+      peakHour: null,
+      peakHourAmount: 0,
       yearlyChart: null,
       patientHeaders: [
         { text: "Name", value: "name", align: "start" },
@@ -363,6 +432,13 @@ export default {
     },
   },
   methods: {
+    updateDailyDate() {
+      this.menuDate = false;
+      this.fetchIncomeData(); // refetch data for selected day
+      this.$nextTick(() => {
+        this.renderDailyChart();
+      });
+    },
     changeTab(tab) {
       this.activeTab = tab;
       this.tab = tab.id;
@@ -414,13 +490,19 @@ export default {
       //   { year: 5, amount: 900 },
       //   { year: 6, amount: 700 },
       // ];
-      this.axiosCall("/payment/getAnalyticsIncome/", "GET").then((res) => {
-        if (res) {
-          this.dailyData = res.data.dailyData;
-          this.monthlyData = res.data.monthlyData;
-          this.yearlyData = res.data.yearlyData;
+      const params = {
+        date: this.selectedDate, // send selected date to backend
+      };
+
+      this.axiosCall("/payment/getAnalyticsIncome", "GET", params).then(
+        (res) => {
+          if (res) {
+            this.dailyData = res.data.dailyData;
+            this.monthlyData = res.data.monthlyData;
+            this.yearlyData = res.data.yearlyData;
+          }
         }
-      });
+      );
     },
     renderDailyChart() {
       const ctx = document.getElementById("dailyChart");

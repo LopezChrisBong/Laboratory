@@ -42,6 +42,19 @@
       justify-content: space-between;
     }
     .footer .line { min-width: 120px; display: inline-block; border-bottom: 1px solid #000; }
+
+    .lastFoot {
+          position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    padding: 10px 0;
+    color: #555;
+    border-top: 1px solid #ccc;
+    background: white;
+    }
   </style>
 </head>
 <body>
@@ -61,7 +74,7 @@
       <div><span class="label">Name:</span> <span class="line">{{prescription.name}}</span></div>
       <div><span class="label">Age/Status:</span> <span class="line">{{prescription.age}}</span></div>
       <div><span class="label">Address:</span> <span class="line">{{prescription.address}}</span></div>
-      <div><span class="label">Date:</span> <span class="line">{{prescription.date}}</span></div>
+      <div><span class="label">Date:</span> <span class="line">{{formatDate prescription.date}}</span></div>
     </div>
 
     <!-- RX Section -->
@@ -82,6 +95,11 @@
         PTR No: <span class="line"></span>
       </div>
     </div>
+
+      <div class="lastFoot">
+      {{formatted}} • 
+      This is a system generated document. No signature is required.
+      </div>
   {{/each}}
 </body>
 </html>
