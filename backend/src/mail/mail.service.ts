@@ -103,7 +103,7 @@ export class MailService {
         <body>
           <div class="container">
             <div class="header">
-              <img src="https://imgur.com/1Ne61vn.png" alt="Paragon Logo">
+              <img src="https://imgur.com/CTpQ9ee" alt="Paragon Logo">
             </div>
             <h1>Welcome to PARAGON!</h1>
             <p>Hi ${user.email || 'User'},</p>
@@ -249,7 +249,7 @@ export class MailService {
             <div class="card" role="main" aria-labelledby="title">
               <div class="icon" aria-hidden="true">
                 <!-- simple check/envelope svg -->
-                <img style='width: 400px;' src="https://imgur.com/1Ne61vn.png" alt="Paragon Logo">
+                <img style='width: 400px;' src="https://imgur.com/CTpQ9ee.png" alt="Paragon Logo">
               </div>
 
               <h1 id="title" class="title">Hooray!</h1>

@@ -5,6 +5,19 @@
   <title>Medical Invoice</title>
 
   <style>
+    .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    padding: 10px 0;
+    color: #555;
+    border-top: 1px solid #ccc;
+    background: white;
+  }
+
     body {
       font-family: Arial, Helvetica, sans-serif;
       padding: 40px;
@@ -152,7 +165,7 @@
       {{#each items.labData}}
       <tr>
         <td>{{service_description}}</td>
-        <td class="text-right">{{service_price}}</td>
+        <td class="text-right">₱ {{service_price}}</td>
       </tr>
       {{/each}}
     </tbody>
@@ -162,7 +175,7 @@
   <table class="totals">
     <tr>
       <td>Subtotal:</td>
-      <td class="text-right">{{invoice.amount}}</td>
+      <td class="text-right">₱ {{invoice.amount}}</td>
     </tr>
     <tr>
       <td>Discount:</td>
@@ -184,11 +197,11 @@
     </tr>
     <tr>
       <td>Discount Amount:</td>
-      <td class="text-right">-{{invoice.discount_amount}}</td>
+      <td class="text-right">₱ -{{invoice.discount_amount}}</td>
     </tr>
     <tr class="total-row">
       <td>Total:</td>
-      <td class="text-right">{{invoice.total_amount}}</td>
+      <td class="text-right">₱ {{invoice.total_amount}}</td>
     </tr>
   </table>
 
@@ -197,6 +210,11 @@
     <div class="terms-title">Terms and Conditions</div>
     <div>{{terms}}</div>
   </div>
+
+      <div class="footer">
+      {{ formatted}} • 
+      This is a system generated document. No signature is required.
+    </div>
 
 </body>
 </html>

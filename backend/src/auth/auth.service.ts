@@ -220,8 +220,18 @@ export class AuthService {
       .createQueryBuilder(UserLogs, 'ul')
       .select('ul.*')
       .getRawMany();
-    console.log(data)
+
     return data
+  }
+
+    async getAllEntryLogs() {
+      const  datas = await this.dataSource.manager.query(
+        'SELECT * FROM ' +
+          process.env.DATABASE_NAME +
+          ".logs"
+      );   
+       console.log(datas)
+    return datas
   }
 
   // UPDATE THE USERS PASSWORD ONLY

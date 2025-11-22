@@ -93,6 +93,13 @@ export class AuthController {
     return this.authService.getAllUserLogs();
   }
 
+      @Get('getAllEntryLogs')
+    getAllEntryLogs() {
+    return this.authService.getAllEntryLogs();
+  }
+
+  
+
 
   // @Post('compareOTP')
   // compareOTP(@Body() data: any) {

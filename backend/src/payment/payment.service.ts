@@ -216,78 +216,92 @@ private generateInvoiceNumber(id: number): string {
   return `INV-${datePart}-${id.toString().padStart(6, '0')}`;
 }
 
-async getIncomeInvoice() {
-  const result = await this.dataSource.manager
-    .createQueryBuilder()
-    .from('payment', 'pay') 
-    .select(`
-      (
-      -- SELECT COALESCE(AVG(p.amount), 0)
-        SELECT COALESCE(SUM(p.amount), 0)
-        FROM payment p
-        WHERE p.status = 1
-          AND DATE(p.created_at) = CURDATE()
-      ) AS daily_average_income
-    `)
-    .addSelect(`
-      (
-        SELECT COALESCE(SUM(p.amount), 0)
-        FROM payment p
-        WHERE p.status = 1
-          AND MONTH(p.created_at) = MONTH(CURDATE())
-          AND YEAR(p.created_at) = YEAR(CURDATE())
-      ) AS total_month_income
-    `)
-    .addSelect(`
-      (
-        SELECT COALESCE(SUM(p.amount), 0)
-        FROM payment p
-        WHERE p.status = 1
-          AND YEAR(p.created_at) = YEAR(CURDATE())
-      ) AS total_year_income
-    `)
-    .getRawOne();
-  return result;
-}
-async getAnalyticsIncome(){
-const dailyData = await this.dataSource.manager
-  .createQueryBuilder(Payment, 'pay')
-  .select('DAY(pay.created_at)', 'day')
-  .addSelect('SUM(pay.amount)', 'amount')
-  .where('pay.status = 1')
-  .groupBy('day')
-  .orderBy('day', 'ASC')
-  .getRawMany();
+  async getIncomeInvoice() {
+    const result = await this.dataSource.manager
+      .createQueryBuilder()
+      .from('payment', 'pay') 
+      .select(`
+        (
+        -- SELECT COALESCE(AVG(p.amount), 0)
+          SELECT COALESCE(SUM(p.amount), 0)
+          FROM payment p
+          WHERE p.status = 1
+            AND DATE(p.created_at) = CURDATE()
+        ) AS daily_average_income
+      `)
+      .addSelect(`
+        (
+          SELECT COALESCE(SUM(p.amount), 0)
+          FROM payment p
+          WHERE p.status = 1
+            AND MONTH(p.created_at) = MONTH(CURDATE())
+            AND YEAR(p.created_at) = YEAR(CURDATE())
+        ) AS total_month_income
+      `)
+      .addSelect(`
+        (
+          SELECT COALESCE(SUM(p.amount), 0)
+          FROM payment p
+          WHERE p.status = 1
+            AND YEAR(p.created_at) = YEAR(CURDATE())
+        ) AS total_year_income
+      `)
+      .getRawOne();
+      console.log(result)
+    return result;
+  }
 
-const monthlyData = await this.dataSource.manager
-  .createQueryBuilder(Payment, 'pay')
-  .select('MONTH(pay.created_at) - 1', 'month') 
-  .addSelect('SUM(pay.amount)', 'amount')
-  .where('pay.status = 1')
-  .groupBy('month')
-  .orderBy('month', 'ASC')
-  .getRawMany();
 
-const yearlyRaw = await this.dataSource.manager
-  .createQueryBuilder(Payment, 'pay')
-  .select('YEAR(pay.created_at)', 'year')
-  .addSelect('SUM(pay.amount)', 'amount')
-  .where('pay.status = 1')
-  .groupBy('year')
-  .orderBy('year', 'ASC')
-  .getRawMany();
+  async getAnalyticsIncome(selectedDate?: string) {
+    // DAILY — filtered by date (if provided)
+    let dailyQuery = this.dataSource.manager
+      .createQueryBuilder(Payment, 'pay')
+      .select('HOUR(pay.created_at)', 'hour')
+      .addSelect('SUM(pay.amount)', 'amount')
+      .where('pay.status = 1');
 
-// ✅ Normalize raw DB output to expected format
-const yearlyData = yearlyRaw.map(r => ({
-  year: Number(r.year ?? r.YEAR),
-  amount: Number(r.amount ?? r.AMOUNT),
-}));
+    if (selectedDate) {
+      // precise date filtering
+      dailyQuery = dailyQuery.andWhere('DATE(pay.created_at) = :date', {
+        date: selectedDate,
+      });
+    } else {
+      // default: this month
+      dailyQuery = dailyQuery.andWhere('MONTH(pay.created_at) = MONTH(CURDATE())');
+    }
 
-  console.log(yearlyData)
+    const dailyData = await dailyQuery
+      .groupBy('hour')
+      .orderBy('hour', 'ASC')
+      .getRawMany();
 
-  return { dailyData, monthlyData, yearlyData };
+    // MONTHLY
+    const monthlyData = await this.dataSource.manager
+      .createQueryBuilder(Payment, 'pay')
+      .select('MONTH(pay.created_at) - 1', 'month')
+      .addSelect('SUM(pay.amount)', 'amount')
+      .where('pay.status = 1')
+      .groupBy('month')
+      .orderBy('month', 'ASC')
+      .getRawMany();
 
-}
+    // YEARLY
+    const yearlyRaw = await this.dataSource.manager
+      .createQueryBuilder(Payment, 'pay')
+      .select('YEAR(pay.created_at)', 'year')
+      .addSelect('SUM(pay.amount)', 'amount')
+      .where('pay.status = 1')
+      .groupBy('year')
+      .orderBy('year', 'ASC')
+      .getRawMany();
+
+    const yearlyData = yearlyRaw.map((r) => ({
+      year: Number(r.year ?? r.YEAR),
+      amount: Number(r.amount ?? r.AMOUNT),
+    }));
+
+    return { dailyData, monthlyData, yearlyData };
+  }
 
 
   findAll() {

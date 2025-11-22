@@ -94,9 +94,14 @@ hbs.registerHelper('getPresentDate', function () {
 
 hbs.registerHelper('formatDate', function (value) {
   if (!value) return "";
-  return moment(value).isValid() 
-    ? moment(value).format('MM-DD-YYYY') 
-    : "";
+
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(date);
 });
 
 
@@ -411,10 +416,15 @@ export class PdfGeneratorService {
       .where('p.id = :id', { id })
       .getOne();
 
-      console.log(prescription)
+          const now = new Date();
+    const formatted = new Intl.DateTimeFormat('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(now);
     const data = [
       {
-        prescription:prescription
+        prescription:prescription,
+        formatted
       },
     ];
     try {
@@ -460,8 +470,12 @@ async invoice(id: number) {
     .leftJoin(Patient, 'p', 'inv.patientId = p.id')
     .where('inv.id = :id', { id })  
     .getRawOne();     
-    
-    console.log(invoiceData)
+  
+    const now = new Date();
+    const formatted = new Intl.DateTimeFormat('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(now);
 
   const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
   const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
@@ -469,7 +483,8 @@ async invoice(id: number) {
   const data = {
     invoice: invoiceData,
     headerImg: headerImg,
-    items
+    items,
+    formatted
   };
 
   try {
@@ -601,8 +616,11 @@ async patientMedicalRecord(id: number) {
     .leftJoin(Patient, 'p', 'mid.patientId = p.id')
     .where('mid.id = :id', { id })  
     .getRawOne();     
-    
-    console.log(patientData)
+     const now = new Date();
+     const formatted = new Intl.DateTimeFormat('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(now);
 
   const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
   // const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
@@ -611,6 +629,7 @@ async patientMedicalRecord(id: number) {
   const data = {
     patientData: patientData,
     headerImg: headerImg,
+    formatted
   };
 
   try {
