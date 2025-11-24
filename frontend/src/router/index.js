@@ -9,7 +9,6 @@ import ResetPassword from "../views/Auth/ResetPassword.vue";
 import Dashboard from "../views/Pages/Dashboard.vue";
 import EmployeeDashboard from "../views/Pages/EmployeeDashboard.vue";
 import Profile from "../views/Pages/Profile.vue";
-import RegisterSuccess from "../views/Auth/RegisterSuccess.vue";
 import UserType from "../views/Pages/UserType.vue";
 import AccountVerification from "../views/Pages/AccountVerification.vue";
 import Users from "../views/Pages/Users.vue";
@@ -58,11 +57,7 @@ const routes = [
         component: Register,
         meta: { authRequired: false },
       },
-      {
-        path: "registration-success",
-        component: RegisterSuccess,
-        meta: { authRequired: false },
-      },
+
          {
         path: "patient-appointment",
         component: PatientAppointment,
