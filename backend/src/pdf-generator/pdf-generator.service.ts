@@ -93,17 +93,16 @@ hbs.registerHelper('getPresentDate', function () {
 });
 
 hbs.registerHelper('formatDate', function (value) {
-  if (!value) return "";
+  if (!value) return '';
 
   const date = new Date(value);
-  if (isNaN(date.getTime())) return "";
+  if (isNaN(date.getTime())) return '';
 
   return new Intl.DateTimeFormat('en-PH', {
     dateStyle: 'medium',
-    timeStyle: 'short'
+    timeStyle: 'short',
   }).format(date);
 });
-
 
 hbs.registerHelper('sexFormat', function (value) {
   if (value) {
@@ -408,29 +407,27 @@ export class PdfGeneratorService {
     return moment(value).format('MMM DD,YYYY');
   }
 
-
-
-  async prescription(id: number,) {
-      let prescription = await this.dataSource.manager
+  async prescription(id: number) {
+    let prescription = await this.dataSource.manager
       .createQueryBuilder(Prescription, 'p')
       .where('p.id = :id', { id })
       .getOne();
 
-          const now = new Date();
+    const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
       dateStyle: 'medium',
-      timeStyle: 'short'
+      timeStyle: 'short',
     }).format(now);
     const data = [
       {
-        prescription:prescription,
-        formatted
+        prescription: prescription,
+        formatted,
       },
     ];
     try {
-      const browser = await puppeteer.launch({ 
+      const browser = await puppeteer.launch({
         headless: 'new',
-        args: ['--no-sandbox']
+        args: ['--no-sandbox'],
       });
       const page = await browser.newPage();
       // compile(template_name, data)
@@ -455,216 +452,214 @@ export class PdfGeneratorService {
     }
   }
 
-async invoice(id: number) {
-  let items= await this.findInvoicePayments(id)
-  const invoiceData = await this.dataSource.manager
-    .createQueryBuilder(Invoice, 'inv')
-    .select([
-      `IF (
+  async invoice(id: number) {
+    let items = await this.findInvoicePayments(id);
+    const invoiceData = await this.dataSource.manager
+      .createQueryBuilder(Invoice, 'inv')
+      .select([
+        `IF (
           !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
-      'inv.*',
-    ])
-    .leftJoin(Patient, 'p', 'inv.patientId = p.id')
-    .where('inv.id = :id', { id })  
-    .getRawOne();     
-  
+        'inv.*',
+      ])
+      .leftJoin(Patient, 'p', 'inv.patientId = p.id')
+      .where('inv.id = :id', { id })
+      .getRawOne();
+
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
       dateStyle: 'medium',
-      timeStyle: 'short'
+      timeStyle: 'short',
     }).format(now);
 
-  const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
-  const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
+    const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
+    const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
 
-  const data = {
-    invoice: invoiceData,
-    headerImg: headerImg,
-    items,
-    formatted
-  };
+    const data = {
+      invoice: invoiceData,
+      headerImg: headerImg,
+      items,
+      formatted,
+    };
 
-  try {
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox'],
+    try {
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox'],
+      });
+
+      const page = await browser.newPage();
+
+      const content = await this.compile('invoice', data);
+      await page.setContent(content);
+
+      const buffer = await page.pdf({
+        format: 'letter',
+        margin: {
+          top: '0.20in',
+          left: '0.50in',
+          bottom: '0.20in',
+          right: '0.50in',
+        },
+        landscape: false,
+        printBackground: true,
+      });
+
+      await browser.close();
+      return buffer;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async findInvoicePayments(invoiceId: number) {
+    const invoice = await this.dataSource.manager.findOne(Invoice, {
+      where: { id: invoiceId },
     });
 
-    const page = await browser.newPage();
+    if (!invoice) return [];
+    let payedIds = [];
+    try {
+      payedIds = JSON.parse(invoice.payedId || '[]');
+    } catch (e) {
+      return [];
+    }
 
-    const content = await this.compile('invoice', data);
-    await page.setContent(content);
-
-    const buffer = await page.pdf({
-      format: 'letter',
-      margin: {
-        top: '0.20in',
-        left: '0.50in',
-        bottom: '0.20in',
-        right: '0.50in',
-      },
-      landscape: false,
-      printBackground: true,
-    });
-
-    await browser.close();
-    return buffer;
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async findInvoicePayments(invoiceId: number) {
-  const invoice = await this.dataSource.manager.findOne(Invoice, {
-    where: { id: invoiceId }
-  });
-
-  if (!invoice) return [];
-  let payedIds = [];
-  try {
-    payedIds = JSON.parse(invoice.payedId || '[]');
-  } catch (e) {
-    return [];
-  }
-
-  if (!Array.isArray(payedIds) || !payedIds.length) {
-    return [];
-  }
-  const payments = await this.dataSource.manager
-    .createQueryBuilder(Payment, "pay")
-    .select([
-      "pay.*",
-      `IF (
+    if (!Array.isArray(payedIds) || !payedIds.length) {
+      return [];
+    }
+    const payments = await this.dataSource.manager
+      .createQueryBuilder(Payment, 'pay')
+      .select([
+        'pay.*',
+        `IF (
         !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
         CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
         CONCAT(p.f_name, ' ', p.l_name)
-      ) AS name`
-    ])
-    .leftJoin(Patient, "p", "pay.patientId = p.id")
-    .where("pay.id IN (:...ids)", { ids: payedIds })
-    .getRawMany();
+      ) AS name`,
+      ])
+      .leftJoin(Patient, 'p', 'pay.patientId = p.id')
+      .where('pay.id IN (:...ids)', { ids: payedIds })
+      .getRawMany();
 
     let allLabData: any[] = [];
-let totalAmount = 0;
+    let totalAmount = 0;
 
-payments.forEach((pay: any) => {
-  let services: any[] = [];
+    payments.forEach((pay: any) => {
+      let services: any[] = [];
 
-  try {
-    let parsed = pay.data ? JSON.parse(pay.data) : null;
+      try {
+        let parsed = pay.data ? JSON.parse(pay.data) : null;
 
-    if (parsed && parsed.labData && parsed.labData.length > 0) {
-      services = parsed.labData.map(item => ({
-        service_description: item.service_description,
-        service_price: item.service_price || 0,
-      }));
-    } else {
-      services = [
-        {
-          service_description: 'General Consultation',
-          service_price: pay.amount || 0,
-        },
-      ];
-    }
-  } catch (err) {
-    console.error(`Invalid JSON in payment ${pay.id}:`, err);
+        if (parsed && parsed.labData && parsed.labData.length > 0) {
+          services = parsed.labData.map((item) => ({
+            service_description: item.service_description,
+            service_price: item.service_price || 0,
+          }));
+        } else {
+          services = [
+            {
+              service_description: 'General Consultation',
+              service_price: pay.amount || 0,
+            },
+          ];
+        }
+      } catch (err) {
+        console.error(`Invalid JSON in payment ${pay.id}:`, err);
 
-    services = [
+        services = [
+          {
+            service_description: 'General Consultation',
+            service_price: pay.amount || 0,
+          },
+        ];
+      }
+
+      allLabData.push(...services);
+
+      totalAmount += services.reduce(
+        (sum, s) => sum + (s.service_price || 0),
+        0,
+      );
+    });
+
+    const result = [
       {
-        service_description: 'General Consultation',
-        service_price: pay.amount || 0,
+        patientId: payments[0].patientId,
+        name: payments[0].name,
+        labData: allLabData,
+        total_amount: totalAmount,
       },
     ];
+
+    return result[0];
   }
 
-  allLabData.push(...services);
-
-  totalAmount += services.reduce(
-    (sum, s) => sum + (s.service_price || 0),
-    0
-  );
-});
-
-const result = [
-  {
-    patientId: payments[0].patientId,
-    name: payments[0].name,
-    labData: allLabData,
-    total_amount: totalAmount,
-  },
-];
-
-
-  return result[0];
-}
-
-async patientMedicalRecord(id: number) {
-  console.log(id)
-  const patientData = await this.dataSource.manager
-    .createQueryBuilder(MedicalInfo, 'mid')
-    .select([
-      `IF (
+  async patientMedicalRecord(id: number) {
+    console.log(id);
+    const patientData = await this.dataSource.manager
+      .createQueryBuilder(MedicalInfo, 'mid')
+      .select([
+        `IF (
           !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
-      'mid.*',
-    ])
-    .leftJoin(Patient, 'p', 'mid.patientId = p.id')
-    .where('mid.id = :id', { id })  
-    .getRawOne();     
-     const now = new Date();
-     const formatted = new Intl.DateTimeFormat('en-PH', {
+        'mid.*',
+      ])
+      .leftJoin(Patient, 'p', 'mid.patientId = p.id')
+      .where('mid.id = :id', { id })
+      .getRawOne();
+    const now = new Date();
+    const formatted = new Intl.DateTimeFormat('en-PH', {
       dateStyle: 'medium',
-      timeStyle: 'short'
+      timeStyle: 'short',
     }).format(now);
 
-  const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
-  // const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
-  const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
+    const headerImgPath = join(
+      process.cwd(),
+      '/../static/img/Paragon Logo.png',
+    );
+    // const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
+    const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
 
-  const data = {
-    patientData: patientData,
-    headerImg: headerImg,
-    formatted
-  };
+    const data = {
+      patientData: patientData,
+      headerImg: headerImg,
+      formatted,
+    };
 
-  try {
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox'],
-    });
+    try {
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox'],
+      });
 
-    const page = await browser.newPage();
+      const page = await browser.newPage();
 
-    const content = await this.compile('medical-info', data);
-    await page.setContent(content);
+      const content = await this.compile('medical-info', data);
+      await page.setContent(content);
 
-    const buffer = await page.pdf({
-      format: 'letter',
-      margin: {
-        top: '0.20in',
-        left: '0.50in',
-        bottom: '0.20in',
-        right: '0.50in',
-      },
-      landscape: false,
-      printBackground: true,
-    });
+      const buffer = await page.pdf({
+        format: 'letter',
+        margin: {
+          top: '0.20in',
+          left: '0.50in',
+          bottom: '0.20in',
+          right: '0.50in',
+        },
+        landscape: false,
+        printBackground: true,
+      });
 
-    await browser.close();
-    return buffer;
-  } catch (e) {
-    console.log(e);
+      await browser.close();
+      return buffer;
+    } catch (e) {
+      console.log(e);
+    }
   }
-}
-
-
-
- 
 
   async getQRCode(id: string) {
     let d = await QRCode.toDataURL(id)
@@ -704,7 +699,4 @@ async patientMedicalRecord(id: number) {
       // console.log(e);
     }
   }
- 
- 
-
 }
