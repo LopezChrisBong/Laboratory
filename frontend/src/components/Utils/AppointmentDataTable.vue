@@ -449,7 +449,9 @@ export default {
       },
       headers: [
         { text: "Name", value: "name", align: "start" },
-        { text: "PatientID", value: "unique_patientID", align: "center" },
+        // { text: "PatientID", value: "unique_patientID", align: "center" },
+        { text: "Dontor's Name", value: "doctor_name", align: "center" },
+        { text: "Clinic", value: "clinic", align: "center" },
         { text: "Date", value: "date", align: "center" },
         { text: "Time", value: "time", align: "center" },
         { text: "Status", value: "status", align: "center" },

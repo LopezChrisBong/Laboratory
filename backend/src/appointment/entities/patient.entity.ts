@@ -39,6 +39,21 @@ export class Patient {
     @Column({ type: "varchar" })
     gender: string
 
+    @Column({ type: "varchar" })
+    region: string
+
+    @Column({ type: "varchar" })
+    province: string
+
+
+    @Column({ type: "varchar" })
+    city_muni: string
+
+    @Column({ type: "varchar" })
+    baranggay: string
+
+    @Column({ type: "varchar" })
+    purok: string
     
     @Column({ type: "bigint" })
     contact_no: number

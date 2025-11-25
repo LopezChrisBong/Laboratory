@@ -32,7 +32,7 @@
                 <v-row class="">
                   <v-col cols="12" md="4" sm="12" v-show="info == 1">
                     <v-text-field
-                      label="First Name"
+                      label="*First Name"
                       v-model="form.f_name"
                       :rules="[formRules.required]"
                       class="text-uppercase"
@@ -51,7 +51,7 @@
                   </v-col>
                   <v-col cols="12" md="4" sm="12" v-show="info == 1">
                     <v-text-field
-                      label="Last Name"
+                      label="*Last Name"
                       v-model="form.l_name"
                       :rules="[formRules.required]"
                       class="text-uppercase"
@@ -70,7 +70,7 @@
                   </v-col>
                   <v-col cols="12" md="4" sm="12" v-show="info == 1">
                     <v-text-field
-                      label="Birth Date"
+                      label="*Birth Date"
                       v-model="form.b_date"
                       :rules="[formRules.required]"
                       required
@@ -102,7 +102,7 @@
                   </v-col> -->
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-select
-                      label="Civil Status"
+                      label="*Civil Status"
                       :items="statusList"
                       v-model="form.civil_status"
                       :rules="[(v) => !!v || 'Gender is required']"
@@ -112,7 +112,7 @@
                   </v-col>
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-text-field
-                      label="Occupation"
+                      label="*Occupation"
                       v-model="form.occupation"
                       :rules="[formRules.required]"
                       class="text-uppercase"
@@ -123,7 +123,7 @@
 
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-select
-                      label="Sex"
+                      label="*Sex"
                       :items="genderList"
                       v-model="form.gender"
                       :rules="[(v) => !!v || 'Gender is required']"
@@ -132,20 +132,96 @@
                     />
                   </v-col>
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
-                    <v-text-field
-                      label="Contact No."
+                    <!-- <v-text-field
+                      label="*Contact No."
                       v-model="form.contact_no"
                       :rules="[formRules.required]"
                       required
                       type="number"
                       class="text-uppercase"
-                    />
+                    /> -->
+                    <v-text-field
+                      v-model="form.contact_no"
+                      label="*Contact No."
+                      color="#6DB249"
+                      type="text"
+                      maxlength="11"
+                      @keypress="onlyDigits"
+                      :rules="[contactNoRule]"
+                    ></v-text-field>
                   </v-col>
 
-                  <v-col cols="12" md="12" sm="12" v-show="info == 1">
-                    <v-text-field
-                      label="Address"
+                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                    <!-- <v-text-field
+                      label="*Address"
                       v-model="form.address"
+                      :rules="[formRules.required]"
+                      class="text-uppercase"
+                      required
+                      @input="toUppercase('address', $event)"
+                    /> -->
+                    <v-autocomplete
+                      v-model="form.region"
+                      :rules="[formRules.required]"
+                      dense
+                      class="rounded-lg"
+                      item-text="regionName"
+                      item-value="code"
+                      label="*Region"
+                      color="#93CB5B"
+                      :items="regionList"
+                      @change="changeRegion()"
+                    >
+                    </v-autocomplete>
+                  </v-col>
+                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                    <v-autocomplete
+                      v-model="form.province"
+                      :rules="[formRules.required]"
+                      dense
+                      class="rounded-lg"
+                      item-text="name"
+                      item-value="code"
+                      label="*Province"
+                      color="#93CB5B"
+                      :items="provinceList"
+                      @change="changeProvince()"
+                    >
+                    </v-autocomplete>
+                  </v-col>
+                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                    <v-autocomplete
+                      v-model="form.city_muni"
+                      :rules="[formRules.required]"
+                      dense
+                      class="rounded-lg"
+                      item-text="name"
+                      item-value="code"
+                      label="*City/Municipality"
+                      color="#93CB5B"
+                      :items="city_muniList"
+                      @change="changeCityMuni()"
+                    >
+                    </v-autocomplete>
+                  </v-col>
+                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                    <v-autocomplete
+                      v-model="form.baranggay"
+                      :rules="[formRules.required]"
+                      dense
+                      class="rounded-lg"
+                      item-text="name"
+                      item-value="code"
+                      label="*Baranggay"
+                      color="#93CB5B"
+                      :items="baranggayList"
+                    >
+                    </v-autocomplete>
+                  </v-col>
+                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                    <v-text-field
+                      label="*Street/Purok"
+                      v-model="form.purok"
                       :rules="[formRules.required]"
                       class="text-uppercase"
                       required
@@ -155,7 +231,7 @@
                   <v-col cols="12" v-show="info == 2">
                     <div>
                       <p style="font-size: 24px;">
-                        Please select the Clinic to Visit
+                        Please Select a Clinic Specialty to Visit
                       </p>
                     </div>
                   </v-col>
@@ -293,10 +369,23 @@
                           deletable-chips
                           :rules="[(v) => !!v || 'required']"
                           label="Select Date"
-                          item-value="id"
                           item-text="date"
-                          @change="changeSchedule(doctors_date)"
                           :items="doctors_schedList"
+                          class="rounded-lg"
+                          @change="changeDoctorList()"
+                          color="#6DB249"
+                        ></v-autocomplete>
+                        <br />
+                        <v-autocomplete
+                          v-model="doctor_selected"
+                          small-chips
+                          deletable-chips
+                          :rules="[(v) => !!v || 'required']"
+                          label="Select Doctor"
+                          item-value="id"
+                          item-text="name"
+                          @change="changeSchedule(doctor_selected)"
+                          :items="doctors_data"
                           class="rounded-lg"
                           color="#6DB249"
                         ></v-autocomplete>
@@ -325,12 +414,7 @@
                                 <v-img
                                   style="width: 200px; height: 150px;"
                                   :src="item.profile"
-                                  @error="
-                                    (e) =>
-                                      (e.target.src =
-                                        process.env.VUE_APP_SERVER +
-                                        '/user-details/getProfileImg/img_avatar.png')
-                                  "
+                                  @error="onImageError(item)"
                                 ></v-img>
                               </div>
                               <div>
@@ -383,19 +467,7 @@
                     v-if="info != 3"
                     color="primary"
                     class="mt-4"
-                    @click="
-                      form.f_name &&
-                      form.l_name &&
-                      form.age &&
-                      form.civil_status &&
-                      form.gender &&
-                      form.occupation &&
-                      form.contact_no &&
-                      form.b_date &&
-                      form.address != null
-                        ? next()
-                        : alerts()
-                    "
+                    @click="validateAndNext"
                   >
                     Next
                   </v-btn>
@@ -408,11 +480,6 @@
 
       <v-dialog v-model="confirmationDialog" max-width="450">
         <v-card>
-          <!-- <v-card-title
-            ><p style="text-align: center;">
-              Thank you for your submission!
-            </p></v-card-title
-          > -->
           <div class="pt-4">
             <p style="text-align: center; font-size: 24px;">
               <b>Thank you for your submission!</b>
@@ -420,16 +487,59 @@
           </div>
           <v-card-text>
             <v-row>
+              <!-- Booking Details -->
+              <v-col cols="12" class="mb-2">
+                <div style=" font-size: 12px;">
+                  <v-row>
+                    <v-col cols="12" md="6">
+                      <span>
+                        <b>Patient Name:</b> {{ form.f_name }} {{ form.l_name }}
+                      </span></v-col
+                    >
+                    <v-col cols="12" md="6">
+                      <span
+                        ><b>Scheduled Date:</b>
+                        {{ doctors_date ? doctors_date : form.date }}</span
+                      ></v-col
+                    >
+                    <v-col cols="12" md="6"
+                      ><span
+                        ><b>Scheduled Time:</b>
+                        {{ doctor_time ? doctor_time : form.time }}</span
+                      ></v-col
+                    >
+                    <v-col cols="12" md="6" v-if="doc_profile.length">
+                      <b>Doctor:</b>
+                      <span v-for="item in doc_profile" :key="item.id">
+                        {{ item.name }}
+                      </span>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="clinicDecription.specialty != 'Others'"
+                    >
+                      <span
+                        ><b>Department:</b>
+                        {{ clinicDecription.specialty }}</span
+                      ></v-col
+                    >
+                  </v-row>
+                </div>
+              </v-col>
+
+              <!-- Screenshot Note -->
               <v-col cols="12" class="mb-1">
                 <div>
                   <p style="text-align: center; font-size: 14px;" class="px-2">
-                    Please take a screenshot of this confirmation receipt. You
-                    will need to present it together with your valid ID when you
-                    arrive at the clinic for validation
+                    Please <b>take a screenshot</b> of this confirmation
+                    receipt. You will need to present it together with your
+                    valid ID when you arrive at the clinic for validation.
                   </p>
                 </div>
               </v-col>
 
+              <!-- Contact Info -->
               <v-col cols="12" class="mb-1">
                 <div>
                   <p style="text-align: center; font-size: 14px;" class="px-2">
@@ -472,6 +582,7 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   data() {
     return {
@@ -479,12 +590,10 @@ export default {
       allTotalServices: null,
       serviceTotalPrice: null,
       packageTotalPrice: null,
-      doctors_time: null,
       doctors_date: null,
       doc_profile: [],
       doctor_time: null,
       doctors_schedList: [],
-      doctors_schedList1: [],
       activeTab: { id: 1, name: "Laboratory" },
       tab: 1,
       tabList: [
@@ -498,6 +607,8 @@ export default {
       info: 1,
       menu: false,
       confirmationDialog: false,
+      provinceList: [],
+      city_muniList: [],
       form: {
         f_name: null,
         suffix: null,
@@ -512,8 +623,18 @@ export default {
         address: null,
         date: null,
         time: null,
+        region: null,
+        province: null,
+        city_muni: null,
+        baranggay: null,
+        purok: null,
       },
+      doctors_data: [],
+      doctor_selected: null,
+      baranggayList: [],
       clinicList: [],
+      envProcess: process.env.VUE_APP_SERVER,
+      regionList: [],
       selectedIndex: null,
       dataPackages: [],
       genderList: ["Male", "Female"],
@@ -533,6 +654,7 @@ export default {
         "04:00 PM",
       ],
       allTimes1: [
+        "12:00 AM",
         "01:00 AM",
         "02:00 AM",
         "03:00 AM",
@@ -556,7 +678,6 @@ export default {
         "09:00 PM",
         "10:00 PM",
         "11:00 PM",
-        "12:00 AM",
       ],
       dataServices: [],
       bookings: [],
@@ -570,6 +691,12 @@ export default {
     };
   },
   computed: {
+    contactNoRule() {
+      return (v) => {
+        if (!v || v.length !== 11) return "Contact number must be 11 digits";
+        return true;
+      };
+    },
     filteredTimes() {
       const now = new Date();
       const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
@@ -591,9 +718,7 @@ export default {
     },
     remainingTimes() {
       const now = new Date();
-      const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
-
-      // Convert time like "02:00 PM" → total minutes
+      const todayStr = now.toISOString().split("T")[0];
       const timeToMinutes = (t) => {
         const [time, modifier] = t.split(" ");
         let [hours, minutes] = time.split(":").map(Number);
@@ -609,41 +734,47 @@ export default {
       return this.allTimes1;
     },
     availableTimes() {
-      if (!this.form.date) return this.remainingTimes;
+      if (!this.doctor_selected) return this.remainingTimes;
+
+      const timeToMinutes = (t) => {
+        const [time, modifier] = t.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (modifier === "PM" && hours !== 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
 
       const bookedTimes = this.bookings
-        .filter((b) => b.date === this.form.date)
+        .filter((b) => b.date === this.doctors_date)
         .map((b) => b.time.trim());
+
+      console.log("bookedTimes", bookedTimes);
 
       const uniqueBooked = [...new Set(bookedTimes)];
 
       const docSchedule = this.doc_profile.find(
-        (d) => d.date === this.form.date
+        (d) => d.oldDate === this.doctors_date
       );
 
       let doctorTimes = this.remainingTimes;
 
       if (docSchedule) {
-        const startIndex = this.remainingTimes.indexOf(docSchedule.timeFrom);
-        const endIndex = this.remainingTimes.indexOf(docSchedule.timeTo);
+        const start = timeToMinutes(docSchedule.timeFrom);
+        const end = timeToMinutes(docSchedule.timeTo);
 
-        if (startIndex !== -1 && endIndex !== -1) {
-          if (startIndex <= endIndex) {
-            doctorTimes = this.remainingTimes.slice(startIndex, endIndex + 1);
-          } else {
-            doctorTimes = [
-              ...this.remainingTimes.slice(startIndex),
-              ...this.remainingTimes.slice(0, endIndex + 1),
-            ];
-          }
-        }
+        doctorTimes = this.remainingTimes.filter((t) => {
+          const minutes = timeToMinutes(t);
+          return minutes >= start && minutes <= end;
+        });
       }
+      let newTime = doctorTimes.filter((time) => !uniqueBooked.includes(time));
 
-      return doctorTimes.filter((time) => !uniqueBooked.includes(time));
+      return newTime;
     },
+
     minDate() {
       const today = new Date();
-      today.setMonth(today.getMonth());
+      today.setMonth(today.getMonth() - 1);
       return today.toISOString().substr(0, 10);
     },
     maxDate() {
@@ -683,11 +814,67 @@ export default {
   },
   mounted() {
     // this.getAllSchedule();
+
     this.getAllServices();
     this.getAllPackages();
     this.getAllClinic();
+    this.getRegion();
   },
   methods: {
+    validateAndNext() {
+      const {
+        f_name,
+        l_name,
+        age,
+        civil_status,
+        gender,
+        occupation,
+        contact_no,
+        b_date,
+        region,
+        province,
+        city_muni,
+        baranggay,
+        purok,
+        address,
+      } = this.form;
+
+      const contactValid = contact_no && contact_no.length === 11;
+      const allFieldsFilled =
+        f_name &&
+        l_name &&
+        age &&
+        civil_status &&
+        gender &&
+        occupation &&
+        contactValid &&
+        b_date &&
+        region &&
+        province &&
+        city_muni &&
+        baranggay &&
+        purok &&
+        address;
+
+      if (allFieldsFilled) {
+        this.next();
+      } else {
+        this.alerts();
+      }
+    },
+    onImageError(item) {
+      item.profile =
+        this.envProcess + "/user-details/getProfileImg/img_avatar.png";
+    },
+    changeDoctorList() {
+      let newArr = [];
+      for (let i = 0; i < this.doctors_schedList.length; i++) {
+        if (this.doctors_schedList[i].date == this.doctors_date) {
+          newArr.push(this.doctors_schedList[i].doctors);
+        }
+      }
+      this.doctors_data = newArr[0];
+    },
     selectButton(index) {
       this.selectedIndex = index;
     },
@@ -715,15 +902,12 @@ export default {
     },
     async fetchBookings(data) {
       try {
-        this.axiosCall(
+        const res = await this.axiosCall(
           "/appointment/getAllDoctorsAppointment/" + data[0].doctorID,
           "GET"
-        ).then((res) => {
-          for (let i = 0; i < res.data.length; i++) {
-            this.bookings.push(res.data[i]);
-          }
-          console.log(" this.bookings.", this.bookings);
-        });
+        );
+
+        this.bookings = res.data;
       } catch (err) {
         console.error("Failed to fetch bookings:", err);
       }
@@ -733,42 +917,44 @@ export default {
       this.confirmationDialog = true;
     },
     changeSchedule(sched) {
-      // console.log("wdadawdawd", sched);
-      let newArr = [];
-      for (let i = 0; i < this.doctors_schedList.length; i++) {
-        if (this.doctors_schedList[i].id == sched) {
-          newArr.push(this.doctors_schedList[i]);
-        }
+      let newArr = this.doctors_data.filter((doc) => doc.id == sched);
+      if (!newArr.length) return;
+      console.log("newArr", newArr);
+
+      for (let i = 0; i < newArr.length; i++) {
+        newArr[i].oldDate = newArr[i].date; // keep track of the schedule date
+        const profileUrl =
+          process.env.VUE_APP_SERVER +
+          "/user-details/getProfileImg/" +
+          newArr[i].profile;
+        newArr[i].profile = newArr[i].profile
+          ? profileUrl
+          : process.env.VUE_APP_SERVER +
+            "/user-details/getProfileImg/img_avatar.png";
+        newArr[
+          i
+        ].displayDate = `${newArr[i].date} From: ${newArr[i].timeFrom} To: ${newArr[i].timeTo}`;
       }
-      this.allTimes1 = this.getDoctorAvailableTimes(newArr[0]);
-      this.form.date = newArr[0].oldDate;
       this.doc_profile = newArr;
       this.fetchBookings(newArr);
     },
 
     getDoctorAvailableTimes(schedule) {
-      const normalizeTime = (str) => str.trim().toUpperCase();
+      const timeToMinutes = (t) => {
+        const [time, modifier] = t.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (modifier === "PM" && hours !== 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
 
-      const startTime = normalizeTime(schedule.timeFrom);
-      const endTime = normalizeTime(schedule.timeTo);
+      const start = timeToMinutes(schedule.timeFrom);
+      const end = timeToMinutes(schedule.timeTo);
 
-      const startIndex = this.allTimes1.indexOf(startTime);
-      const endIndex = this.allTimes1.indexOf(endTime);
-
-      if (startIndex === -1 || endIndex === -1) {
-        return []; // if mismatch, return empty
-      }
-
-      if (startIndex <= endIndex) {
-        // Normal case: e.g. 01:00 AM → 11:00 AM
-        return this.allTimes1.slice(startIndex, endIndex + 1);
-      } else {
-        // Overnight case: e.g. 10:00 PM → 02:00 AM
-        return [
-          ...this.allTimes1.slice(startIndex),
-          ...this.allTimes1.slice(0, endIndex + 1),
-        ];
-      }
+      return this.allTimes1.filter((t) => {
+        const minutes = timeToMinutes(t);
+        return minutes >= start && minutes <= end;
+      });
     },
     // getAllSchedule() {
     //   this.axiosCall("/appointment/getAllSchedule/DataAppointment", "GET").then(
@@ -831,32 +1017,9 @@ export default {
         "GET"
       ).then((res) => {
         if (res) {
-          // console.log(res.data);
-          this.doctors_schedList1 = res.data;
+          console.log(res.data);
+
           let data = res.data;
-          Object.assign(data, { oldDate: null });
-
-          for (let i = 0; i < data.length; i++) {
-            const url =
-              process.env.VUE_APP_SERVER +
-              "/user-details/getProfileImg/" +
-              data[i].profile;
-
-            data[i].oldDate = data[i].date;
-            data[i].date =
-              this.formatDate(data[i].date) +
-              " From: " +
-              data[i].timeFrom +
-              " To: " +
-              data[i].timeTo;
-
-            data[i].profile = url
-              ? process.env.VUE_APP_SERVER +
-                "/user-details/getProfileImg/" +
-                data[i].profile
-              : process.env.VUE_APP_SERVER +
-                "/user-details/getProfileImg/img_avatar.png";
-          }
 
           this.doctors_schedList = data;
         }
@@ -874,7 +1037,21 @@ export default {
         gender: this.form.gender,
         contact_no: this.form.contact_no,
         b_date: this.form.b_date,
-        address: this.form.address,
+        region: this.form.region,
+        province: this.form.province,
+        city_muni: this.form.city_muni,
+        baranggay: this.form.baranggay,
+        purok: this.form.purok,
+        address:
+          this.form.region +
+          " " +
+          this.form.province +
+          ", " +
+          this.form.city_muni +
+          ", " +
+          this.form.baranggay +
+          " " +
+          this.purok,
       };
 
       // console.log("Data Passed", data);
@@ -1068,12 +1245,13 @@ export default {
       this.doctor_time = null;
       this.doctors_date = null;
       this.doctors_schedList = [];
-      this.doctors_schedList1 = [];
       this.selected = [];
     },
     changeTime() {
       this.doctors_date = null;
+      this.doctor_selected = null;
       this.form.date = null;
+      this.doc_profile = [];
       this.allTimes1 = [
         "01:00 AM",
         "02:00 AM",
@@ -1100,6 +1278,50 @@ export default {
         "11:00 PM",
         "12:00 AM",
       ];
+    },
+    getRegion() {
+      axios.get("https://psgc.gitlab.io/api/regions.json").then((res) => {
+        this.regionList = res.data;
+      });
+    },
+    changeRegion() {
+      axios
+        .get(
+          "https://psgc.gitlab.io/api/regions/" +
+            this.form.region +
+            "/provinces.json"
+        )
+        .then((res) => {
+          this.provinceList = res.data;
+        });
+    },
+    changeProvince() {
+      axios
+        .get(
+          "https://psgc.gitlab.io/api/provinces/" +
+            this.form.province +
+            "/cities-municipalities.json"
+        )
+        .then((res) => {
+          this.city_muniList = res.data;
+        });
+    },
+    changeCityMuni() {
+      axios
+        .get(
+          "https://psgc.gitlab.io/api/municipalities/" +
+            this.form.city_muni +
+            "/barangays.json"
+        )
+        .then((res) => {
+          this.baranggayList = res.data;
+        });
+    },
+    onlyDigits(event) {
+      const char = String.fromCharCode(event.keyCode);
+      if (!/[0-9]/.test(char)) {
+        event.preventDefault();
+      }
     },
   },
 };

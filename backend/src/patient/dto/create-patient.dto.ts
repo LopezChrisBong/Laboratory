@@ -18,7 +18,17 @@ export class CreatePatientDto {
             @ApiProperty()
             gender:string;
             @ApiProperty()
-            age:number;
+            age:string;
+            @ApiProperty()
+            region:string;
+            @ApiProperty()
+            province:string;
+            @ApiProperty()
+            city_muni:string;
+            @ApiProperty()
+            baranggay:string;
+            @ApiProperty()
+            purok:string;
             @ApiProperty()
             n_spouse:string;
             @ApiProperty()

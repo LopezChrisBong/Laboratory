@@ -141,7 +141,10 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="laboratoryDialog" max-width="600px">
+    <v-dialog
+      v-model="laboratoryDialog"
+      :max-width="currentFileUrl ? '1000px' : '600px'"
+    >
       <v-card outlined class="pa-4">
         <v-card-title>
           {{ !currentFileUrl ? "Upload" : "View" }} Attachment
@@ -173,8 +176,32 @@
 
           <!-- Preview existing file -->
           <div v-if="currentFileUrl" class="mt-4">
-            <strong>Uploaded File:</strong><br />
-            <a :href="currentFileUrl" target="_blank">{{ currentFileName }}</a>
+            <strong>Uploaded File:</strong>
+            <a
+              :href="currentFileUrlDownload"
+              download
+              style="border: 1px solid black; padding: 3px 5px; display: inline-block; cursor: pointer; border-radius: 20px; margin-left: 1rem; margin-bottom: 1rem;"
+            >
+              Download
+            </a>
+            <br />
+            <!-- <a :href="currentFileUrl" target="_blank">{{ currentFileName }}</a> -->
+            <!-- <iframe
+              v-if="currentFileUrl"
+              width="100%"
+              height="600"
+              :src="currentFileUrl"
+              title="LIS Reports"
+            ></iframe> -->
+            <iframe
+              v-if="currentFileUrl"
+              width="100%"
+              height="600"
+              src="https://docs.google.com/spreadsheets/d/1Yb3lOvrlONVzwG8OH7Wp_P4NbPXqIAABTAr9doKeQww/edit?usp=sharing"
+              title="LIS Reports"
+            ></iframe>
+
+            {{ currentFileUrl }}
           </div>
         </v-card-text>
       </v-card>
@@ -212,7 +239,7 @@ export default {
         top: 10,
       },
       dialog: false,
-
+      currentFileUrlDownload: null,
       medicalData: null,
       id: null,
       isButtonLoading: false,
@@ -374,11 +401,42 @@ export default {
     async loadExistingFile(attachment) {
       try {
         if (attachment) {
-          this.currentFileUrl =
+          this.getFileDownload(attachment);
+          const baseUrl =
             process.env.VUE_APP_SERVER +
             "/appointment/view/attachment/" +
             attachment;
+          const ext = attachment
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+          // File types that need Office Viewer (cannot be viewed by browser)
+          const officeExt = ["xls", "xlsx", "doc", "docx", "ppt", "pptx"];
+
+          if (officeExt.includes(ext)) {
+            // Wrap URL with Office viewer
+            this.currentFileUrl =
+              "https://view.officeapps.live.com/op/embed.aspx?src=" +
+              encodeURIComponent(baseUrl);
+          } else {
+            // Normal files (pdf/images/videos) can load directly
+            this.currentFileUrl = baseUrl;
+          }
+
           this.currentFileName = attachment;
+        }
+      } catch (err) {
+        console.error("Error fetching file:", err);
+      }
+    },
+    async getFileDownload(attachment) {
+      try {
+        if (attachment) {
+          this.currentFileUrlDownload =
+            process.env.VUE_APP_SERVER +
+            "/appointment/view/attachment/" +
+            attachment;
         }
       } catch (err) {
         console.error("Error fetching file:", err);

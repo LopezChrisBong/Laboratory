@@ -73,6 +73,11 @@ export class AppointmentService {
           contact_no: patient.contact_no,
           b_date: patient.b_date,
           address: patient.address,
+          region: patient.region,
+          province: patient.province,
+          city_muni: patient.city_muni,
+          baranggay: patient.baranggay,
+          purok: patient.purok,
         });
 
         let savedCategory = await queryRunner.manager.save(data);
@@ -131,8 +136,8 @@ export class AppointmentService {
           date: appointment.date,
           time: appointment.time,
           clinic:appointment.clinic,
-          status:appointment.status ? appointment.status : 0,
-          doctorID:appointment.doctorID
+          status:appointment.status ? appointment.status : appointment.clinic != 'Others' ? 1 : 0,
+          doctorID:appointment.doctorID,
         });
 
         await queryRunner.manager.save(data);
@@ -689,9 +694,11 @@ let data = await this.appointmentRepository
   .select([
     'ap.*',
     "IF (!ISNULL(p.m_name), concat(p.f_name, ' ',SUBSTRING(p.m_name, 1, 1) ,'. ',p.l_name) ,concat(p.f_name, ' ', p.l_name)) as name",
-    'p.patientID as unique_patientID'
+    'p.patientID as unique_patientID',
+     "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
   ])
   .leftJoin(Patient, 'p', 'p.id = ap.patientID')
+  .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
   .where('ap.medtechID IS NULL')
   if(tab == 1){
     data.andWhere('ap.status = 0')
@@ -699,6 +706,7 @@ let data = await this.appointmentRepository
     data.andWhere('ap.status != 0')
   }
   let newData = await data.getRawMany();
+  console.log(newData)
   return newData
   }
 
@@ -806,22 +814,23 @@ async getAllDoctorsAppointment(id: number) {
   const events = data.map(item => {
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    const startDate = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A').format('YYYY-MM-DD HH:mm');
-    const endDate = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A').format('YYYY-MM-DD HH:mm');
+    const start = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A');
+    const end = start.add(30, 'minute'); 
 
     return {
       name: item.name,
       status: item.status,
-      start: startDate, 
-      end: endDate,    
+      start: start.format('YYYY-MM-DD HH:mm'),
+      end: end.format('YYYY-MM-DD HH:mm'),
       color: randomColor,
-      time:item.time,
-      date:item.date
+      time: item.time,
+      date: item.date
     };
   });
-    // console.log(events)
+
   return events;
 }
+
 
 async getAllMedtechAppointment(id: number) {
   const data = await this.serviceAppointmentRepository
