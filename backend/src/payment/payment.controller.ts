@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -17,10 +26,27 @@ export class PaymentController {
     return this.paymentService.invoice(createPaymentDto);
   }
 
-
   @Get('/getAnalyticsIncome')
   getAnalyticsIncome(@Query('date') date?: string) {
     return this.paymentService.getAnalyticsIncome(date);
+  }
+
+  @Get('/getDailyIncome')
+  getDailyIncome(@Query('date') date?: string) {
+    return this.paymentService.getDailyIncome(date);
+  }
+
+  @Get('/getMonthlyIncome')
+  getMonthlyIncome(
+    @Query('month') month?: string,
+    @Query('year') year?: string,
+  ) {
+    return this.paymentService.getMonthlyIncome(month, year);
+  }
+
+  @Get('/getYearlyIncome')
+  getYearlyIncome(@Query('year') year?: string) {
+    return this.paymentService.getYearlyIncome(year);
   }
 
   @Get('/getIncomeInvoice')
@@ -28,21 +54,21 @@ export class PaymentController {
     return this.paymentService.getIncomeInvoice();
   }
 
-    @Get('/findAllPendingPayment')
+  @Get('/findAllPendingPayment')
   findAllPendingPayment() {
     return this.paymentService.findAllPendingPayment();
   }
 
-    @Get('/fullyPaid')
+  @Get('/fullyPaid')
   fullyPaid() {
     return this.paymentService.fullyPaid();
   }
 
-    @Get('/findOnePatientPayment/:id')
+  @Get('/findOnePatientPayment/:id')
   findOnePatientPayment(@Param('id') id: string) {
     return this.paymentService.findOnePatientPayment(+id);
   }
- 
+
   @Get()
   findAll() {
     return this.paymentService.findAll();

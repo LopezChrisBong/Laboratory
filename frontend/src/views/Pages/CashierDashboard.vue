@@ -3,339 +3,112 @@
     <!--Invoice-->
     <v-row>
       <v-col cols="12" md="4">
-        <v-card @click="openIncome()">
+        <v-card>
           <v-card-text
             class="d-flex flex-column align-center justify-center text-center"
             ><div class="d-flex align-center justify-center">
               <v-icon size="40">mdi-currency-php</v-icon>
-              <h1>{{ invoice_income.daily_average_income }}</h1>
+              <h1>{{ computeDaily }}</h1>
             </div>
-            <p>Total Income Daily</p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-card @click="openIncome()">
-          <v-card-text
-            class="d-flex flex-column align-center justify-center text-center"
-          >
-            <div class="d-flex align-center justify-center">
-              <v-icon size="40">mdi-currency-php</v-icon>
-              <h1>{{ invoice_income.total_month_income }}</h1>
-            </div>
-
-            <p>Total Income of this Month: {{ currentMonthIndex }}</p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-card @click="openIncome()">
-          <v-card-text
-            class="d-flex flex-column align-center justify-center text-center"
-          >
-            <div class="d-flex align-center justify-center">
-              <v-icon size="40">mdi-currency-php</v-icon>
-              <h1>{{ invoice_income.total_year_income }}</h1>
-            </div>
-            <p>Total Income of Year {{ currentYear }}</p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-    <!-- Appointment Request & Recent Patients -->
-    <v-row class="mt-6" dense>
-      <v-col cols="12" md="6" class="pa-0">
-        <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
-          <v-tab v-for="tab in tabList" :key="tab.id" @click="changeTab(tab)"
-            >{{ tab.name }}
-          </v-tab>
-        </v-tabs>
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-text-field
-          v-model="search"
-          outlined
-          prepend-inner-icon="search"
-          label="Search"
-          single-line
-          hide-details
-          class="rounded-lg"
-          color="#239FAB"
-          dense
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" md="12">
-        <v-card class="pa-4 rounded-lg elevation-2">
-          <!-- <h3 class="font-weight-medium mb-3">Pending Payment</h3> -->
-          <v-data-table
-            :headers="tab == 1 ? patientHeaders : patientHeaders2"
-            :items="patients"
-            :options.sync="options"
-            dense
-            :search="search"
-            :loading="loading"
-          >
-            <template v-slot:[`item.status`]="{ item }">
-              <v-chip
-                :color="
-                  item.status === 'Outpatient'
-                    ? 'green lighten-4'
-                    : 'red lighten-4'
-                "
-                text-color="black"
-                small
-              >
-                {{ item.status }}
-              </v-chip>
-            </template>
-            <template v-slot:[`item.action`]="{ item }">
-              <v-btn
-                small
-                color="grey"
-                icon
-                @click="editItem(item)"
-                v-if="tab == 1"
-              >
-                <v-icon>mdi-account-cash</v-icon>
-              </v-btn>
-              <v-btn
-                small
-                color="blue"
-                icon
-                @click="print(item)"
-                v-if="tab == 2"
-              >
-                <v-icon>mdi-printer-outline</v-icon>
-              </v-btn>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-dialog v-model="dialogConfirmDone" max-width="800">
-      <v-card class="pa-6">
-        <!-- Header -->
-        <v-row>
-          <v-col cols="8">
-            <div class="text-h6 font-weight-bold">
-              PARAGON Diagnostics And Multi-Specialty Clinic
-            </div>
-            <div>Bluz Building 2, Tadeco Road,</div>
-            <div>Brgy. San Francisco, Panabo, Philippines</div>
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-            style="justify-items: right; align-items: right;"
-          >
-            <v-img
-              src="../../assets/img/Paragon Logo.png"
-              :style="$vuetify.breakpoint.smAndUp ? 'width: 60%' : 'width:20%'"
-            ></v-img>
-          </v-col>
-        </v-row>
-
-        <v-divider class="my-4"></v-divider>
-
-        <div
-          class="text-center text-h5 font-weight-bold mb-6 blue--text text--darken-3"
-        >
-          MEDICAL INVOICE
-        </div>
-
-        <!-- Invoice Info -->
-        <v-row>
-          <v-col cols="6">
-            <div class="font-weight-bold blue--text text--darken-3 mb-1">
-              Bill To
-            </div>
-            <div>{{ payPatient.name }}</div>
-          </v-col>
-
-          <v-col cols="6" class="text-right">
-            <div><strong>Invoice #:</strong> {{ payPatient.invoice_no }}</div>
-            <div><strong>Invoice date:</strong> {{ date }}</div>
-          </v-col>
-        </v-row>
-
-        <!-- Service Table -->
-        <v-simple-table class="mt-6">
-          <thead>
-            <tr style="background-color:#003366; color:white">
-              <!-- <th class="text-left">QTY</th> -->
-              <th class="text-left white--text">Description</th>
-              <th class="text-right white--text">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, i) in payPatient.labData" :key="i">
-              <!-- <td>1</td> -->
-              <td>{{ item.service_description }}</td>
-              <td class="text-right">{{ item.service_price }}</td>
-            </tr>
-          </tbody>
-        </v-simple-table>
-
-        <!-- Totals -->
-        <v-row class="justify-end mt-4">
-          <v-col cols="12" sm="6">
-            <v-simple-table dense>
-              <tbody>
-                <tr>
-                  <td>Subtotal</td>
-                  <td class="text-right">{{ payPatient.total_amount }}</td>
-                </tr>
-                <tr>
-                  <td>Discount</td>
-                  <td class="text-right">
-                    <v-autocomplete
-                      v-model="selectedDiscount"
-                      small-chips
-                      deletable-chips
+            <div class="d-flex align-center">
+              <div>Total Income of the Day</div>
+              <div class="mt-2 mx-2">
+                <v-menu
+                  v-model="menuDate"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  max-width="290px"
+                  min-width="290px"
+                >
+                  <template #activator="{ on, attrs }">
+                    <v-text-field
                       dense
-                      class="rounded-lg"
-                      item-text="description"
-                      item-value="id"
-                      label=""
-                      color="#93CB5B"
-                      :items="discountList"
-                    >
-                    </v-autocomplete>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Discount Amount</td>
-                  <td class="text-right">-{{ discountAmount }}</td>
-                </tr>
-                <tr style="font-weight:bold; color:#003366">
-                  <td>Total (Php)</td>
-                  <td class="text-right">{{ totalAmount }}</td>
-                </tr>
-              </tbody>
-            </v-simple-table>
-          </v-col>
-        </v-row>
-
-        <v-divider class="my-4"></v-divider>
-
-        <!-- Terms -->
-        <div class="blue--text text--darken-3 font-weight-bold">
-          Terms and Conditions
-        </div>
-        <div>Please make checks payable to: PARAGON</div>
-
-        <!-- Actions -->
-        <v-card-actions class="mt-6">
-          <v-spacer></v-spacer>
-          <v-btn color="grey" outlined @click="dialogConfirmDone = false"
-            >Close</v-btn
-          >
-          <v-btn color="primary" dark @click="invoice()">Confirm</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="dialog" max-width="900px">
-      <v-card>
-        <v-card-title class="headline">Income Analytics</v-card-title>
-
-        <v-card-text>
-          <v-tabs
-            v-model="tabIncome"
-            background-color="primary"
-            dark
-            show-arrows
-            @change="changeIncome"
-          >
-            <v-tab>Daily (This Month)</v-tab>
-            <v-tab>Monthly (This Year)</v-tab>
-            <v-tab>Yearly (Past 5 Years)</v-tab>
-          </v-tabs>
-
-          <v-tabs-items v-model="tabIncome">
-            <v-tab-item>
-              <v-row class="mt-4" align="center" justify="start">
-                <v-col cols="12" md="4">
-                  <v-menu
-                    v-model="menuDate"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
-                  >
-                    <template #activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="selectedDate"
-                        label="Select Date"
-                        prepend-icon="mdi-calendar"
-                        readonly
-                        outlined
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-
-                    <v-date-picker
                       v-model="selectedDate"
-                      @input="updateDailyDate"
-                      color="primary"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-col>
-              </v-row>
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
 
-              <!-- Hourly Breakdown -->
-              <v-card class="pa-4 mt-4" elevation="2">
-                <h3 class="text-h6 mb-4">
-                  Tolal income of: {{ formatDate(selectedDate) }}
-                </h3>
-
-                <div
-                  v-if="dailyData.length === 0"
-                  class="text-center text-grey"
+                  <v-date-picker
+                    v-model="selectedDate"
+                    @input="getDailyIncome()"
+                    color="primary"
+                  ></v-date-picker>
+                </v-menu>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-card>
+          <v-card-text class="d-flex flex-column align-center justify-center">
+            <div class="d-flex align-center justify-center">
+              <v-icon size="40">mdi-currency-php</v-icon>
+              <h1>{{ computeMonthly }}</h1>
+            </div>
+            <div class="d-flex align-center">
+              <div class="d-flex justify-start">
+                Total Income of this Month:
+              </div>
+              <div class="d-flex">
+                <v-autocomplete
+                  v-model="selectedMonth"
+                  dense
+                  @change="getMonthIncome()"
+                  class="rounded-lg"
+                  color="#93CB5B"
+                  :items="monthArr"
                 >
-                  No records found for this date.
-                </div>
-
-                <div
-                  v-for="(item, index) in dailyData"
-                  :key="index"
-                  class="mb-4"
+                </v-autocomplete>
+                <v-autocomplete
+                  v-model="selectedYear"
+                  @change="getMonthIncome()"
+                  dense
+                  class="rounded-lg"
+                  color="#93CB5B"
+                  :items="yrArr"
                 >
-                  <div class="d-flex justify-space-between">
-                    <strong>{{ item.hour }}:00</strong>
-                    <span>₱ {{ item.amount.toLocaleString() }}</span>
-                  </div>
+                </v-autocomplete>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-card>
+          <v-card-text class="d-flex flex-column align-center justify-center">
+            <div class="d-flex align-center justify-center">
+              <v-icon size="40">mdi-currency-php</v-icon>
+              <h1>{{ computeYearly }}</h1>
+            </div>
 
-                  <v-progress-linear
-                    :model-value="(item.amount / peakHourAmount) * 100"
-                    height="10"
-                    rounded
-                  ></v-progress-linear>
-                </div>
-              </v-card>
-
-              <!-- <canvas id="dailyChart"></canvas> -->
-            </v-tab-item>
-
-            <v-tab-item>
-              <canvas id="monthlyChart"></canvas>
-            </v-tab-item>
-
-            <v-tab-item>
-              <canvas id="yearlyChart"></canvas>
-            </v-tab-item>
-          </v-tabs-items>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red" text @click="dialog = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+            <div class="d-flex align-center">
+              <div class="d-flex justify-start">Total Income of Year:</div>
+              <div class="d-flex mt-2 mx-2">
+                <v-autocomplete
+                  v-model="selectedYear1"
+                  @change="getYearlyIncome()"
+                  dense
+                  class="rounded-lg"
+                  color="#93CB5B"
+                  :items="yrArr"
+                >
+                </v-autocomplete>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="6">
+        <canvas id="monthlyChart"></canvas>
+      </v-col>
+      <v-col cols="6">
+        <canvas id="yearlyChart"></canvas>
+      </v-col>
+    </v-row>
 
     <fade-away-message-component
       displayType="variation2"
@@ -410,9 +183,39 @@ export default {
         { id: 1, name: "Pending" },
         { id: 2, name: "Fully Paid" },
       ],
+      monthArr: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ],
+      yrArr: [],
+      selectedMonth: null,
+      monthIncome: [],
+      selectedYear: null,
+      yearIncome: [],
+      selectedYear1: null,
     };
   },
   mounted() {
+    let d = new Date();
+    for (let i = d.getFullYear(); i >= 2024; i--) {
+      this.yrArr.push(i);
+    }
+    this.selectedYear = d.getFullYear();
+    this.selectedYear1 = d.getFullYear();
+    this.selectedMonth = this.monthArr[d.getMonth()];
+    this.getMonthIncome();
+    this.getYearlyIncome();
+    this.fetchIncomeData();
     this.initialize();
   },
   computed: {
@@ -429,6 +232,36 @@ export default {
     },
     totalAmount() {
       return this.payPatient.total_amount - this.discountAmount;
+    },
+
+    computeDaily() {
+      let amount = 0;
+      if (this.dailyData.length > 0) {
+        for (let i = 0; i < this.dailyData.length; i++) {
+          amount += this.dailyData[i].amount;
+        }
+      }
+      return this.formatNumberValue(amount, 2);
+    },
+    computeMonthly() {
+      let amount = 0;
+      if (this.monthIncome.length > 0) {
+        for (let i = 0; i < this.monthIncome.length; i++) {
+          amount += this.monthIncome[i].amount;
+        }
+      }
+
+      return this.formatNumberValue(amount, 2);
+    },
+    computeYearly() {
+      let amount = 0;
+      if (this.yearIncome.length > 0) {
+        for (let i = 0; i < this.yearIncome.length; i++) {
+          amount += this.yearIncome[i].amount;
+        }
+      }
+
+      return this.formatNumberValue(amount, 2);
     },
   },
   methods: {
@@ -474,22 +307,47 @@ export default {
       this.renderYearlyChart();
     },
 
+    getDailyIncome() {
+      const params = {
+        date: this.selectedDate, // send selected date to backend
+      };
+
+      this.axiosCall("/payment/getDailyIncome", "GET", params).then((res) => {
+        if (res) {
+          console.log("daily", res.data);
+          this.dailyData = res.data;
+        }
+      });
+    },
+
+    getMonthIncome() {
+      const params = {
+        month: this.selectedMonth,
+        year: this.selectedYear,
+      };
+
+      this.axiosCall("/payment/getMonthlyIncome", "GET", params).then((res) => {
+        if (res) {
+          console.log("month", res.data);
+          this.monthIncome = res.data;
+        }
+      });
+    },
+
+    getYearlyIncome() {
+      const params = {
+        year: this.selectedYear1,
+      };
+
+      this.axiosCall("/payment/getYearlyIncome", "GET", params).then((res) => {
+        if (res) {
+          console.log("month", res.data);
+          this.yearIncome = res.data;
+        }
+      });
+    },
+
     async fetchIncomeData() {
-      // this.dailyData = [
-      //   { day: 4, amount: 1100 },
-      //   { day: 5, amount: 900 },
-      //   { day: 6, amount: 700 },
-      // ];
-      // this.monthlyData = [
-      //   { month: 4, amount: 1100 },
-      //   { month: 5, amount: 900 },
-      //   { month: 6, amount: 700 },
-      // ];
-      // this.yearlyData = [
-      //   { year: 4, amount: 1100 },
-      //   { year: 5, amount: 900 },
-      //   { year: 6, amount: 700 },
-      // ];
       const params = {
         date: this.selectedDate, // send selected date to backend
       };
@@ -497,9 +355,11 @@ export default {
       this.axiosCall("/payment/getAnalyticsIncome", "GET", params).then(
         (res) => {
           if (res) {
-            this.dailyData = res.data.dailyData;
-            this.monthlyData = res.data.monthlyData;
-            this.yearlyData = res.data.yearlyData;
+            console.log("daily", res.data);
+            // this.monthlyData = res.data.monthlyData;
+            // this.yearlyData = res.data.yearlyData;
+            this.renderMonthlyChart(res.data.monthlyData);
+            this.renderYearlyChart(res.data.yearlyData);
           }
         }
       );
@@ -525,7 +385,7 @@ export default {
       });
     },
 
-    renderMonthlyChart() {
+    renderMonthlyChart(mnthData) {
       const ctx = document.getElementById("monthlyChart");
       if (this.monthlyChart) this.monthlyChart.destroy();
 
@@ -533,7 +393,10 @@ export default {
       const monthlyArray = new Array(12).fill(0);
 
       // ✅ Fill the array with your data
-      this.monthlyData.forEach((item) => {
+      // this.monthlyData.forEach((item) => {
+      //   monthlyArray[item.month] = item.amount;
+      // });
+      mnthData.forEach((item) => {
         monthlyArray[item.month] = item.amount;
       });
 
@@ -565,16 +428,22 @@ export default {
       });
     },
 
-    renderYearlyChart() {
+    renderYearlyChart(yrData) {
+      console.log("YT", yrData);
       const ctx = document.getElementById("yearlyChart");
       if (this.yearlyChart) this.yearlyChart.destroy();
 
-      this.yearlyData = this.yearlyData.map((item) => ({
+      // this.yearlyData = this.yearlyData.map((item) => ({
+      //   year: Number(item.year ?? item.YEAR),
+      //   amount: Number(item.amount ?? item.AMOUNT),
+      // }));
+      yrData = yrData.map((item) => ({
         year: Number(item.year ?? item.YEAR),
         amount: Number(item.amount ?? item.AMOUNT),
       }));
 
-      const years = this.yearlyData.map((i) => Number(i.year));
+      // const years = this.yearlyData.map((i) => Number(i.year));
+      const years = yrData.map((i) => Number(i.year));
 
       const currentYear = Math.max(...years);
 
@@ -586,8 +455,13 @@ export default {
         currentYear,
       ];
 
+      // const yearlyArray = yearRange.map((y) => {
+      //   const match = this.yearlyData.find((item) => Number(item.year) === y);
+      //   return match ? Number(match.amount) : 0;
+      // });
+
       const yearlyArray = yearRange.map((y) => {
-        const match = this.yearlyData.find((item) => Number(item.year) === y);
+        const match = yrData.find((item) => Number(item.year) === y);
         return match ? Number(match.amount) : 0;
       });
 
