@@ -15,21 +15,22 @@ import Users from "../views/Pages/Users.vue";
 import UserModules from "../views/Pages/UserModules.vue";
 import ModulesList from "../views/Pages/ModulesList.vue";
 import NotFound from "../views/Pages/NotFound.vue";
-import Patient from "../views/Pages/Patient.vue"
-import Inventory from "../views/Pages/Inventory.vue"
-import Appointment from "../views/Pages/Appointment.vue"
-import HospitalBilling from "../views/Pages/HospitalBilling.vue"
-import LaboratoryRequest from "../views/Pages/LaboratoryRequest.vue"
-import BillingData from "../views/Pages/BillingData.vue"
-import ReuestData from "../views/Pages/RequestData.vue"
-import PatientAppointment from "../views/Auth/PatientAppointment.vue"
-import LandingPage from "../views/Auth/LandingPage.vue"
-import Services from "../views/Pages/Services.vue"
-import PatientDoctor from "../views/Pages/PatientDoctor.vue"
+import Patient from "../views/Pages/Patient.vue";
+import Inventory from "../views/Pages/Inventory.vue";
+import Appointment from "../views/Pages/Appointment.vue";
+import HospitalBilling from "../views/Pages/HospitalBilling.vue";
+import LaboratoryRequest from "../views/Pages/LaboratoryRequest.vue";
+import BillingData from "../views/Pages/BillingData.vue";
+import ReuestData from "../views/Pages/RequestData.vue";
+import PatientAppointment from "../views/Auth/PatientAppointment.vue";
+import LandingPage from "../views/Auth/LandingPage.vue";
+import Services from "../views/Pages/Services.vue";
+import PatientDoctor from "../views/Pages/PatientDoctor.vue";
 import PatientEntry from "../views/Auth/PatientEntry.vue";
 import DoctorsUtility from "../views/Pages/DoctorsUtility.vue";
 import MedicalInformation from "../views/Pages/MedicalInformation.vue";
 import Supplier from "../views/Pages/Supplier.vue";
+import Cashiering from "../views/Pages/Cashiering.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -51,31 +52,30 @@ const routes = [
         component: Login,
         meta: { authRequired: false },
       },
-     
+
       {
         path: "register",
         component: Register,
         meta: { authRequired: false },
       },
 
-         {
+      {
         path: "patient-appointment",
         component: PatientAppointment,
         meta: { authRequired: false },
       },
 
-            {
+      {
         path: "patient-entry",
         component: PatientEntry,
         meta: { authRequired: false },
       },
- 
+
       {
         path: "forgot-pw",
         component: ResetPassword,
         meta: { authRequired: false },
       },
-  
     ],
   },
   {
@@ -112,7 +112,7 @@ const routes = [
         component: Profile,
         meta: { title: "My Profile", authRequired: true },
       },
-  
+
       {
         path: "modules-list",
         component: ModulesList,
@@ -165,7 +165,7 @@ const routes = [
         component: ReuestData,
         meta: { title: "Request Data Table", authRequired: true },
       },
-       {
+      {
         path: "services",
         component: Services,
         meta: { title: "Services", authRequired: true },
@@ -195,8 +195,6 @@ const routes = [
         component: Dashboard,
         meta: { title: "Dashboard", authRequired: true },
       },
-
-
 
       {
         path: "user-type",
@@ -264,12 +262,6 @@ const routes = [
         component: ReuestData,
         meta: { title: "Request Data Table", authRequired: true },
       },
-   
-
-      
-
-
-
     ],
   },
   //employee
@@ -323,12 +315,12 @@ const routes = [
         meta: { title: "Services", authRequired: true },
       },
 
-       {
+      {
         path: "patient-doctor",
         component: PatientDoctor,
         meta: { title: "Patient Doctor List", authRequired: true },
       },
-      
+
       {
         path: "doctors-utility",
         component: DoctorsUtility,
@@ -358,9 +350,13 @@ const routes = [
         meta: { title: "", authRequired: true },
       },
 
+      {
+        path: "cashiering",
+        component: Cashiering,
+        meta: { title: "", authRequired: true },
+      },
     ],
   },
-
 ];
 
 const router = new VueRouter({
@@ -388,7 +384,7 @@ router.beforeEach((to, from, next) => {
         } else {
           next("/admin/dashboard");
         }
-      }  else {
+      } else {
         if (store.state.user.user.user_roleID == 5) {
           if (ptSplit[1].toLowerCase() == "superadmin") {
             if (!to.matched.length) {
@@ -456,7 +452,6 @@ router.beforeEach((to, from, next) => {
       next();
     }
   }
-
 });
 
 export default router;
