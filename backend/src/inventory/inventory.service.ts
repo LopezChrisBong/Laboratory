@@ -4,13 +4,55 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { Inventory } from './entities/inventory.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { InventoryTransactionService } from '../inventory-transaction/inventory-transaction.service';
 
 @Injectable()
 export class InventoryService {
 constructor(
     @InjectRepository(Inventory)
     private inventoryRepository: Repository<Inventory>,
+    private inventoryTransactionService: InventoryTransactionService,
   ) {}
+
+  /**
+   * Calculate inventory status automatically based on stock levels and expiry date
+   */
+  private calculateStatus(
+    totalEndQuantity: number,
+    startingQuantity: number,
+    expiryDate: Date,
+  ): string {
+    const now = new Date();
+    const twoMonthsFromNow = new Date();
+    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+    // Priority: Expired > Nearly Expiry > Consumed > Inadequate > Lacking > Sufficient
+    if (expiryDate && new Date(expiryDate) <= now) {
+      return 'Expired';
+    }
+
+    if (expiryDate && new Date(expiryDate) <= twoMonthsFromNow) {
+      return 'Nearly Expiry';
+    }
+
+    if (totalEndQuantity === 0) {
+      return 'Consumed';
+    }
+
+    if (startingQuantity > 0) {
+      const percentageRemaining = (totalEndQuantity / startingQuantity) * 100;
+
+      if (percentageRemaining <= 25) {
+        return 'Inadequate';
+      }
+
+      if (percentageRemaining <= 50) {
+        return 'Lacking';
+      }
+    }
+
+    return 'Sufficient';
+  }
 
   async create(createInventoryDto: CreateInventoryDto) {
     // Initialize quantities to 0 if null or undefined for calculations
@@ -18,24 +60,73 @@ constructor(
     createInventoryDto.used_quantity = createInventoryDto.used_quantity || 0;
     createInventoryDto.added_quantity = createInventoryDto.added_quantity || 0;
 
-    if (createInventoryDto.transactionType === 'Resupply') {
-        createInventoryDto.used_quantity = 0; // Only added quantity is relevant for resupply
-    } else if (createInventoryDto.transactionType === 'Consumed') {
-        createInventoryDto.added_quantity = 0; // Only used quantity is relevant for consumed
+    // Validate: quantities cannot be negative
+    if (createInventoryDto.starting_quantity < 0) {
+      throw new Error('Starting quantity cannot be negative.');
     }
-
+    if (createInventoryDto.used_quantity < 0) {
+      throw new Error('Used quantity cannot be negative.');
+    }
     if (createInventoryDto.added_quantity < 0) {
-        throw new Error('Added quantity cannot be negative.');
+      throw new Error('Added quantity cannot be negative.');
     }
 
-    const totalEndQuantity = createInventoryDto.starting_quantity - createInventoryDto.used_quantity + createInventoryDto.added_quantity;
+    let totalEndQuantity = 0;
+
+    if (createInventoryDto.transactionType === 'Resupply') {
+      // For resupply: starting_quantity + added_quantity = total_end_quantity
+      totalEndQuantity = createInventoryDto.starting_quantity + createInventoryDto.added_quantity;
+      // Don't reset used_quantity, it persists from previous consumption
+    } else if (createInventoryDto.transactionType === 'Consumed') {
+      // For consumed: starting_quantity - used_quantity = total_end_quantity
+      totalEndQuantity = createInventoryDto.starting_quantity - createInventoryDto.used_quantity;
+      createInventoryDto.added_quantity = 0; // No resupply in consumed transaction
+      
+      // Validate: used_quantity cannot exceed starting_quantity
+      if (createInventoryDto.used_quantity > createInventoryDto.starting_quantity) {
+        throw new Error(`Used quantity (${createInventoryDto.used_quantity}) cannot exceed available stock (${createInventoryDto.starting_quantity}).`);
+      }
+    } else {
+      // Default calculation
+      totalEndQuantity = createInventoryDto.starting_quantity - createInventoryDto.used_quantity + createInventoryDto.added_quantity;
+    }
 
     if (totalEndQuantity < 0) {
         throw new Error('Used quantity exceeds available stock.');
     }
 
     createInventoryDto.totalend_quantity = totalEndQuantity;
-    return await this.inventoryRepository.save(createInventoryDto);
+
+    // Automatically calculate status
+    createInventoryDto.reorder_status = this.calculateStatus(
+      totalEndQuantity,
+      createInventoryDto.starting_quantity,
+      createInventoryDto.expiry,
+    );
+
+    const savedInventory = await this.inventoryRepository.save(createInventoryDto);
+
+    // Log transaction if it's a Resupply or Consumed type
+    if (createInventoryDto.transactionType === 'Resupply' || createInventoryDto.transactionType === 'Consumed') {
+      await this.inventoryTransactionService.create({
+        inventoryItemId: savedInventory.id,
+        itemName: savedInventory.itemName,
+        transactionType: createInventoryDto.transactionType,
+        quantity: createInventoryDto.transactionType === 'Resupply' 
+          ? createInventoryDto.added_quantity 
+          : createInventoryDto.used_quantity,
+        previousStock: createInventoryDto.starting_quantity,
+        newStock: totalEndQuantity,
+        supplier: createInventoryDto.supplier,
+        lotNumber: createInventoryDto.lotNumber,
+        brand: createInventoryDto.brand,
+        notes: `Initial ${createInventoryDto.transactionType} transaction`,
+        performedBy: 'System', // You can pass user info from request if needed
+        transaction_date: new Date(),
+      });
+    }
+
+    return savedInventory;
   }
 
   findAll() {
@@ -52,31 +143,98 @@ constructor(
         throw new Error('Inventory item not found.');
     }
 
-    // Initialize quantities to existing values if not provided in DTO
-    const newStartingQuantity = updateInventoryDto.starting_quantity ?? existingInventory.starting_quantity ?? 0;
-    let newUsedQuantity = updateInventoryDto.used_quantity ?? existingInventory.used_quantity ?? 0;
-    let newAddedQuantity = updateInventoryDto.added_quantity ?? existingInventory.added_quantity ?? 0;
+    // Get current values
+    const currentStartingQty = existingInventory.starting_quantity || 0;
+    const currentUsedQty = existingInventory.used_quantity || 0;
+    const currentAddedQty = existingInventory.added_quantity || 0;
+    const currentTotalEndQty = existingInventory.totalend_quantity || 0;
 
-    // Adjust quantities based on transaction type if provided
-    if (updateInventoryDto.transactionType === 'Resupply') {
-        newUsedQuantity = 0; // Only added quantity is relevant for resupply
-    } else if (updateInventoryDto.transactionType === 'Consumed') {
-        newAddedQuantity = 0; // Only used quantity is relevant for consumed
-    }
+    // Use updated values if provided, otherwise keep existing
+    let newStartingQuantity = updateInventoryDto.starting_quantity ?? currentStartingQty;
+    let newUsedQuantity = updateInventoryDto.used_quantity ?? currentUsedQty;
+    let newAddedQuantity = updateInventoryDto.added_quantity ?? currentAddedQty;
+    let totalEndQuantity = 0;
+    let transactionQuantity = 0;
+    let transactionType = null;
 
-    if (newAddedQuantity < 0) {
+    // Check if added_quantity changed (Resupply transaction)
+    if (updateInventoryDto.added_quantity !== undefined && updateInventoryDto.added_quantity !== currentAddedQty) {
+      transactionQuantity = updateInventoryDto.added_quantity - currentAddedQty;
+      
+      // Validate: added_quantity cannot be negative
+      if (updateInventoryDto.added_quantity < 0) {
         throw new Error('Added quantity cannot be negative.');
+      }
+      
+      // Add to starting quantity
+      newStartingQuantity = currentStartingQty + transactionQuantity;
+      // Reset added_quantity to 0 after applying
+      newAddedQuantity = 0;
+      transactionType = 'Resupply';
+    }
+    
+    // Check if used_quantity changed (Consumed transaction)
+    if (updateInventoryDto.used_quantity !== undefined && updateInventoryDto.used_quantity !== currentUsedQty) {
+      transactionQuantity = updateInventoryDto.used_quantity - currentUsedQty;
+      
+      // Validate: used_quantity cannot be negative
+      if (updateInventoryDto.used_quantity < 0) {
+        throw new Error('Used quantity cannot be negative.');
+      }
+      
+      // Validate: used_quantity cannot exceed current total end quantity
+      if (updateInventoryDto.used_quantity > currentTotalEndQty) {
+        throw new Error(`Used quantity (${updateInventoryDto.used_quantity}) cannot exceed available stock (${currentTotalEndQty}).`);
+      }
+      
+      // Subtract from starting quantity
+      newStartingQuantity = currentStartingQty - transactionQuantity;
+      // Reset used_quantity to 0 after applying
+      newUsedQuantity = 0;
+      transactionType = 'Consumed';
     }
 
-    const totalEndQuantity = newStartingQuantity - newUsedQuantity + newAddedQuantity;
+    // Calculate total end quantity
+    // Formula: starting_quantity - used_quantity + added_quantity = total_end_quantity
+    totalEndQuantity = newStartingQuantity - newUsedQuantity + newAddedQuantity;
 
     if (totalEndQuantity < 0) {
         throw new Error('Used quantity exceeds available stock.');
     }
 
+    updateInventoryDto.starting_quantity = newStartingQuantity;
+    updateInventoryDto.used_quantity = newUsedQuantity;
+    updateInventoryDto.added_quantity = newAddedQuantity;
     updateInventoryDto.totalend_quantity = totalEndQuantity;
 
-    return await this.inventoryRepository.update(id, updateInventoryDto);
+    // Automatically calculate status
+    updateInventoryDto.reorder_status = this.calculateStatus(
+      totalEndQuantity,
+      newStartingQuantity,
+      updateInventoryDto.expiry ?? existingInventory.expiry,
+    );
+
+    const result = await this.inventoryRepository.update(id, updateInventoryDto);
+
+    // Log transaction if there was a quantity change
+    if (transactionType && transactionQuantity !== 0) {
+      await this.inventoryTransactionService.create({
+        inventoryItemId: id,
+        itemName: updateInventoryDto.itemName ?? existingInventory.itemName,
+        transactionType: transactionType,
+        quantity: Math.abs(transactionQuantity),
+        previousStock: currentTotalEndQty,
+        newStock: totalEndQuantity,
+        supplier: updateInventoryDto.supplier ?? existingInventory.supplier,
+        lotNumber: updateInventoryDto.lotNumber ?? existingInventory.lotNumber,
+        brand: updateInventoryDto.brand ?? existingInventory.brand,
+        notes: `${transactionType} transaction - ${Math.abs(transactionQuantity)} units`,
+        performedBy: 'System', // You can pass user info from request if needed
+        transaction_date: new Date(),
+      });
+    }
+
+    return result;
   }
 
   remove(id: number) {

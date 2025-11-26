@@ -28,6 +28,7 @@ import { DoctorsSchedule } from 'src/doctors-schedule/entities/doctors-schedule.
 import { Prescription } from 'src/patient/entities/prescription.entity';
 import { Invoice } from 'src/payment/entities/invoice.entity';
 import { Supplier } from 'src/supplier/entities/supplier.entity';
+import { InventoryTransaction } from 'src/inventory-transaction/entities/inventory-transaction.entity';
 
 const entities = [
   Users,
@@ -58,7 +59,8 @@ const entities = [
   DoctorsSchedule,
   Prescription,
   Invoice,
-  Supplier
+  Supplier,
+  InventoryTransaction
 ];
 
 export {
@@ -90,7 +92,8 @@ export {
   DoctorsSchedule,
   Prescription,
   Invoice,
-  Supplier
+  Supplier,
+  InventoryTransaction
 
 };
 

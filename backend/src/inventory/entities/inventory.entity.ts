@@ -33,8 +33,6 @@ export class Inventory {
   supplier: string;
   @Column({ default: null, nullable: true })
   transactionType: string;
-  @Column({ name: 'transaction_date', type: 'timestamp', nullable: true })
-  transaction_date: Date;
   @CreateDateColumn({ name: 'created_at', type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
 

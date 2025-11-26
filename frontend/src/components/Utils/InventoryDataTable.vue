@@ -104,10 +104,10 @@
             </td>
             <td>
               <v-edit-dialog
-                :return-value.sync="item.unit"
-                @save="saveInlineItem(item)"
-                large
-                persistent
+                  :return-value.sync="item.unit"
+                  @save="saveInlineItem(item)"
+                  large
+                  persistent
               >
                 <div>{{ item.unit }}</div>
                 <template v-slot:input>
@@ -180,26 +180,7 @@
               </v-edit-dialog>
             </td>
             <td>
-              <v-edit-dialog
-                :return-value.sync="item.starting_quantity"
-                @save="saveInlineItem(item)"
-                large
-                persistent
-              >
-                <div>{{ item.starting_quantity }}</div>
-                <template v-slot:input>
-                  <v-text-field
-                    v-model.number="item.starting_quantity"
-                    label="Edit Starting Quantity"
-                    single-line
-                    type="number"
-                    counter
-                    :rules="[formRules.required, formRules.number]"
-                  ></v-text-field>
-                </template>
-              </v-edit-dialog>
-            </td>
-            <td>
+              <!-- Used quantity is editable only for Consumed transactions -->
               <v-edit-dialog
                 v-if="selectedTransactionType === 'Consumed'"
                 :return-value.sync="item.used_quantity"
@@ -207,20 +188,27 @@
                 large
                 persistent
               >
-                <div>{{ item.used_quantity }}</div>
+                <div>{{ item.used_quantity || 0 }}</div>
                 <template v-slot:input>
                   <v-text-field
                     v-model.number="item.used_quantity"
                     label="Edit Used Quantity"
                     single-line
                     type="number"
+                    min="0"
                     counter
-                    :rules="[formRules.required, formRules.number]"
+                    :rules="[
+                      formRules.number,
+                      v => v >= 0 || 'Cannot be negative',
+                      v => v <= (item.totalend_quantity || 0) || 'Cannot exceed available stock (' + (item.totalend_quantity || 0) + ')'
+                    ]"
                   ></v-text-field>
                 </template>
               </v-edit-dialog>
+              <div v-else>{{ item.used_quantity || 0 }}</div>
             </td>
             <td>
+              <!-- Added quantity is editable only for Resupply transactions -->
               <v-edit-dialog
                 v-if="selectedTransactionType === 'Resupply'"
                 :return-value.sync="item.added_quantity"
@@ -228,38 +216,27 @@
                 large
                 persistent
               >
-                <div>{{ item.added_quantity }}</div>
+                <div>{{ item.added_quantity || 0 }}</div>
                 <template v-slot:input>
                   <v-text-field
                     v-model.number="item.added_quantity"
                     label="Edit Added Quantity"
                     single-line
                     type="number"
+                    min="0"
                     counter
-                    :rules="[formRules.required, formRules.number]"
+                    :rules="[
+                      formRules.number,
+                      v => v >= 0 || 'Cannot be negative'
+                    ]"
                   ></v-text-field>
                 </template>
               </v-edit-dialog>
+              <div v-else>{{ item.added_quantity || 0 }}</div>
             </td>
             <td>
-              <v-edit-dialog
-                :return-value.sync="item.totalend_quantity"
-                @save="saveInlineItem(item)"
-                large
-                persistent
-              >
-                <div>{{ item.totalend_quantity }}</div>
-                <template v-slot:input>
-                  <v-text-field
-                    v-model.number="item.totalend_quantity"
-                    label="Edit Total End Quantity"
-                    single-line
-                    type="number"
-                    counter
-                    :rules="[formRules.required, formRules.number]"
-                  ></v-text-field>
-                </template>
-              </v-edit-dialog>
+              <!-- Total end quantity is read-only (auto-calculated) -->
+              <div>{{ item.totalend_quantity }}</div>
             </td>
             <td>
               <v-edit-dialog
@@ -281,86 +258,26 @@
               </v-edit-dialog>
             </td>
             <td>
-              <v-edit-dialog
-                v-if="selectedTransactionType === 'Resupply'"
-                :return-value.sync="item.supply_date"
-                @save="saveInlineItem(item)"
-                large
-                persistent
+              <!-- Status is automatically calculated, display only -->
+              <v-chip
+                :color="getStatusColor(item.reorder_status)"
+                dark
+                small
               >
-                <div>
-                  {{
-                    item.supply_date ? item.supply_date.substring(0, 10) : ""
-                  }}
-                </div>
-                <template v-slot:input>
-                  <v-text-field
-                    v-model="item.supply_date"
-                    label="Edit Supply Date"
-                    single-line
-                    type="date"
-                    counter
-                    :rules="[formRules.required]"
-                  ></v-text-field>
-                </template>
-              </v-edit-dialog>
+                <span v-if="item.reorder_status === 'Consumed'">©</span>
+                <span v-else>{{ item.reorder_status }}</span>
+              </v-chip>
             </td>
             <td>
-              <v-edit-dialog
-                v-if="selectedTransactionType === 'Consumed'"
-                :return-value.sync="item.transaction_date"
-                @save="saveInlineItem(item)"
-                large
-                persistent
+              <v-icon 
+                small 
+                class="mr-2" 
+                @click="viewTransactionHistory(item)"
+                color="blue"
+                title="View Transaction History"
               >
-                <div>
-                  {{
-                    item.transaction_date
-                      ? item.transaction_date.substring(0, 10)
-                      : ""
-                  }}
-                </div>
-                <template v-slot:input>
-                  <v-text-field
-                    v-model="item.transaction_date"
-                    label="Edit Transaction Date"
-                    single-line
-                    type="date"
-                    counter
-                    :rules="[formRules.required]"
-                  ></v-text-field>
-                </template>
-              </v-edit-dialog>
-            </td>
-            <td>
-              <v-edit-dialog
-                :return-value.sync="item.reorder_status"
-                @save="saveInlineItem(item)"
-                large
-                persistent
-              >
-                <div>
-                  <v-chip
-                    :color="getStatusColor(item.reorder_status)"
-                    dark
-                    small
-                  >
-                    <span v-if="item.reorder_status === 'Consumed'">©</span>
-                    <span v-else>{{ item.reorder_status }}</span>
-                  </v-chip>
-                </div>
-                <template v-slot:input>
-                  <v-select
-                    v-model="item.reorder_status"
-                    :items="reorderStatuses"
-                    label="Edit Reorder Status"
-                    single-line
-                    :rules="[formRules.required]"
-                  ></v-select>
-                </template>
-              </v-edit-dialog>
-            </td>
-            <td>
+                mdi-history
+              </v-icon>
               <v-icon small class="mr-2" @click="deleteItem(item)">
                 mdi-delete
               </v-icon>
@@ -471,7 +388,10 @@
               <v-col cols="12">
                 <v-text-field
                   v-model.number="editedItem.starting_quantity"
-                  :rules="[formRules.required]"
+                  :rules="[
+                    formRules.required,
+                    v => v >= 0 || 'Cannot be negative'
+                  ]"
                   dense
                   outlined
                   required
@@ -479,6 +399,7 @@
                   class="rounded-lg"
                   color="blue"
                   type="number"
+                  min="0"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
@@ -530,14 +451,24 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <TransactionHistoryDialog
+      v-model="showTransactionHistory"
+      :inventoryItemId="selectedItemId"
+      :itemName="selectedItemName"
+    />
   </v-container>
 </template>
 
 <script>
 import axios from "axios";
 import { debounce } from "lodash";
+import TransactionHistoryDialog from "../Dialogs/TransactionHistoryDialog.vue";
 
 export default {
+  components: {
+    TransactionHistoryDialog,
+  },
   data() {
     // eslint-disable-line no-unused-vars
     return {
@@ -560,15 +491,11 @@ export default {
         { text: "Usage Type", value: "usageType" },
         { text: "Lot Number", value: "lotNumber" },
         { text: "Expiry", value: "expiry" },
-        { text: "Starting Quantity", value: "starting_quantity" },
         { text: "Used Quantity", value: "used_quantity" },
         { text: "Added Quantity", value: "added_quantity" },
         { text: "Total End Quantity", value: "totalend_quantity" },
         { text: "Supplier", value: "supplier" },
-        { text: "Supply Date", value: "supply_date" },
-        // { text: "Transaction Type", value: "transactionType" },
-        { text: "Transaction Date", value: "transaction_date" },
-        { text: "Reorder Status", value: "reorder_status" },
+        { text: "Status (Auto)", value: "reorder_status" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       items: [],
@@ -627,7 +554,8 @@ export default {
         "Sufficient",
         "Inadequate",
         "Lacking",
-        "Near Expiry",
+        "Nearly Expiry",
+        "Expired",
         "Consumed",
       ],
       transactionTypes: ["Resupply", "Consumed"],
@@ -645,6 +573,9 @@ export default {
       },
       deleteDialog: false,
       itemToDelete: null,
+      showTransactionHistory: false,
+      selectedItemId: null,
+      selectedItemName: "",
     };
   },
 
@@ -745,16 +676,17 @@ export default {
               ? this.editedItem.supply_date || null
               : null,
           supplier: this.editedItem.supplier,
-          reorder_status: "Sufficient",
+          reorder_status: "Sufficient", // Will be auto-calculated by backend
           section: this.selectedSection,
           transactionType: this.selectedTransactionType || null,
-          transaction_date:
-            this.selectedTransactionType === "Consumed"
-              ? this.editedItem.transaction_date || null
-              : null,
         };
         console.log(dataToSend);
-        await axios.post(process.env.VUE_APP_SERVER + "/inventory", dataToSend);
+        const token = localStorage.getItem("token");
+        await axios.post(process.env.VUE_APP_SERVER + "/inventory", dataToSend, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         this.fadeAwayMessage.show = true;
         this.fadeAwayMessage.type = "success";
         this.fadeAwayMessage.header = "System Message";
@@ -775,6 +707,7 @@ export default {
       if (item.id) {
         // Existing item, update
         try {
+          const token = localStorage.getItem("token");
           const dataToSend = {
             itemName: item.itemName,
             brand: item.brand,
@@ -783,43 +716,57 @@ export default {
             lotNumber: item.lotNumber,
             expiry: item.expiry || null,
             starting_quantity: item.starting_quantity || 0,
-            used_quantity:
-              this.selectedTransactionType === "Consumed"
-                ? item.used_quantity || 0
-                : 0,
-            added_quantity:
-              this.selectedTransactionType === "Resupply"
-                ? item.added_quantity || 0
-                : 0,
+            used_quantity: item.used_quantity || 0, // Always include, it persists
+            added_quantity: item.added_quantity || 0, // Always include
             supply_date:
               this.selectedTransactionType === "Resupply"
                 ? item.supply_date || null
                 : null,
             supplier: item.supplier,
-            reorder_status: item.reorder_status,
+            reorder_status: item.reorder_status, // Backend will recalculate
             section: item.section,
             transactionType: this.selectedTransactionType || null,
-            transaction_date:
-              this.selectedTransactionType === "Consumed"
-                ? item.transaction_date || null
-                : null,
           };
+          
           await axios.patch(
             process.env.VUE_APP_SERVER + `/inventory/${item.id}`,
-            dataToSend
+            dataToSend,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
+
+          // Fetch updated item to get recalculated values
+          const updatedItem = await axios.get(
+            process.env.VUE_APP_SERVER + `/inventory/${item.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          // Update the item in the table with new calculated values
+          if (updatedItem.data) {
+            Object.assign(item, updatedItem.data);
+          }
+
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
           this.fadeAwayMessage.message = "Successfully Updated";
-          this.getData();
+          
+          // Refresh the entire table to ensure all values are in sync
+          await this.getData();
         } catch (error) {
           console.error("Error updating inventory item:", error);
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
           this.fadeAwayMessage.header = "Error";
           this.fadeAwayMessage.message =
-            error.response.data.message || "An error occurred";
+            error.response?.data?.message || "An error occurred";
           this.getData(); // Revert to original data on error
         }
       } else {
@@ -833,30 +780,26 @@ export default {
             lotNumber: item.lotNumber,
             expiry: item.expiry || null,
             starting_quantity: item.starting_quantity || 0,
-            used_quantity:
-              this.selectedTransactionType === "Consumed"
-                ? item.used_quantity || 0
-                : 0,
-            added_quantity:
-              this.selectedTransactionType === "Resupply"
-                ? item.added_quantity || 0
-                : 0,
+            used_quantity: item.used_quantity || 0, // Always include
+            added_quantity: item.added_quantity || 0, // Always include
             supply_date:
               this.selectedTransactionType === "Resupply"
                 ? item.supply_date || null
                 : null,
             supplier: item.supplier,
-            reorder_status: item.reorder_status,
+            reorder_status: item.reorder_status, // Backend will calculate
             section: this.selectedSection,
             transactionType: this.selectedTransactionType || null,
-            transaction_date:
-              this.selectedTransactionType === "Consumed"
-                ? item.transaction_date || null
-                : null,
           };
+          const token = localStorage.getItem("token");
           await axios.post(
             process.env.VUE_APP_SERVER + "/inventory",
-            dataToSend
+            dataToSend,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "success";
@@ -905,6 +848,11 @@ export default {
       this.deleteDialog = false;
       this.itemToDelete = null;
     },
+    viewTransactionHistory(item) {
+      this.selectedItemId = item.id;
+      this.selectedItemName = item.itemName;
+      this.showTransactionHistory = true;
+    },
     changeSelected() {
       this.getData();
     },
@@ -930,11 +878,13 @@ export default {
         case "Sufficient":
           return "green";
         case "Inadequate":
-          return "purple";
+          return "orange";
         case "Lacking":
-          return "red";
-        case "Near Expiry":
-          return "red";
+          return "orange darken-2";
+        case "Nearly Expiry":
+          return "red lighten-1";
+        case "Expired":
+          return "red darken-2";
         case "Consumed":
           return "grey";
         default:

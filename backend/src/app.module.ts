@@ -32,6 +32,7 @@ import { MedicalInfoModule } from './medical-info/medical-info.module';
 import { NotificationModule } from './notification/notification.module';
 import { DoctorsScheduleModule } from './doctors-schedule/doctors-schedule.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { InventoryTransactionModule } from './inventory-transaction/inventory-transaction.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { SupplierModule } from './supplier/supplier.module';
     NotificationModule,
     DoctorsScheduleModule,
     SupplierModule,
+    InventoryTransactionModule,
   ],
 
   controllers: [AppController],
