@@ -15,43 +15,77 @@ constructor(
   ) {}
 
   /**
-   * Calculate inventory status automatically based on stock levels and expiry date
+   * Calculate quantity status based on stock levels
+   * Uses quantity_needed as the base for percentage calculation
    */
-  private calculateStatus(
+  private calculateQuantityStatus(
     totalEndQuantity: number,
-    startingQuantity: number,
-    expiryDate: Date,
+    quantityNeeded: number,
   ): string {
-    const now = new Date();
-    const twoMonthsFromNow = new Date();
-    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
-
-    // Priority: Expired > Nearly Expiry > Consumed > Inadequate > Lacking > Sufficient
-    if (expiryDate && new Date(expiryDate) <= now) {
-      return 'Expired';
-    }
-
-    if (expiryDate && new Date(expiryDate) <= twoMonthsFromNow) {
-      return 'Nearly Expiry';
-    }
-
     if (totalEndQuantity === 0) {
       return 'Consumed';
     }
 
-    if (startingQuantity > 0) {
-      const percentageRemaining = (totalEndQuantity / startingQuantity) * 100;
+    // Use quantity_needed as the base for percentage calculation
+    if (quantityNeeded > 0) {
+      const percentageAvailable = (totalEndQuantity / quantityNeeded) * 100;
 
-      if (percentageRemaining <= 25) {
+      if (percentageAvailable <= 25) {
         return 'Inadequate';
       }
 
-      if (percentageRemaining <= 50) {
+      if (percentageAvailable <= 50) {
         return 'Lacking';
       }
     }
 
     return 'Sufficient';
+  }
+
+  /**
+   * Calculate expiry status based on expiry date
+   */
+  private calculateExpiryStatus(expiryDate: Date): string {
+    if (!expiryDate) {
+      return 'N/A';
+    }
+
+    const now = new Date();
+    const twoMonthsFromNow = new Date();
+    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+    if (new Date(expiryDate) <= now) {
+      return 'Expired';
+    }
+
+    if (new Date(expiryDate) <= twoMonthsFromNow) {
+      return 'Nearly Expiry';
+    }
+
+    return 'Valid';
+  }
+
+  /**
+   * Calculate combined status for backward compatibility
+   */
+  private calculateStatus(
+    totalEndQuantity: number,
+    quantityNeeded: number,
+    expiryDate: Date,
+  ): string {
+    const expiryStatus = this.calculateExpiryStatus(expiryDate);
+    const quantityStatus = this.calculateQuantityStatus(totalEndQuantity, quantityNeeded);
+
+    // Priority: Expired > Nearly Expiry > Quantity Status
+    if (expiryStatus === 'Expired') {
+      return 'Expired';
+    }
+
+    if (expiryStatus === 'Nearly Expiry') {
+      return 'Nearly Expiry';
+    }
+
+    return quantityStatus;
   }
 
   async create(createInventoryDto: CreateInventoryDto) {
@@ -97,10 +131,18 @@ constructor(
 
     createInventoryDto.totalend_quantity = totalEndQuantity;
 
-    // Automatically calculate status
+    // Automatically calculate statuses
+    const quantityNeeded = createInventoryDto.quantity_needed || createInventoryDto.starting_quantity || 0;
+    createInventoryDto.quantity_status = this.calculateQuantityStatus(
+      totalEndQuantity,
+      quantityNeeded,
+    );
+    createInventoryDto.expiry_status = this.calculateExpiryStatus(
+      createInventoryDto.expiry,
+    );
     createInventoryDto.reorder_status = this.calculateStatus(
       totalEndQuantity,
-      createInventoryDto.starting_quantity,
+      quantityNeeded,
       createInventoryDto.expiry,
     );
 
@@ -207,10 +249,20 @@ constructor(
     updateInventoryDto.added_quantity = newAddedQuantity;
     updateInventoryDto.totalend_quantity = totalEndQuantity;
 
-    // Automatically calculate status
+    // Use quantity_needed for status calculation, fallback to starting_quantity if not set
+    const quantityNeeded = updateInventoryDto.quantity_needed ?? existingInventory.quantity_needed ?? newStartingQuantity;
+
+    // Automatically calculate statuses
+    updateInventoryDto.quantity_status = this.calculateQuantityStatus(
+      totalEndQuantity,
+      quantityNeeded,
+    );
+    updateInventoryDto.expiry_status = this.calculateExpiryStatus(
+      updateInventoryDto.expiry ?? existingInventory.expiry,
+    );
     updateInventoryDto.reorder_status = this.calculateStatus(
       totalEndQuantity,
-      newStartingQuantity,
+      quantityNeeded,
       updateInventoryDto.expiry ?? existingInventory.expiry,
     );
 

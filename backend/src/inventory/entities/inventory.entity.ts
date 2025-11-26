@@ -23,12 +23,18 @@ export class Inventory {
   used_quantity: number;
   @Column({default: null, nullable: true}) 
   added_quantity: number;
+  @Column({default: null, nullable: true}) 
+  quantity_needed: number;
   @CreateDateColumn({ name: 'date_supplied', type: 'timestamp', nullable: true })
   supply_date: Date;
   @Column({ default: null, nullable: true }) 
   totalend_quantity: number;
   @Column({ default: null })
   reorder_status: string;
+  @Column({ default: null, nullable: true })
+  quantity_status: string;
+  @Column({ default: null, nullable: true })
+  expiry_status: string;
   @Column({ default: null })
   supplier: string;
   @Column({ default: null, nullable: true })

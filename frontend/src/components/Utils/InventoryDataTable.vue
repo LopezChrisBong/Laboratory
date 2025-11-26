@@ -130,13 +130,13 @@
               >
                 <div>{{ item.usageType }}</div>
                 <template v-slot:input>
-                  <v-text-field
+                  <v-select
                     v-model="item.usageType"
+                    :items="['Disposable', 'Reusable']"
                     label="Edit Kind of Usage"
                     single-line
-                    counter
                     :rules="[formRules.required]"
-                  ></v-text-field>
+                  ></v-select>
                 </template>
               </v-edit-dialog>
             </td>
@@ -175,6 +175,31 @@
                     type="date"
                     counter
                     :rules="[formRules.required]"
+                  ></v-text-field>
+                </template>
+              </v-edit-dialog>
+            </td>
+            <td>
+              <!-- Quantity needed is editable -->
+              <v-edit-dialog
+                :return-value.sync="item.quantity_needed"
+                @save="saveInlineItem(item)"
+                large
+                persistent
+              >
+                <div>{{ item.quantity_needed || 0 }}</div>
+                <template v-slot:input>
+                  <v-text-field
+                    v-model.number="item.quantity_needed"
+                    label="Edit Quantity Needed"
+                    single-line
+                    type="number"
+                    min="0"
+                    counter
+                    :rules="[
+                      formRules.number,
+                      v => v >= 0 || 'Cannot be negative'
+                    ]"
                   ></v-text-field>
                 </template>
               </v-edit-dialog>
@@ -258,14 +283,24 @@
               </v-edit-dialog>
             </td>
             <td>
-              <!-- Status is automatically calculated, display only -->
+              <!-- Quantity status is automatically calculated, display only -->
               <v-chip
-                :color="getStatusColor(item.reorder_status)"
+                :color="getQuantityStatusColor(item.quantity_status)"
                 dark
                 small
               >
-                <span v-if="item.reorder_status === 'Consumed'">©</span>
-                <span v-else>{{ item.reorder_status }}</span>
+                <span v-if="item.quantity_status === 'Consumed'">©</span>
+                <span v-else>{{ item.quantity_status }}</span>
+              </v-chip>
+            </td>
+            <td>
+              <!-- Expiry status is automatically calculated, display only -->
+              <v-chip
+                :color="getExpiryStatusColor(item.expiry_status)"
+                dark
+                small
+              >
+                {{ item.expiry_status }}
               </v-chip>
             </td>
             <td>
@@ -502,11 +537,13 @@ export default {
         { text: "Usage Type", value: "usageType" },
         { text: "Lot Number", value: "lotNumber" },
         { text: "Expiry", value: "expiry" },
+        { text: "Quantity Needed", value: "quantity_needed" },
         { text: "Used Quantity", value: "used_quantity" },
         { text: "Added Quantity", value: "added_quantity" },
         { text: "Total End Quantity", value: "totalend_quantity" },
         { text: "Supplier", value: "supplier" },
-        { text: "Status (Auto)", value: "reorder_status" },
+        { text: "Quantity Status", value: "quantity_status" },
+        { text: "Expiry Status", value: "expiry_status" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       items: [],
@@ -517,6 +554,7 @@ export default {
         usageType: "",
         lotNumber: "",
         expiry: "",
+        quantity_needed: 0,
         starting_quantity: 0,
         used_quantity: 0,
         added_quantity: 0,
@@ -532,6 +570,7 @@ export default {
         usageType: "",
         lotNumber: "",
         expiry: "",
+        quantity_needed: 0,
         starting_quantity: 0,
         used_quantity: 0,
         added_quantity: 0,
@@ -675,6 +714,7 @@ export default {
           usageType: this.editedItem.usageType,
           lotNumber: this.editedItem.lotNumber,
           expiry: this.editedItem.expiry || null,
+          quantity_needed: this.editedItem.quantity_needed || 0,
           starting_quantity: this.editedItem.starting_quantity || 0,
           used_quantity:
             this.selectedTransactionType === "Consumed"
@@ -728,6 +768,7 @@ export default {
             usageType: item.usageType,
             lotNumber: item.lotNumber,
             expiry: item.expiry || null,
+            quantity_needed: item.quantity_needed || 0,
             starting_quantity: item.starting_quantity || 0,
             used_quantity: item.used_quantity || 0, // Always include, it persists
             added_quantity: item.added_quantity || 0, // Always include
@@ -885,6 +926,34 @@ export default {
 
     resetForm() {
       this.editedItem = Object.assign({}, this.defaultItem);
+    },
+    getQuantityStatusColor(status) {
+      switch (status) {
+        case "Sufficient":
+          return "green";
+        case "Inadequate":
+          return "orange";
+        case "Lacking":
+          return "orange darken-2";
+        case "Consumed":
+          return "grey";
+        default:
+          return "blue";
+      }
+    },
+    getExpiryStatusColor(status) {
+      switch (status) {
+        case "Valid":
+          return "green";
+        case "Nearly Expiry":
+          return "orange";
+        case "Expired":
+          return "red";
+        case "N/A":
+          return "grey lighten-1";
+        default:
+          return "blue";
+      }
     },
     getStatusColor(status) {
       switch (status) {

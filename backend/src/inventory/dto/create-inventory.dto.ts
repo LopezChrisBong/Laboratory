@@ -34,6 +34,10 @@ export class CreateInventoryDto {
         @IsOptional()
         @IsNumber()
         added_quantity: number;
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsNumber()
+        quantity_needed: number;
         @ApiProperty({ required: false, type: String, format: 'date' })
         @IsOptional()
         @IsDateString()
@@ -45,6 +49,14 @@ export class CreateInventoryDto {
         @ApiProperty()
         @IsString()
         reorder_status: string;
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsString()
+        quantity_status: string;
+        @ApiProperty({ required: false })
+        @IsOptional()
+        @IsString()
+        expiry_status: string;
         @ApiProperty()
         @IsString()
         supplier: string;
