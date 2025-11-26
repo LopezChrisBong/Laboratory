@@ -343,21 +343,32 @@
                   label="Edit Unit"
                   class="rounded-lg"
                   color="#96CB5B"
-                  :items="brands"
+                  :items="[
+                    'PC',
+                    'Pack',
+                    'Container',
+                    'Bottle',
+                    'Roll',
+                    'Bag',
+                    'Box',
+                    'Gallon',
+                    'Liter',
+                  ]"
                 >
                 </v-autocomplete>
               </v-col>
               <v-col cols="12">
-                <v-text-field
+                <v-autocomplete
                   v-model="editedItem.usageType"
                   :rules="[formRules.required]"
                   dense
                   outlined
-                  required
                   label="Edit Kind of Usage"
                   class="rounded-lg"
-                  color="blue"
-                ></v-text-field>
+                  color="#96CB5B"
+                  :items="['Disposable', 'Reusable']"
+                >
+                </v-autocomplete>
               </v-col>
               <v-col cols="12">
                 <v-text-field
@@ -638,10 +649,12 @@ export default {
       if (this.selectedSupplier) {
         this.loading = true;
         try {
-          const res = await axios.get(process.env.VUE_APP_SERVER + "/inventory");
-          this.itemData = res.data.filter(
-            item => item.supplier === this.selectedSupplier
-          ).reverse();
+          const res = await axios.get(
+            process.env.VUE_APP_SERVER + "/inventory"
+          );
+          this.itemData = res.data
+            .filter((item) => item.supplier === this.selectedSupplier)
+            .reverse();
         } catch (error) {
           console.error("Error filtering inventory by supplier:", error);
           this.itemData = [];

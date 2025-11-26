@@ -12,12 +12,13 @@ export class NotificationService {
   ){}
 
  async create(createNotificationDto: CreateNotificationDto) {
-  // // console.log(createNotificationDto)
+  // console.log(createNotificationDto)
         const queryRunner = this.dataSource.createQueryRunner();
             await queryRunner.connect();
             await queryRunner.startTransaction();
             try {
               let notification = createNotificationDto;
+              
         
                 const data = queryRunner.manager.create(Notification, {
                   patientID:notification.patientID,
@@ -65,6 +66,19 @@ export class NotificationService {
         
         // // console.log(data)
 
+        return data
+  }
+
+   async getAllReceptionistNotif(){
+        let id = 1
+        let data = await this.dataSource.manager.createQueryBuilder(Notification, 'nt')
+        .select([
+         "nt.*"
+        ])
+        .where('nt.assignedID = :id', {id})
+        .orderBy('nt.createdAt', 'DESC')
+        .getRawMany()
+        console.log('loveddddssd',data)
         return data
   }
 

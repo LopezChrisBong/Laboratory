@@ -695,6 +695,8 @@ let data = await this.appointmentRepository
   .where('ap.medtechID IS NULL')
   if(tab == 1){
     data.andWhere('ap.status = 0')
+  }else{
+    data.andWhere('ap.status != 0')
   }
   let newData = await data.getRawMany();
   return newData
@@ -796,7 +798,7 @@ async getAllDoctorsAppointment(id: number) {
     .leftJoin(Patient, 'p', 'p.id = ap.patientID')
     .where('ap.medtechID IS NULL')
     .andWhere('ap.doctorID = :id', { id })
-    .andWhere('ap.status = 1')
+    .andWhere('ap.status != 3')
     .getRawMany();
 
   const colors = ['blue', 'green', 'orange', 'red', 'purple', 'indigo', 'teal'];
@@ -964,20 +966,21 @@ async getAllMedtechAppointment(id: number) {
   }
 
     async confirmAppointment(id: number, updateAppointmentDto: UpdateAppointmentDto){
-       
+        
         try {
+          const isExist = await this.appointmentRepository.findOneBy({id});
           await this.dataSource.manager.update(Appointment, id,{
           status:updateAppointmentDto.status,
           })
-       return{
-       msg:'Updated successfully!', status:HttpStatus.CREATED,
-       updateAppointment:{
-        id:id,
-       }
-     }
+        return{
+        msg:'Updated successfully!', status:HttpStatus.OK,
+        updateAppointment:{
+        id:isExist.doctorID,
+        }
+        }
        
         } catch (error) {
-     return{
+        return{
        msg:'Something went wrong!'+ error, status:HttpStatus.BAD_REQUEST
      }
    }

@@ -167,7 +167,7 @@
                     small-chips
                     deletable-chips
                     :rules="[(v) => !!v || 'time from is required']"
-                    label="from"
+                    label="from:"
                     :items="allTimes"
                     :readonly="action == 'View'"
                     class="rounded-lg"
@@ -180,7 +180,7 @@
                     small-chips
                     deletable-chips
                     :rules="[(v) => !!v || 'time to is required']"
-                    label="from"
+                    label="to:"
                     :items="allTimes"
                     :readonly="action == 'View'"
                     class="rounded-lg"
@@ -427,7 +427,7 @@ export default {
     },
     maxDate() {
       const today = new Date();
-      today.setMonth(today.getMonth() + 3);
+      today.setMonth(today.getMonth() + 12);
       return today.toISOString().substr(0, 10);
     },
   },

@@ -131,6 +131,16 @@
                     >
                   </div>
                 </v-col>
+                <v-col cols="12">
+                  <div
+                    class="d-flex align-center justify-center"
+                    style="font-size:14px; "
+                  >
+                    <router-link class="pl-2" to="/forgot-pw">
+                      Forgot Password!</router-link
+                    >
+                  </div>
+                </v-col>
               </v-row>
             </v-form>
           </v-card>

@@ -15,7 +15,7 @@ import { MailService } from 'src/mail/mail.service';
   imports: [ConfigModule.forRoot(), JwtModule.register({
     secret: process.env.JWT_SECRET,
     signOptions: { expiresIn: process.env.JWT_TOKEN_EXPIRATION }
-  }), TypeOrmModule.forFeature([UserDetail, Users, UserType,])],
+  }), TypeOrmModule.forFeature([UserDetail, Users, UserType])],
   controllers: [UserDetailsController],
   providers: [UserDetailsService, AuthService, UserTypeService, MailService]
 })

@@ -359,6 +359,48 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="confirmDeleteAppointment" persistent max-width="420">
+      <v-card class="pa-4 rounded-xl elevation-4">
+        <v-card-title class="d-flex align-center justify-center">
+          <v-avatar color="red-lighten-4" size="56">
+            <v-icon size="36" color="red">mdi-alert</v-icon>
+          </v-avatar>
+        </v-card-title>
+
+        <v-card-text class="text-center">
+          <h3 class="text-h6 font-weight-bold mb-2 text-red-darken-2">
+            Delete Confirmation
+          </h3>
+          <p class="text-body-2 mb-3" style="text-align: justify;">
+            Are you sure you want to <b>delete this information</b>?
+            <br /><br />
+            Please note that <b>this action cannot be undone.</b>
+          </p>
+        </v-card-text>
+
+        <v-card-actions class="justify-end">
+          <v-btn
+            variant="outlined"
+            color="red"
+            @click="confirmDeleteAppointment = false"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn
+            color="green"
+            variant="flat"
+            :loading="isButtonLoading"
+            :disabled="isButtonLoading"
+            @click="confirmDelete()"
+          >
+            <v-icon start>mdi-delete</v-icon>
+            Confirm Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -376,6 +418,7 @@ export default {
   data() {
     return {
       dialog: false,
+      confirmDeleteAppointment: false,
       clinicList: [],
       doc_profile: [],
       doctors_schedList: [],
@@ -688,14 +731,39 @@ export default {
         "PATCH",
         data
       ).then((res) => {
-        if (res.data.status == 201) {
-          // alert("updated");
-          this.initialize();
-          this.updateID = null;
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
+        if (res.data.status == 200) {
+          console.log(res.data.updateAppointment.id);
+          if (res.data.updateAppointment.id) {
+            let notif_data = {
+              patientID: item.id,
+              title: "Patient Appointment",
+              message: "View patient appointment!",
+              route: "/patient",
+              assignedID: res.data.updateAppointment.id,
+            };
+            this.axiosCall("/notification", "POST", notif_data).then((res) => {
+              if (res.data.status == 200) {
+                this.initialize();
+                this.updateID = null;
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "success";
+                this.fadeAwayMessage.header = "System Message";
+                this.fadeAwayMessage.message = res.data.msg;
+              } else {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "error";
+                this.fadeAwayMessage.message = res.data.message;
+                this.fadeAwayMessage.header = "System Message";
+              }
+            });
+          } else {
+            this.initialize();
+            this.updateID = null;
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+          }
         } else if (res.data.status == 400) {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
@@ -758,11 +826,13 @@ export default {
       );
     },
     cancelAppointment(id) {
-      // this.appointments = this.appointments.filter((a) => a.id !== id);
-      // alert("delete optional id:" + id);
-      this.axiosCall("/appointment/" + id, "DELETE").then(() => {
+      this.confirmDeleteAppointment = true;
+      this.updateID = id;
+    },
+    confirmDelete() {
+      this.axiosCall("/appointment/" + this.updateID, "DELETE").then(() => {
         this.initialize();
-        // this.updateID = null;
+        this.confirmDeleteAppointment = false;
         this.fadeAwayMessage.show = true;
         this.fadeAwayMessage.type = "success";
         this.fadeAwayMessage.header = "System Message";
@@ -770,6 +840,7 @@ export default {
         // this.dialog = false;
       });
     },
+
     openDialogWithDoctor() {
       // if (this.selectedDoctor == null) {
       //   this.fadeAwayMessage.show = true;

@@ -176,7 +176,7 @@
                     </v-row>
                   </v-expand-transition>
                 </v-col>
-                <v-col cols="12" md="6" v-if="pregnant == false">
+                <!-- <v-col cols="12" md="6" v-if="pregnant == false">
                   <v-menu
                     ref="menu1"
                     :close-on-content-click="false"
@@ -262,7 +262,7 @@
                       </v-btn>
                     </v-date-picker>
                   </v-menu>
-                </v-col>
+                </v-col> -->
 
                 <v-col cols="12" md="6" v-if="pregnant == true">
                   <v-menu

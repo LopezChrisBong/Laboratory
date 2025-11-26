@@ -306,7 +306,7 @@
         </div>
 
         <!-- Hardcoded Supplier Menu for Admin Only -->
-        <div v-if="userType === 'admin'">
+        <!-- <div v-if="userType === 'admin'">
           <v-list-item
             :to="'/' + userType + '/supplier'"
             router
@@ -321,7 +321,7 @@
               <v-list-item-title>Supplier</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-        </div>
+        </div> -->
       </v-list>
     </v-navigation-drawer>
 
@@ -454,12 +454,24 @@ export default {
       return role;
     },
     getAllNotifications() {
-      let userID = this.$store.state.user.id;
-      this.axiosCall("/notification/getAllNotifications/" + userID, "GET").then(
-        (res) => {
+      let assignedModule = this.$store.state.user.user.assignedModuleID;
+
+      if (assignedModule == 3) {
+        this.axiosCall(
+          "/notification/getAllReceptionist/Notification",
+          "GET"
+        ).then((res) => {
           this.notifications = res.data;
-        }
-      );
+        });
+      } else {
+        let userID = this.$store.state.user.id;
+        this.axiosCall(
+          "/notification/getAllNotifications/" + userID,
+          "GET"
+        ).then((res) => {
+          this.notifications = res.data;
+        });
+      }
     },
 
     openMobileNav() {

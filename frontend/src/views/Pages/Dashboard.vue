@@ -2,49 +2,48 @@
   <v-container fluid>
     <v-row>
       <!-- LEFT PANEL: Booking Appointment -->
-      <v-col cols="12" md="0">
+      <v-col cols="12" md="6" v-if="assignModule == 1">
         <v-card outlined>
-          <!-- <v-card-title>
-            Booking Appointment
-          </v-card-title> -->
+          <v-card-title>
+            Users Logs
+          </v-card-title>
 
-          <!-- <v-divider></v-divider> -->
-
-          <!-- Calendar -->
-          <!-- <v-date-picker v-model="selectedDate" scrollable></v-date-picker> -->
-
-          <!-- <v-divider class="my-2"></v-divider> -->
-
-          <!-- <v-card-subtitle>
-            {{ formattedDate }}
-          </v-card-subtitle> -->
-
-          <!-- Time Slots -->
-          <!-- <v-row>
-            <v-col v-for="(slot, i) in timeSlots" :key="i" cols="6">
-              <v-btn
-                block
-                outlined
-                color="primary"
-                :disabled="slot.disabled"
-                @click="selectedTime = slot.time"
+          <v-row>
+            <v-col>
+              <v-data-table
+                :headers="headers"
+                :items="userLogs"
+                :items-per-page="5"
+                class="elevation-1"
               >
-                {{ slot.time }}
-              </v-btn>
+                <template v-slot:item.created_at="{ item }">
+                  {{ formatDate(item.created_at) }}
+                </template>
+              </v-data-table>
             </v-col>
-          </v-row> -->
+          </v-row>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6" v-if="assignModule == 1">
+        <v-card outlined>
+          <v-card-title>
+            Entry Logs
+          </v-card-title>
 
-          <!-- <v-divider class="my-2"></v-divider> -->
-
-          <!-- Patient Concerns -->
-          <!-- <v-card-text>
-            <v-textarea
-              label="Patient Concerns"
-              outlined
-              v-model="patientConcerns"
-              rows="5"
-            ></v-textarea>
-          </v-card-text> -->
+          <v-row>
+            <v-col>
+              <v-data-table
+                :headers="entryHeaders"
+                :items="entryLogs"
+                :items-per-page="5"
+                class="elevation-1"
+              >
+                <template v-slot:item.created_at="{ item }">
+                  {{ formatDate(item.created_at) }}
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
         </v-card>
       </v-col>
       <v-col cols="12">
@@ -238,8 +237,11 @@ export default {
       selectedDate: new Date().toISOString().substr(0, 10),
       selectedTime: null,
       patientConcerns: "",
+      assignModule: null,
       search: "",
       dialog: false,
+      entryLogs: [],
+      userLogs: [],
       action: null,
       doctors: [],
       appointmentData: null,
@@ -248,6 +250,20 @@ export default {
       appointmentHeaders: [
         { text: "Patient", value: "name", align: "start", sortable: false },
         { text: "Date", value: "start", align: "end", sortable: false },
+      ],
+      entryHeaders: [
+        { text: "action", value: "action", align: "start", sortable: false },
+        {
+          text: "description",
+          value: "description",
+          align: "center",
+          sortable: false,
+        },
+        { text: "Date", value: "created_at", align: "end", sortable: false },
+      ],
+      headers: [
+        { text: "User name", value: "email", align: "start", sortable: false },
+        { text: "Logs", value: "created_at", align: "center", sortable: false },
       ],
       timeSlots: [
         { time: "08:00 AM", disabled: false },
@@ -264,6 +280,7 @@ export default {
     };
   },
   mounted() {
+    this.assignModule = this.$store.state.user.user.assignedModuleID;
     this.initialize();
   },
   computed: {
@@ -299,8 +316,25 @@ export default {
         }
       );
     },
+    getAllLogs() {
+      this.axiosCall("/auth/getAllUserLogs/", "GET").then((res) => {
+        if (res) {
+          this.userLogs = res.data;
+        }
+      });
+    },
+
+    getAllEntryLogs() {
+      this.axiosCall("/auth/getAllEntryLogs/", "GET").then((res) => {
+        if (res) {
+          this.entryLogs = res.data;
+        }
+      });
+    },
     initialize() {
       this.getAllDoctors();
+      this.getAllLogs();
+      this.getAllEntryLogs();
     },
     getAllDoctors() {
       this.axiosCall("/doctors-schedule/getAllDoctorsDashboard", "GET").then(

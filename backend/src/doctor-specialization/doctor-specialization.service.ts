@@ -29,7 +29,7 @@ export class DoctorSpecializationService {
           await queryRunner.startTransaction();
           try {
             let specialization = createDoctorSpecializationDto;
-            const isExist = await this.doctorSpecializationRepository.findOneBy({specialty:specialization.specialty,});
+            const isExist = await this.doctorSpecializationRepository.findOneBy({specialty:specialization.specialty,doctorID:specialization.doctorID });
       
             if(!isExist){
               const data = queryRunner.manager.create(DoctorSpecialization, {

@@ -3,7 +3,7 @@
     <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span>Apointment</span>
+          <span>Appointment</span>
           <v-spacer></v-spacer>
           <v-btn icon dark @click="closeD()">
             <v-icon>mdi-close</v-icon>
@@ -179,7 +179,8 @@
               <v-row
                 v-if="
                   !clinicDecription.doctors ||
-                    clinicDecription.specialty == 'Others'
+                    clinicDecription.specialty == 'Others' ||
+                    assignModule == 5
                 "
               >
                 <v-col cols="12" md="4" sm="12">
@@ -441,6 +442,7 @@ export default {
           sortable: false,
         },
       ],
+      doctorID: null,
       clinicList: [],
       doc_profile: [],
       doctors_schedList: [],
@@ -523,6 +525,7 @@ export default {
         "11:00 PM",
         "12:00 AM",
       ],
+      assignModule: null,
       search: "",
       loading: false,
       paginationData: {},
@@ -547,7 +550,7 @@ export default {
     },
     maxDate() {
       const today = new Date();
-      today.setMonth(today.getMonth() + 1);
+      today.setMonth(today.getMonth() + 12);
       return today.toISOString().substr(0, 10);
     },
   },
@@ -583,7 +586,10 @@ export default {
       deep: true,
     },
   },
-  mounted() {},
+  mounted() {
+    this.assignModule = this.$store.state.user.user.assignedModuleID;
+    this.doctorID = this.$store.state.user.id;
+  },
 
   beforeDestroy() {},
 
@@ -694,27 +700,15 @@ export default {
     saveAppointment() {
       let data = {
         patientID: this.data.id,
-        status: 1,
-        date:
-          this.clinicDecription.specialty == "Others" ||
-          !this.clinicDecription.doctors
-            ? this.form.date
-            : this.doc_profile[0].oldDate,
-        time:
-          this.clinicDecription.specialty == "Others" ||
-          !this.clinicDecription.doctors
-            ? this.form.time
-            : this.doctor_time,
+        status: 0,
+        date: this.form.date,
+        time: this.form.time,
         clinic: this.clinicDecription.specialty
           ? this.clinicDecription.specialty
           : "",
-        doctorID:
-          this.clinicDecription.specialty == "Others" ||
-          !this.clinicDecription.doctors
-            ? null
-            : this.doc_profile[0].doctorID,
+        doctorID: this.doctorID,
       };
-      // console.log(data);
+      console.log(data);
 
       this.axiosCall("/appointment/bookAppointment", "POST", data).then(
         (res) => {
@@ -723,6 +717,7 @@ export default {
             this.fadeAwayMessage.type = "success";
             this.fadeAwayMessage.header = "Successfully Updated";
             this.dialog = false;
+            this.addAppointmentDialog = false;
             this.initialize();
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.show = true;

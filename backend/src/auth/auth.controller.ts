@@ -58,10 +58,10 @@ export class AuthController {
     return this.authService.checkEmail(email);
   }
 
-  @Post('confirmOtp')
-  confirmOTP(@Body() conOTP: ConfirmOTPDto) {
-    return this.authService.confirmOTP(conOTP);
-  }
+  // @Post('confirmOtp')
+  // confirmOTP(@Body() conOTP: ConfirmOTPDto) {
+  //   return this.authService.confirmOTP(conOTP);
+  // }
 
   @UseGuards(JWTAuthGuard)
   @ApiBearerAuth()
@@ -83,10 +83,23 @@ export class AuthController {
 
   // @UseGuards(JWTAuthGuard)
   // @ApiBearerAuth()
-  // @Get('sendOTP/:email')
-  // sendOTP(@Param('email') email: string) {
-  //   return this.authService.sendOTP(email);
-  // }
+  @Get('sendNewPassword/:email')
+  sendOTP(@Param('email') email: string) {
+    return this.authService.sendNewPassword(email);
+  }
+
+    @Get('getAllUserLogs')
+    getAllUserLogs() {
+    return this.authService.getAllUserLogs();
+  }
+
+      @Get('getAllEntryLogs')
+    getAllEntryLogs() {
+    return this.authService.getAllEntryLogs();
+  }
+
+  
+
 
   // @Post('compareOTP')
   // compareOTP(@Body() data: any) {

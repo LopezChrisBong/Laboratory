@@ -32,80 +32,6 @@
                     outlined
                   ></v-text-field>
                 </v-col>
-
-                <v-col cols="12" v-show="showOTP == true">
-                  <v-row class="mx-5">
-                    <v-col cols="12" class="pa-0 px-4 mb-2">
-                      <p class="text-body-2 text-center">
-                        Please enter the OTP that was sent to your email address
-                        to continue resetting your acount.
-                      </p>
-                    </v-col>
-                    <v-col cols="12" class="mb-4">
-                      <p class="text-caption text-gray-100 text-center">
-                        Please enter your One Time Pin
-                      </p>
-                      <!-- <div style="max-width: 300px;position: relative;">
-                        <v-otp-input length="6" type="number"></v-otp-input>
-                      </div> -->
-
-                      <div id="otp" class="otp-div">
-                        <input type="text" id="first" maxlength="1" />
-                        <input type="text" id="second" maxlength="1" />
-                        <input type="text" id="third" maxlength="1" />
-                        <input type="text" id="fourth" maxlength="1" />
-                        <input type="text" id="fifth" maxlength="1" />
-                        <input type="text" id="sixth" maxlength="1" />
-                      </div>
-                    </v-col>
-                    <v-col cols="12" class="pa-0 px-4">
-                      <v-btn
-                        :loading="isLoading"
-                        @click="submitOTP()"
-                        block
-                        depressed
-                        :color="$vuetify.theme.themes.light.submitBtns"
-                        class="white--text py-5 font-size-14 rounded-lg"
-                        >CONFIRM</v-btn
-                      >
-                    </v-col>
-                  </v-row>
-                </v-col>
-
-                <v-col v-if="showPass == true" cols="12" class="pa-0 px-4 mt-2">
-                  <v-text-field
-                    color="blue"
-                    class="font-size-14 rounded-lg"
-                    v-model="password"
-                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                    :rules="
-                      showPass == true
-                        ? [formRules.required, formRules.password]
-                        : []
-                    "
-                    :type="show1 ? 'text' : 'password'"
-                    name="input-10-1"
-                    label="New Password"
-                    dense
-                    outlined
-                    @click:append="show1 = !show1"
-                  ></v-text-field>
-                </v-col>
-                <v-col v-if="showPass == true" cols="12" class="pa-0 px-4 mt-2">
-                  <v-text-field
-                    color="blue"
-                    class="font-size-14 rounded-lg"
-                    v-model="confirm_pass"
-                    :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
-                    :rules="[formRules.required]"
-                    :type="show2 ? 'text' : 'password'"
-                    name="input-10-1"
-                    label="Confirm Password"
-                    dense
-                    outlined
-                    @click:append="show2 = !show2"
-                  ></v-text-field>
-                </v-col>
                 <v-col cols="12" class="mb-5">
                   <div class="d-flex justify-center" v-if="showEmail == true">
                     <v-btn
@@ -115,22 +41,9 @@
                       class="white--text py-2 font-size-15 rounded-lg"
                       :loading="isLoading"
                       @click="checkEmail()"
-                      >Check Email</v-btn
+                      >Send new password to email</v-btn
                     >
                   </div>
-
-                  <!-- <div class="d-flex justify-center" v-if="showOTP == true">
-                    <v-btn
-                      block
-                      depressed
-                      color="#123E4D"
-                      class="white--text py-2 font-size-15 rounded-lg"
-                      :loading="isLoading"
-                      @click="checkOTP()"
-                      >Verify OTP</v-btn
-                    >
-                  </div> -->
-
                   <div class="d-flex justify-center" v-if="showPass == true">
                     <v-btn
                       block
@@ -178,14 +91,6 @@ export default {
     }
   },
 
-  beforeUnmount() {
-    document.getElementById("first").value = "";
-    document.getElementById("second").value = "";
-    document.getElementById("third").value = "";
-    document.getElementById("fourth").value = "";
-    document.getElementById("fifth").value = "";
-    document.getElementById("sixth").value = "";
-  },
   data: () => ({
     isLoading: false,
     user_id: "",
@@ -230,83 +135,30 @@ export default {
         });
       }
     },
-    submitOTP() {
-      const first = document.getElementById("first").value;
-      const second = document.getElementById("second").value;
-      const third = document.getElementById("third").value;
-      const fourth = document.getElementById("fourth").value;
-      const fifth = document.getElementById("fifth").value;
-      const sixth = document.getElementById("sixth").value;
 
-      let otp =
-        first +
-        "" +
-        second +
-        "" +
-        third +
-        "" +
-        fourth +
-        "" +
-        fifth +
-        "" +
-        sixth;
-
-      let data = {
-        email: this.$store.state.email,
-        otp: otp,
-      };
-      if (first && second && third && fourth && fifth && sixth) {
-        this.isLoading = true;
-
-        // console.log(data);
-        this.axiosCall("/auth/compareOTP", "POST", data).then((res) => {
-          if (res.data.status == 200) {
-            this.isLoading = false;
-            this.showEmail = false;
-            this.showPass = true;
-            this.showOTP = false;
-            // this.$router.push("/registration-success");
-          } else {
-            this.isLoading = false;
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.message = res.data.msg;
-            this.fadeAwayMessage.header = "System Message";
-          }
-        });
-      } else {
-        this.isLoading = false;
-        this.fadeAwayMessage.show = true;
-        this.fadeAwayMessage.type = "error";
-        this.fadeAwayMessage.message = "Please fill all the fields.";
-        this.fadeAwayMessage.header = "System Message";
-      }
-    },
     checkEmail() {
       if (this.$refs.Formref.validate()) {
         this.isLoading = true;
-        this.axiosCall("/auth/sendOTP/" + this.email, "GET").then((res) => {
-          if (res.data.status == 200) {
-            this.$store.dispatch("setEmail", this.email);
-            this.isLoading = false;
-            this.showEmail = false;
-            this.showPass = false;
-            this.showOTP = true;
-            this.email = res.data.user;
-          } else if (res.data.status == 400) {
-            this.isLoading = false;
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.message = res.data.msg;
-            this.fadeAwayMessage.header = "System Message";
-          } else if (res.data.status == 404) {
-            this.isLoading = false;
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.message = res.data.msg;
-            this.fadeAwayMessage.header = "System Message";
+        this.axiosCall("/auth/sendNewPassword/" + this.email, "GET").then(
+          (res) => {
+            if (res.data.status == 200) {
+              this.isLoading = false;
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.message = res.data.msg;
+              this.fadeAwayMessage.header = "System Message";
+              setTimeout(() => {
+                this.$router.push("/login");
+              }, 1500);
+            } else {
+              this.isLoading = false;
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "error";
+              this.fadeAwayMessage.message = res.data.msg;
+              this.fadeAwayMessage.header = "System Message";
+            }
           }
-        });
+        );
       }
     },
     // checkOTP() {

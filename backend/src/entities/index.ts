@@ -29,6 +29,7 @@ import { Prescription } from 'src/patient/entities/prescription.entity';
 import { Invoice } from 'src/payment/entities/invoice.entity';
 import { Supplier } from 'src/supplier/entities/supplier.entity';
 import { InventoryTransaction } from 'src/inventory-transaction/entities/inventory-transaction.entity';
+import { UserLogs } from 'src/auth/entities/user_logs.entity';
 
 const entities = [
   Users,
@@ -60,7 +61,8 @@ const entities = [
   Prescription,
   Invoice,
   Supplier,
-  InventoryTransaction
+  InventoryTransaction,
+  UserLogs
 ];
 
 export {
@@ -93,7 +95,8 @@ export {
   Prescription,
   Invoice,
   Supplier,
-  InventoryTransaction
+  InventoryTransaction,
+  UserLogs
 
 };
 

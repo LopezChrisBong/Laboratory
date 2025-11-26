@@ -26,6 +26,11 @@ export class NotificationController {
   getAllNotifications(@Param('id') id: string) {
     return this.notificationService.getAllNotifications(+id);
   }
+
+      @Get('getAllReceptionist/Notification')
+  getAllReceptionistNotif() {
+    return this.notificationService.getAllReceptionistNotif();
+  }
   
 
   @Patch(':id')

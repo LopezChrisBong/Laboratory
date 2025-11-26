@@ -123,7 +123,7 @@
 
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-select
-                      label="Gender"
+                      label="Sex"
                       :items="genderList"
                       v-model="form.gender"
                       :rules="[(v) => !!v || 'Gender is required']"
@@ -152,161 +152,6 @@
                       @input="toUppercase('address', $event)"
                     />
                   </v-col>
-                  <!--Laboratory Services Area-->
-                  <!-- <v-col cols="12" v-if="tab == 1">
-                    <v-row>
-                      <v-col
-                        cols="12"
-                        :md="item.data.length <= 0 ? 3 : 12"
-                        sm="12"
-                        v-show="info == 2"
-                        v-for="item in dataServices"
-                        :key="item.id"
-                        class="my-1 mx-1"
-                        style="border: 1px solid black; border-radius: 10px;"
-                      >
-                        <div
-                          v-if="item.data.length <= 0"
-                          class="d-flex justify-center align-center"
-                        >
-                          <div>
-                            <v-checkbox
-                              v-model="selected"
-                              :label="item.description"
-                              :value="item"
-                            ></v-checkbox>
-                          </div>
-                          <div class="mx-2">&#8369;{{ item.price }}</div>
-                        </div>
-                        <div v-if="item.data.length > 0" class="">
-                          <strong> {{ item.description }}</strong>
-                          <v-row>
-                            <v-col
-                              cols="3"
-                              v-for="item in item.data"
-                              :key="item.id"
-                            >
-                              <div class="d-flex justify-center align-center">
-                                <div>
-                                  <v-checkbox
-                                    v-model="selected"
-                                    :label="item.description"
-                                    :value="item"
-                                  ></v-checkbox>
-                                </div>
-                                <div class="mx-2">&#8369;{{ item.price }}</div>
-                              </div>
-                            </v-col>
-                          </v-row>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </v-col> -->
-                  <!-- :rules="[(v) => !!v || 'Service is required']" -->
-                  <!--Imaging Services Area-->
-
-                  <!-- <v-col cols="12" v-if="tab == 2">
-                    <v-row>
-                      <v-col
-                        cols="12"
-                        :md="item.data.length <= 0 ? 3 : 12"
-                        sm="12"
-                        v-show="info == 2"
-                        v-for="item in dataServices"
-                        :key="item.id"
-                        class="my-1 mx-1"
-                        style="border: 1px solid black; border-radius: 10px;"
-                      >
-                        <div
-                          v-if="item.data.length <= 0"
-                          class="d-flex justify-center align-center"
-                        >
-                          <div>
-                            <v-checkbox
-                              v-model="selected"
-                              :label="item.description"
-                              :value="item"
-                            ></v-checkbox>
-                          </div>
-                          <div class="mx-2">&#8369;{{ item.price }}</div>
-                        </div>
-                        <div v-if="item.data.length > 0" class="">
-                          <strong>{{ item.description }}</strong>
-                          <v-row>
-                            <v-col
-                              cols="3"
-                              v-for="item in item.data"
-                              :key="item.id"
-                            >
-                              <div class="d-flex justify-center align-center">
-                                <div>
-                                  <v-checkbox
-                                    v-model="selected"
-                                    :label="item.description"
-                                    :value="item"
-                                  ></v-checkbox>
-                                </div>
-                                <div class="mx-2">&#8369;{{ item.price }}</div>
-                              </div>
-                            </v-col>
-                          </v-row>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </v-col> -->
-
-                  <!--Package Services Area-->
-
-                  <!-- <v-col cols="12" v-if="tab == 3">
-                    <v-row>
-                      <v-col
-                        cols="12"
-                        md="6"
-                        sm="12"
-                        v-show="info == 2"
-                        v-for="item in dataPackages"
-                        :key="item"
-                        style="border: 1px solid black; border-radius: 10px;"
-                      >
-                        <div class="d-flex justify-center align-center">
-                          <div>
-                            <v-checkbox
-                              v-model="selectedPackage"
-                              :label="item.description"
-                              :value="item"
-                            ></v-checkbox>
-                          </div>
-                          <div class="mx-2">&#8369;{{ item.price }}</div>
-                          <br />
-                        </div>
-                        <div class="mb-2">
-                          <strong style="font-size: 14px;"
-                            >List of Service:</strong
-                          >
-                        </div>
-                        <v-row>
-                          <v-col
-                            cols="4"
-                            class="pa-2"
-                            v-for="items in JSON.parse(item.assign_mods)"
-                            :key="items.id"
-                          >
-                            <span style="font-size: 20px;">
-                              <strong>&#x2022;</strong></span
-                            >
-                            <v-chip
-                              small
-                              class="pa-2"
-                              color="blue"
-                              text-color="white"
-                            >
-                              {{ items.service_description }}
-                            </v-chip>
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                    </v-row>
-                  </v-col> -->
                   <v-col cols="12" v-show="info == 2">
                     <div>
                       <p style="font-size: 24px;">
@@ -434,7 +279,7 @@
                           deletable-chips
                           :rules="[(v) => !!v || 'Time is required']"
                           label="Select Time"
-                          :items="allTimes1"
+                          :items="filteredTimes"
                           class="rounded-lg"
                           color="#6DB249"
                         ></v-autocomplete>
@@ -494,7 +339,7 @@
                                 </p>
                               </div>
                               <div>
-                                <p>Field of experties:</p>
+                                <p>Field of expertise:</p>
                                 <ul>
                                   <li
                                     v-for="items in item.specialization"
@@ -518,7 +363,10 @@
                     :disabled="valid"
                     color="primary"
                     class="mt-4"
-                    @click="info == 2 ? (info = 1) : (info = 2)"
+                    @click="
+                      info == 2 ? (info = 1) : (info = 2);
+                      changeTime();
+                    "
                   >
                     Return
                   </v-btn>
@@ -722,8 +570,46 @@ export default {
     };
   },
   computed: {
+    filteredTimes() {
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+      // Convert time like "02:00 PM" → total minutes
+      const timeToMinutes = (t) => {
+        const [time, modifier] = t.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (modifier === "PM" && hours !== 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
+
+      if (this.form.date === todayStr) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return this.allTimes1.filter((t) => timeToMinutes(t) > nowMinutes);
+      }
+      return this.allTimes1;
+    },
+    remainingTimes() {
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+      // Convert time like "02:00 PM" → total minutes
+      const timeToMinutes = (t) => {
+        const [time, modifier] = t.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (modifier === "PM" && hours !== 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
+
+      if (this.doctors_date === todayStr) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return this.allTimes1.filter((t) => timeToMinutes(t) > nowMinutes);
+      }
+      return this.allTimes1;
+    },
     availableTimes() {
-      if (!this.form.date) return this.allTimes1;
+      if (!this.form.date) return this.remainingTimes;
 
       const bookedTimes = this.bookings
         .filter((b) => b.date === this.form.date)
@@ -735,19 +621,19 @@ export default {
         (d) => d.date === this.form.date
       );
 
-      let doctorTimes = this.allTimes1;
+      let doctorTimes = this.remainingTimes;
 
       if (docSchedule) {
-        const startIndex = this.allTimes1.indexOf(docSchedule.timeFrom);
-        const endIndex = this.allTimes1.indexOf(docSchedule.timeTo);
+        const startIndex = this.remainingTimes.indexOf(docSchedule.timeFrom);
+        const endIndex = this.remainingTimes.indexOf(docSchedule.timeTo);
 
         if (startIndex !== -1 && endIndex !== -1) {
           if (startIndex <= endIndex) {
-            doctorTimes = this.allTimes1.slice(startIndex, endIndex + 1);
+            doctorTimes = this.remainingTimes.slice(startIndex, endIndex + 1);
           } else {
             doctorTimes = [
-              ...this.allTimes1.slice(startIndex),
-              ...this.allTimes1.slice(0, endIndex + 1),
+              ...this.remainingTimes.slice(startIndex),
+              ...this.remainingTimes.slice(0, endIndex + 1),
             ];
           }
         }
@@ -1037,12 +923,32 @@ export default {
                 data2
               ).then((res) => {
                 if (res.data.status == 200) {
-                  this.fadeAwayMessage.show = true;
-                  this.fadeAwayMessage.type = "success";
-                  this.fadeAwayMessage.header = "Successfully Saved";
-                  this.info = 1;
-                  this.confirmationDialog = false;
-                  this.resetForm();
+                  let notif_data = {
+                    title: "Patient Appointment",
+                    message: "View patient appointment!",
+                    route: "/appointment",
+                    assignedID: 1,
+                  };
+                  this.axiosCall("/notification", "POST", notif_data).then(
+                    (res) => {
+                      if (res.data.status == 200) {
+                        this.fadeAwayMessage.show = true;
+                        this.fadeAwayMessage.type = "success";
+                        this.fadeAwayMessage.header = "Successfully Saved";
+                        this.info = 1;
+                        this.confirmationDialog = false;
+                        this.resetForm();
+                        setTimeout(() => {
+                          location.reload();
+                        }, 1000);
+                      } else {
+                        this.fadeAwayMessage.show = true;
+                        this.fadeAwayMessage.type = "error";
+                        this.fadeAwayMessage.message = res.data.message;
+                        this.fadeAwayMessage.header = "System Message";
+                      }
+                    }
+                  );
                 } else if (res.data.status == 400) {
                   this.fadeAwayMessage.show = true;
                   this.fadeAwayMessage.type = "error";
@@ -1077,12 +983,32 @@ export default {
           this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
             (res) => {
               if (res.data.status == 200) {
-                this.fadeAwayMessage.show = true;
-                this.fadeAwayMessage.type = "success";
-                this.fadeAwayMessage.header = "Successfully Saved";
-                this.info = 1;
-                this.confirmationDialog = false;
-                this.resetForm();
+                let notif_data = {
+                  title: "Patient Appointment",
+                  message: "View patient appointment!",
+                  route: "/appointment",
+                  assignedID: 1,
+                };
+                this.axiosCall("/notification", "POST", notif_data).then(
+                  (res) => {
+                    if (res.data.status == 200) {
+                      this.fadeAwayMessage.show = true;
+                      this.fadeAwayMessage.type = "success";
+                      this.fadeAwayMessage.header = "Successfully Saved";
+                      this.info = 1;
+                      this.confirmationDialog = false;
+                      this.resetForm();
+                      setTimeout(() => {
+                        location.reload();
+                      }, 1000);
+                    } else {
+                      this.fadeAwayMessage.show = true;
+                      this.fadeAwayMessage.type = "error";
+                      this.fadeAwayMessage.message = res.data.message;
+                      this.fadeAwayMessage.header = "System Message";
+                    }
+                  }
+                );
               } else if (res.data.status == 400) {
                 this.fadeAwayMessage.show = true;
                 this.fadeAwayMessage.type = "error";
@@ -1144,6 +1070,36 @@ export default {
       this.doctors_schedList = [];
       this.doctors_schedList1 = [];
       this.selected = [];
+    },
+    changeTime() {
+      this.doctors_date = null;
+      this.form.date = null;
+      this.allTimes1 = [
+        "01:00 AM",
+        "02:00 AM",
+        "03:00 AM",
+        "04:00 AM",
+        "05:00 AM",
+        "06:00 AM",
+        "07:00 AM",
+        "08:00 AM",
+        "09:00 AM",
+        "10:00 AM",
+        "11:00 AM",
+        "12:00 PM",
+        "01:00 PM",
+        "02:00 PM",
+        "03:00 PM",
+        "04:00 PM",
+        "05:00 PM",
+        "06:00 PM",
+        "07:00 PM",
+        "08:00 PM",
+        "09:00 PM",
+        "10:00 PM",
+        "11:00 PM",
+        "12:00 AM",
+      ];
     },
   },
 };
