@@ -1,86 +1,93 @@
-
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMedicalInfoDto {
+  @ApiProperty()
+  patientID: number;
 
   @ApiProperty()
-    patientID: number;
-
-    @ApiProperty()
-    appointmentID: number;
+  appointmentID: number;
 
   @ApiProperty()
-    doctorID: number;
+  doctorID: number;
 
-    @ApiProperty()
-    am: string;
+  @ApiProperty()
+  am: string;
 
+  @ApiProperty()
+  bp: string;
 
-    @ApiProperty()
-    bp: string;
+  @ApiProperty()
+  date: string;
 
+  @ApiProperty()
+  dateDelivered: string;
 
-    @ApiProperty()
-    date: string;
+  @ApiProperty()
+  deliveryDate: string;
 
-    @ApiProperty()
-    dateDelivered: string;
+  @ApiProperty()
+  deliveryMethod: string;
 
-    @ApiProperty()
-    deliveryDate: string;
+  @ApiProperty()
+  finding: string;
 
-    @ApiProperty()
-    deliveryMethod: string;
+  @ApiProperty()
+  liveBirths: string;
 
-    @ApiProperty()
-    finding: string;
+  @ApiProperty()
+  menstrual: string;
 
-    @ApiProperty()
-    liveBirths: string;
+  @ApiProperty()
+  pregnant: string;
 
-    @ApiProperty()
-    menstrual: string;
+  @ApiProperty()
+  remarks: string;
 
-    @ApiProperty()
-    pregnant: string;
+  @ApiProperty()
+  treatment: string;
 
-    @ApiProperty()
-    remarks: string;
+  @ApiProperty()
+  weight: string;
 
-    @ApiProperty()
-    treatment: string;
+  @ApiProperty()
+  prevPreg: string;
 
-    @ApiProperty()
-    weight: string;
+  @ApiProperty()
+  complain: string;
 
-    @ApiProperty()
-    prevPreg: string;
+  @ApiProperty()
+  Pnumber: string;
 
-    @ApiProperty()
-    complain: string;
+  @ApiProperty()
+  PAnumber: string;
 
-    @ApiProperty()
-    Pnumber: string;
+  @ApiProperty()
+  Gnumber: string;
 
-    @ApiProperty()
-    PAnumber: string;
+  @ApiProperty()
+  Lnumber: string;
 
-    @ApiProperty()
-    Gnumber: string;
+  @ApiProperty()
+  Anumber: string;
 
-    @ApiProperty()
-    Lnumber: string;
+  @ApiProperty()
+  Tnumber: string;
 
-    @ApiProperty()
-    Anumber: string;
+  @ApiProperty()
+  admitted: string;
 
-    @ApiProperty()
-    Tnumber: string;
+  @ApiProperty()
+  discharge: string;
 
-    @ApiProperty()
-    admitted: string;
+  @ApiProperty()
+  referred_by: string;
 
-    @ApiProperty()
-    discharge: string;
+  @ApiProperty()
+  civil_status: string;
 
+  @ApiProperty()
+  age: string;
+
+  @ApiProperty()
+  spouse: string;
 }

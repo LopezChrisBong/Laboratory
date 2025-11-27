@@ -1,4 +1,3 @@
-
 import { Appointment } from 'src/appointment/entities/appointment.entity';
 import { PatientDoctor } from 'src/appointment/entities/patient-doctor.entity';
 import { PatientMedtech } from 'src/appointment/entities/patient-medtech.entity';
@@ -28,7 +27,9 @@ import { DoctorsSchedule } from 'src/doctors-schedule/entities/doctors-schedule.
 import { Prescription } from 'src/patient/entities/prescription.entity';
 import { Invoice } from 'src/payment/entities/invoice.entity';
 import { Supplier } from 'src/supplier/entities/supplier.entity';
+import { InventoryTransaction } from 'src/inventory-transaction/entities/inventory-transaction.entity';
 import { UserLogs } from 'src/auth/entities/user_logs.entity';
+import { Sms } from 'src/sms/entities/sms.entity';
 
 const entities = [
   Users,
@@ -60,7 +61,9 @@ const entities = [
   Prescription,
   Invoice,
   Supplier,
-  UserLogs
+  UserLogs,
+  Sms,
+  InventoryTransaction,
 ];
 
 export {
@@ -93,8 +96,9 @@ export {
   Prescription,
   Invoice,
   Supplier,
-  UserLogs
-
+  UserLogs,
+  Sms,
+  InventoryTransaction,
 };
 
 export default entities;
