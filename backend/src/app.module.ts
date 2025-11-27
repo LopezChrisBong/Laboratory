@@ -32,11 +32,16 @@ import { MedicalInfoModule } from './medical-info/medical-info.module';
 import { NotificationModule } from './notification/notification.module';
 import { DoctorsScheduleModule } from './doctors-schedule/doctors-schedule.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { SmsModule } from './sms/sms.module';
 import { InventoryTransactionModule } from './inventory-transaction/inventory-transaction.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    SmsModule.forRoot({
+      apiToken: process.env.PHILSMS_API_TOKEN,
+      defaultSenderId: process.env.PHILSMS_SENDER_ID,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DATABASE_HOST,

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
+    <v-dialog v-model="dialog" eager persistent scrollable fullscreen>
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span>Medical Information</span>
+          <span>Medical Information of {{ data && data.name }}</span>
           <v-spacer></v-spacer>
           <v-btn icon dark @click="closeD()">
             <v-icon>mdi-close</v-icon>
@@ -11,76 +11,108 @@
         </v-card-title>
 
         <v-card-text style="max-height: 700px" class="my-4">
-          <v-card>
-            <v-row>
-              <v-col cols="" class="flex-items ">
-                <!-- <v-btn
-                  @click="AddFunction()"
-                  class="white--text rounded-lg"
-                  color="blue"
-                  v-if="userRoleID == 3"
-                >
-                  Add
-                </v-btn> -->
-              </v-col>
-              <v-spacer></v-spacer>
-              <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
-                <v-btn
-                  @click="AddFunction()"
-                  class="white--text rounded-lg"
-                  color="blue"
-                  v-if="userRoleID == 3"
-                >
-                  Add
-                </v-btn>
-              </v-col>
-              <v-col cols="12" class=" pt-2 px-4">
-                <v-data-table
-                  :headers="userRoleID == 3 ? headers : headers1"
-                  :items="dataItem"
-                  :items-per-page="10"
-                >
-                  <template v-slot:[`item.index`]="{ index }">
-                    {{ index + 1 }}.
-                  </template>
-                  <template v-slot:[`item.pregnant`]="{ item }">
-                    {{
-                      item.pregnant != "0"
-                        ? " PREGNANCY MEDICATION"
-                        : "NORMAL/USUAL MEDICATION"
-                    }}.
-                  </template>
-
-                  <template v-slot:[`item.finding`]="{ item }">
-                    <div v-html="item.finding"></div>
-                  </template>
-
-                  <template v-slot:[`item.treatment`]="{ item }">
-                    <div v-html="item.treatment"></div>
-                  </template>
-
-                  <template v-slot:[`item.action`]="{ item }">
-                    <v-btn
-                      x-small
-                      class="mt-1"
-                      @click="view(item)"
-                      outlined
-                      color="green"
-                      >View</v-btn
+          <v-row>
+            <!-- <v-col cols="4" class="pa-4" v-for="i in dataItem" :key="i.id">
+              <v-card class="mx-auto" max-width="344" outlined>
+                <v-list-item three-line>
+                  <v-list-item-content>
+                    <div class="text-overline mb-4">
+                      {{
+                        i.pregnant != "0"
+                          ? " PREGNANCY MEDICATION"
+                          : "NORMAL/USUAL MEDICATION"
+                      }}
+                    </div>
+                    <v-list-item-title class="text-h5 mb-1">
+                      <div v-html="i.finding"></div>
+                    </v-list-item-title>
+                    <v-list-item-subtitle
+                      >Greyhound divisely hello coldly
+                      fonwderfully</v-list-item-subtitle
                     >
-                    <v-btn
-                      x-small
-                      class="mt-1 mx-2"
-                      @click="print(item)"
-                      outlined
-                      color="blue"
-                      >Print</v-btn
-                    >
-                  </template>
-                </v-data-table>
-              </v-col>
-            </v-row>
-          </v-card>
+                  </v-list-item-content>
+                </v-list-item>
+
+                <v-card-actions>
+                  <v-btn
+                    x-small
+                    class="mt-1"
+                    @click="view(i)"
+                    outlined
+                    color="green"
+                    >View</v-btn
+                  >
+                  <v-btn
+                    x-small
+                    class="mt-1 mx-2"
+                    @click="print(i)"
+                    outlined
+                    color="blue"
+                    >Print</v-btn
+                  >
+                </v-card-actions>
+              </v-card>
+            </v-col> -->
+            <v-col cols="12" class="d-flex justify-end mt-2 mr-2">
+              <v-btn
+                @click="AddFunction()"
+                class="white--text rounded-lg"
+                color="blue"
+                v-if="userRoleID == 3"
+              >
+                Add
+              </v-btn>
+            </v-col>
+            <v-col cols="12">
+              <v-data-table
+                :headers="userRoleID == 3 ? headers : headers1"
+                :items="dataItem"
+                :items-per-page="10"
+              >
+                <template v-slot:[`item.index`]="{ index }">
+                  {{ index + 1 }}.
+                </template>
+                <template v-slot:[`item.pregnant`]="{ item }">
+                  {{
+                    item.pregnant != "0"
+                      ? " PREGNANCY MEDICATION"
+                      : "NORMAL/USUAL MEDICATION"
+                  }}.
+                </template>
+
+                <template v-slot:[`item.finding`]="{ item }">
+                  <div v-html="item.finding"></div>
+                </template>
+
+                <template v-slot:[`item.treatment`]="{ item }">
+                  <div v-html="item.treatment"></div>
+                </template>
+
+                <template v-slot:[`item.doctor`]="{ item }">
+                  {{ getDoctor(item.doctorID) }}
+                </template>
+
+                <template v-slot:[`item.action`]="{ item }">
+                  <v-btn
+                    x-small
+                    class="mt-1"
+                    @click="view(item)"
+                    outlined
+                    color="green"
+                    >View</v-btn
+                  >
+                  <v-btn
+                    x-small
+                    class="mt-1 mx-2"
+                    @click="print(item)"
+                    outlined
+                    color="blue"
+                    >Print</v-btn
+                  >
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions class="pa-5">
@@ -115,9 +147,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" outlined @click="cancelDelete()">
-            Close
-          </v-btn>
+          <v-btn color="red" outlined @click="cancelDelete()"> Close </v-btn>
           <v-btn
             :disabled="isButtonLoading"
             :loading="isButtonLoading"
@@ -167,7 +197,7 @@ export default {
         message: "",
         top: 10,
       },
-
+      personal_details: null,
       dialog: false,
       loading: false,
       userRoleID: null,
@@ -177,14 +207,14 @@ export default {
       isButtonLoading: false,
       dataItem: [],
       headers: [
-        {
-          text: "No.",
-          value: "index",
-          align: "start",
-          valign: "start",
-          width: 50,
-          sortable: false,
-        },
+        // {
+        //   text: "No.",
+        //   value: "index",
+        //   align: "start",
+        //   valign: "start",
+        //   width: 50,
+        //   sortable: false,
+        // },
         {
           text: "Medication",
           value: "pregnant",
@@ -204,6 +234,14 @@ export default {
         {
           text: "Treatment",
           value: "treatment",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+
+        {
+          text: "Attending Doctor/Physician",
+          value: "doctor",
           align: "start",
           valign: "center",
           sortable: false,
@@ -244,6 +282,14 @@ export default {
         },
 
         {
+          text: "Attending Doctor/Physician",
+          value: "doctor",
+          align: "start",
+          valign: "center",
+          sortable: false,
+        },
+
+        {
           text: "Treatment",
           value: "treatment",
           align: "start",
@@ -251,6 +297,7 @@ export default {
           sortable: false,
         },
       ],
+      docList: [],
     };
   },
 
@@ -258,8 +305,25 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        // console.log("STRAT", data);
-        this.id = data.id;
+        this.tab = 1;
+        console.log(data);
+
+        this.personal_details = {
+          f_name: data.f_name,
+          m_name: data.m_name,
+          l_name: data.l_name,
+          suffix: data.suffix,
+          b_date: data.b_date,
+          age: data.age,
+          gender: data.gender,
+          contact_no: data.contact_no,
+          address: data.address,
+          civil_status: data.civil_status,
+          occupation: data.occupation,
+          spouse:
+            data.civil_status.toLowerCase() == "single" ? "N/A" : data.spouse,
+        };
+        this.getAllDoctor();
         this.initialize();
       },
       deep: true,
@@ -294,7 +358,7 @@ export default {
         "GET"
       ).then((res) => {
         if (res) {
-          // console.log("Get Data", res.data);
+          console.log("Get Data", res.data);
           this.dataItem = res.data;
         } else {
           this.dataItem = null;
@@ -302,6 +366,23 @@ export default {
         this.loading = false;
       });
     },
+
+    getAllDoctor() {
+      this.axiosCall("/user-details/getAllVerifiedUser", "GET").then((res) => {
+        this.docList = res.data;
+      });
+    },
+
+    getDoctor(id) {
+      if (id) {
+        for (let i = 0; i < this.docList.length; i++) {
+          if (this.docList[i].id == id) {
+            return this.docList[i].name;
+          }
+        }
+      }
+    },
+
     closeD() {
       this.eventHub.$emit("closeViewMedicalInformationDialog", false);
       this.dialog = false;
@@ -309,17 +390,23 @@ export default {
 
     edit(item) {
       // console.log(item);
+
       this.medicalData = item;
       this.action = "Update";
     },
     view(item) {
       // console.log(item);
+      Object.assign(item, { personal_details: this.personal_details });
       this.medicalData = item;
       this.action = "View";
     },
 
     AddFunction() {
-      this.medicalData = { id: null, data: this.data };
+      this.medicalData = {
+        id: null,
+        data: this.data,
+        personal_details: this.personal_details,
+      };
       this.action = "Add";
     },
 
