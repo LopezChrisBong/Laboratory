@@ -30,7 +30,7 @@
                     Add
                   </v-btn>
                 </v-col>
-                <v-col cols="12" class=" pt-2 px-4">
+                <v-col cols="12" class="pt-2 px-4">
                   <v-data-table
                     :headers="headers"
                     :items="dataItem"
@@ -103,9 +103,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" outlined @click="cancelDelete()">
-            Close
-          </v-btn>
+          <v-btn color="red" outlined @click="cancelDelete()"> Close </v-btn>
           <v-btn
             :disabled="isButtonLoading"
             :loading="isButtonLoading"
@@ -208,7 +206,7 @@
 
               <vue-editor
                 v-if="action == 'Update' || action == 'Add'"
-                style="width: 100%;"
+                style="width: 100%"
                 v-model="prescription"
                 :editorToolbar="customToolbar"
                 class="mb-10"
@@ -239,12 +237,8 @@
               </div>
             </v-col>
             <v-col cols="4" class="text-right">
-              <div class="text-caption">
-                License No: ______________
-              </div>
-              <div class="text-caption">
-                PTR No: _____________
-              </div>
+              <div class="text-caption">License No: ______________</div>
+              <div class="text-caption">PTR No: _____________</div>
             </v-col>
           </v-row>
         </v-card-text>
@@ -424,15 +418,17 @@ export default {
 
     getAllPatientPrecription() {
       this.loading = true;
-      this.axiosCall(
-        "/patient/getAllPatientPrecription/" + this.data.id,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          this.dataItem = res.data;
-        }
-        this.loading = false;
-      });
+      if (this.data) {
+        this.axiosCall(
+          "/patient/getAllPatientPrecription/" + this.data.id,
+          "GET"
+        ).then((res) => {
+          if (res) {
+            this.dataItem = res.data;
+          }
+          this.loading = false;
+        });
+      }
     },
 
     closeD() {

@@ -21,7 +21,139 @@
           <v-card-text style="max-height: 700px" class="my-4">
             <v-container>
               <v-row>
-                <v-col cols="12" md="6">
+                <v-col cols="12" class="">
+                  <v-tabs v-model="activeTab" color="blue" align-tabs="left">
+                    <v-tab
+                      v-for="tab in tabList"
+                      :key="tab.id"
+                      @change="changeTab(tab)"
+                      >{{ tab.name }}</v-tab
+                    >
+                  </v-tabs>
+                </v-col>
+              </v-row>
+              <v-row v-show="tab == 1">
+                <v-col cols="4">
+                  <v-text-field
+                    label="First Name"
+                    v-model="f_name"
+                    readonly
+                    outlined
+                    dense
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Middle Name"
+                    v-model="m_name"
+                    readonly
+                    outlined
+                    dense
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Last Name"
+                    v-model="l_name"
+                    readonly
+                    outlined
+                    dense
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Suffix"
+                    v-model="suffix"
+                    readonly
+                    disabled
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Sex"
+                    v-model="gender"
+                    readonly
+                    outlined
+                    disabled
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Civil Status"
+                    v-model="civil_status"
+                    readonly
+                    outlined
+                    dense
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Birth Date"
+                    v-model="b_date"
+                    readonly
+                    outlined
+                    dense
+                    disabled
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Age"
+                    v-model="age"
+                    readonly
+                    outlined
+                    disabled
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Contact Number"
+                    v-model="contact_number"
+                    readonly
+                    disabled
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    label="Occupation"
+                    v-model="occupation"
+                    readonly
+                    outlined
+                    disabled
+                    dense
+                  ></v-text-field>
+                  <v-text-field
+                    label="Spouse"
+                    v-model="spouse"
+                    readonly
+                    outlined
+                    disabled
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="8">
+                  <v-textarea
+                    label="Address"
+                    v-model="address"
+                    readonly
+                    outlined
+                    disabled
+                    dense
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+              <v-row v-show="tab == 2">
+                <v-col cols="6" md="6">
                   <v-menu
                     ref="menu"
                     :close-on-content-click="false"
@@ -39,7 +171,7 @@
                         chips
                         color="blue"
                         small-chips
-                        label="Date"
+                        label="Date*"
                         readonly
                         v-bind="attrs"
                         v-on="on"
@@ -60,10 +192,24 @@
                     </v-date-picker>
                   </v-menu>
                 </v-col>
+
+                <v-col cols="6" md="6">
+                  <v-text-field
+                    outlined
+                    dense
+                    v-model="docName"
+                    chips
+                    color="blue"
+                    small-chips
+                    label="Attending Physician"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+
                 <v-col cols="12">
                   <v-row>
                     <!-- Pregnant Checkbox -->
-                    <v-col cols="12" md="6" v-if="action != 'View'">
+                    <v-col cols="12" md="6">
                       <v-checkbox
                         v-model="pregnant"
                         :readonly="action === 'View'"
@@ -101,7 +247,7 @@
                                   v-model="Gnumber"
                                   :items="numberList"
                                   :rules="[formRules.required]"
-                                  label="G"
+                                  label="G*"
                                   dense
                                   outlined
                                   hide-details
@@ -114,7 +260,7 @@
                                   v-model="Pnumber"
                                   :items="numberList"
                                   :rules="[formRules.required]"
-                                  label="P"
+                                  label="P*"
                                   dense
                                   outlined
                                   hide-details
@@ -266,6 +412,48 @@
 
                 <v-col cols="12" md="6" v-if="pregnant == true">
                   <v-menu
+                    ref="menstrual"
+                    :close-on-content-click="false"
+                    :return-value.sync="menstrual"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        dense
+                        v-model="menstrual"
+                        chips
+                        color="blue"
+                        small-chips
+                        label="Last Menstrual Date"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      color="blue"
+                      v-model="menstrual"
+                      no-title
+                      scrollable
+                      :readonly="action == 'View'"
+                    >
+                      <v-spacer></v-spacer>
+
+                      <v-btn
+                        text
+                        color="blue"
+                        @click="$refs.menstrual.save(menstrual)"
+                      >
+                        OK
+                      </v-btn>
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="12" md="6" v-if="pregnant == true">
+                  <v-menu
                     ref="menu3"
                     :close-on-content-click="false"
                     :return-value.sync="deliveryDate"
@@ -282,7 +470,7 @@
                         chips
                         color="blue"
                         small-chips
-                        label="Expected Delivery Date"
+                        label="Expected Delivery Date*"
                         readonly
                         v-bind="attrs"
                         v-on="on"
@@ -307,7 +495,103 @@
                     </v-date-picker>
                   </v-menu>
                 </v-col>
+
                 <v-col cols="12" md="6" v-if="pregnant == true">
+                  <v-text-field
+                    v-model="prevPreg"
+                    :readonly="action == 'View'"
+                    dense
+                    outlined
+                    required
+                    label="Number of Previous Pregnancies"
+                    class="rounded-lg"
+                    color="blue"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6" v-if="pregnant == true">
+                  <v-text-field
+                    v-model="liveBirths"
+                    :readonly="action == 'View'"
+                    dense
+                    outlined
+                    required
+                    label="Number of Live Births"
+                    class="rounded-lg"
+                    color="blue"
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" md="6" v-if="pregnant == true">
+                  <v-menu
+                    ref="dateDelivered"
+                    :close-on-content-click="false"
+                    :return-value.sync="dateDelivered"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        outlined
+                        dense
+                        v-model="dateDelivered"
+                        chips
+                        color="blue"
+                        small-chips
+                        label="Date of Last Delivery"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      color="blue"
+                      v-model="dateDelivered"
+                      no-title
+                      scrollable
+                      :readonly="action == 'View'"
+                    >
+                      <v-spacer></v-spacer>
+
+                      <v-btn
+                        text
+                        color="blue"
+                        @click="$refs.dateDelivered.save(dateDelivered)"
+                      >
+                        OK
+                      </v-btn>
+                    </v-date-picker>
+                  </v-menu>
+
+                  <v-autocomplete
+                    dense
+                    outlined
+                    v-model="referred_by"
+                    class="rounded-lg"
+                    item-text="name"
+                    item-value="id"
+                    label="Referred By"
+                    color="#93CB5B"
+                    :items="docList"
+                  >
+                  </v-autocomplete>
+                </v-col>
+                <v-col cols="12" md="6" v-if="pregnant == true">
+                  <div class="pa-2 rounded-lg" style="border: 1px solid #aaa">
+                    <div class="text-caption">
+                      Method of Previous Deliveries
+                    </div>
+                    <v-radio-group
+                      v-model="deliveryMethod"
+                      row
+                      :rules="[formRules.required]"
+                    >
+                      <v-radio label="Normal" value="Normal"></v-radio>
+                      <v-radio label="CS" value="CS"></v-radio>
+                    </v-radio-group>
+                  </div>
+                </v-col>
+                <v-col cols="12" md="4" v-if="pregnant == true">
                   <v-text-field
                     v-model="weight"
                     :readonly="action == 'View'"
@@ -315,12 +599,13 @@
                     dense
                     outlined
                     required
-                    label="Weight"
+                    label="Weight*"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="6" v-if="pregnant == true">
+
+                <v-col cols="12" md="4" v-if="pregnant == true">
                   <v-text-field
                     v-model="bp"
                     :readonly="action == 'View'"
@@ -328,12 +613,12 @@
                     dense
                     outlined
                     required
-                    label="Blood Pressure"
+                    label="Blood Pressure*"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="6" v-if="pregnant == true">
+                <v-col cols="12" md="4" v-if="pregnant == true">
                   <v-text-field
                     v-model="am"
                     :readonly="action == 'View'"
@@ -341,7 +626,7 @@
                     dense
                     outlined
                     required
-                    label="Abdominal Measurement"
+                    label="Abdominal Measurement*"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
@@ -360,11 +645,7 @@
 
                 <v-col cols="12" md="12" sm="12">
                   <label for="finding">
-                    <strong
-                      ><h3>
-                        Finding
-                      </h3></strong
-                    ></label
+                    <strong><h3>Finding</h3></strong></label
                   >
                   <vue-editor
                     v-model="finding"
@@ -454,6 +735,19 @@ export default {
   },
   data() {
     return {
+      f_name: null,
+      m_name: null,
+      l_name: null,
+      suffix: null,
+      b_date: null,
+      age: null,
+      contact_number: null,
+      gender: null,
+      address: null,
+      civil_status: null,
+      occupation: null,
+      spouse: null,
+      docName: null,
       finding: null,
       treatment: null,
       menstrual: null,
@@ -469,6 +763,7 @@ export default {
       Anumber: null,
       liveBirths: null,
       deliveryMethod: null,
+      referred_by: null,
       weight: null,
       discharge: null,
       admitted: null,
@@ -494,6 +789,13 @@ export default {
         message: "",
         top: 10,
       },
+      activeTab: { id: 1, name: "Personal Information" },
+      tab: 1,
+      tabList: [
+        { id: 1, name: "Personal Information" },
+        { id: 2, name: "Medical Record" },
+      ],
+      docList: [],
     };
   },
 
@@ -502,7 +804,29 @@ export default {
     data: {
       handler(data) {
         this.dialog = true;
-        console.log("View Data", data);
+        this.getAllDoctor();
+        this.activeTab = { id: 1, name: "Personal Information" };
+        this.tab = 1;
+        this.id = data.id;
+        console.log("DATA", data.personal_details);
+        if (data.personal_details) {
+          console.log("DRE");
+          this.f_name = data.personal_details.f_name;
+          this.m_name = data.personal_details.m_name;
+          this.l_name = data.personal_details.l_name;
+          this.suffix = data.personal_details.suffix;
+          this.b_date = data.personal_details.b_date;
+          // this.age = data.personal_details.age;
+          this.contact_number = data.personal_details.contact_number;
+          this.gender = data.personal_details.gender;
+          this.address = data.personal_details.address;
+          // this.civil_status = data.personal_details.civil_status;
+          // this.occupation = data.personal_details.occupation;
+          // this.spouse = data.personal_details.spouse;
+        } else {
+          console.log("DRE121");
+        }
+        this.getDoctor(this.$store.state.user.id, data);
 
         if (data.id) {
           this.initialize();
@@ -529,11 +853,23 @@ export default {
           this.Lnumber = data.Lnumber;
           this.Tnumber = data.Tnumber;
           this.Anumber = data.Anumber;
+          console.log(
+            "AGE",
+            this.calculateAge(data.personal_details.b_date, data.created_at)
+          );
+          this.age = data.age
+            ? data.age
+            : this.calculateAge(data.personal_details.b_date, data.created_at);
+          this.civil_status = data.personal_details.civil_status;
+          this.spouse = data.personal_details.spouse;
         } else {
-          if (this.$refs.MedicalInformation) {
-            this.$refs.MedicalInformation.reset();
-          }
+          // if (this.$refs.MedicalInformation) {
+          //   this.$refs.MedicalInformation.reset();
+          // }
           this.initialize();
+          this.age = this.calculateAge(data.personal_details.b_date, "now");
+          this.civil_status = data.personal_details.civil_status;
+          this.spouse = data.personal_details.spouse;
           this.finding = null;
           this.treatment = null;
           this.menstrual = null;
@@ -561,6 +897,10 @@ export default {
   },
 
   methods: {
+    changeTab(tab) {
+      this.activeTab = tab;
+      this.tab = tab.id;
+    },
     initialize() {
       this.changeMedical();
       // console.log(this.pregnant);
@@ -578,8 +918,53 @@ export default {
         console.log("Patient unmarked as pregnant");
       }
     },
+
+    calculateAge(bdate, yearTo) {
+      let d = yearTo.split("T")[0];
+      var dob = new Date(bdate);
+      var dTo = yearTo == "now" ? new Date() : new Date(d);
+
+      var dob1 = new Date(dob.getFullYear(), dob.getMonth(), dob.getDate());
+      var dTo1 = new Date(dTo.getFullYear(), dTo.getMonth(), dTo.getDate());
+
+      let age = dTo1.getFullYear() - dob1.getFullYear();
+      const monthDifference = dTo1.getMonth() - dob1.getMonth();
+
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && dTo1.getDate() < dob1.getDate())
+      ) {
+        age--;
+      }
+      console.log("AGE", age);
+      return age;
+    },
+    getDoctor(docID, data) {
+      this.axiosCall("/user-details/getAllVerifiedUser", "GET").then((res) => {
+        if (!data.id) {
+          for (let i = 0; i < res.data.length; i++) {
+            if (res.data[i].id == docID) {
+              this.docName = res.data[i].name;
+            }
+          }
+        } else {
+          for (let i = 0; i < res.data.length; i++) {
+            if (res.data[i].id == data.doctorID) {
+              this.docName = res.data[i].name;
+            }
+          }
+        }
+      });
+    },
+
+    getAllDoctor() {
+      this.axiosCall("/user-details/doctors", "GET").then((res) => {
+        this.docList = res.data;
+      });
+    },
+
     add() {
-      let userID = this.$store.state.user.user.usertypeID;
+      let userID = this.$store.state.user.id;
       let data = {
         patientID:
           this.data.userIDd == null ? this.data.data.id : this.data.userIDd,
@@ -608,6 +993,10 @@ export default {
         discharge: this.discharge,
         admitted: this.admitted,
         complain: this.complain,
+        age: this.age,
+        spouse: this.spouse,
+        civil_status: this.civil_status,
+        referred_by: this.referred_by,
       };
 
       console.log(data);
