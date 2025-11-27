@@ -74,7 +74,9 @@
                 class="white--text  d-flex justify-center rounded-lg"
                 @click="addExperty()"
               >
-                <v-icon right color="#2196F3"> mdi-plus-box-outline </v-icon>
+                <v-icon v-if="dataSpecialty.length == 0" right color="#2196F3">
+                  mdi-plus-box-outline
+                </v-icon>
               </button>
             </div>
 
@@ -253,7 +255,6 @@
                   <v-text-field
                     v-model="specialtyDescription"
                     required
-                    readonly
                     label="Description"
                     class="rounded-lg"
                     color="#6DB249"
@@ -606,7 +607,6 @@ export default {
           specialty_description: this.specialtyDescription,
         };
         // console.log(data);
-
         this.axiosCall("/doctor-specialization", "POST", data).then((res) => {
           if (res.data.status == 200) {
             this.fadeAwayMessage.show = true;

@@ -455,7 +455,7 @@ export class PaymentService {
             await this.dataSource.manager.update(
               ServiceAppointment,
               serviceAppointmentId,
-              { status: 1 },
+              { status: 1, medtechID:12 },
             );
           }
         } catch (err) {

@@ -54,6 +54,7 @@ export class AppointmentService {
   }
 
  async addPatient(createPatientDto:CreatePatientDto){
+  console.log(createPatientDto)
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -78,6 +79,7 @@ export class AppointmentService {
           city_muni: patient.city_muni,
           baranggay: patient.baranggay,
           purok: patient.purok,
+          spouse: patient.spouse
         });
 
         let savedCategory = await queryRunner.manager.save(data);
@@ -89,7 +91,7 @@ export class AppointmentService {
         id:savedCategory.id,
         duplicate:false,
       };
-      }
+              }
 
         // // console.log(savedCategory.id);
       await queryRunner.commitTransaction();
@@ -109,13 +111,6 @@ export class AppointmentService {
       };
     }
 
-//     catch (error) {
-//   if (error.code === '23505') { // Postgres unique violation
-//     throw new ConflictException('Email already exists');
-//   }
-//   throw error; // rethrow if not handled
-// }
-    
     finally {
       await queryRunner.release();
     }
@@ -417,12 +412,17 @@ export class AppointmentService {
       .createQueryBuilder('pt')
       .select([
         "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+        " ap.date as date",
+        " ap.time as time",
+        " ap.clinic as clinic",
+        "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
         " pt.*",
       ])
+      .leftJoin(Appointment, 'ap', 'ap.patientID = pt.id')
+      .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
+      .orderBy('ap.date', "DESC")
       .groupBy('pt.patientID')
       .getRawMany()
-
-
       }
       else{
        
@@ -474,13 +474,20 @@ export class AppointmentService {
               .createQueryBuilder('pt')
               .select([
                 "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-                " pt.*",
+                "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
+                " ap.*",
                 " ap.id as appointmentID",
+                " ap.date as date",
+                " ap.clinic as clinic",
               ])
               .leftJoin(Appointment, 'ap', 'ap.patientID = pt.id')
+              .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
               .where('ap.status = 1')
+              .andWhere('ap.doctorID IS NOT NULL')
+              .orderBy('ap.date', "DESC")
               .groupBy('pt.patientID')
               .getRawMany()
+
             }else{
                  console.log('NAA')
              data = []
@@ -498,7 +505,6 @@ export class AppointmentService {
       .getRawMany()
   }
 
-     
       return data
   }
 
@@ -508,35 +514,98 @@ export class AppointmentService {
       .createQueryBuilder('ap')
       .select([
         "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-        " pt.*",
+        "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
+        " ap.*",
       ])
       .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
+      .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
       // .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
       .where('ap.doctorID = :doctorID', { doctorID })
-      // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-      .groupBy('pt.patientID')
-      .getRawMany()
-      
-      return data
-  }
-
-      async getAllPatientForMedtech(medtechID:number){
-         console.log(medtechID)
-      let data = await this.serviceAppointmentRepository
-      .createQueryBuilder('sa')
-      .select([
-        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-        " pt.*",
-      ])
-      .leftJoin(Patient, 'pt', 'sa.patientID = pt.id')
-      // .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-      .where('sa.medtechID = :medtechID', { medtechID })
+      .andWhere('ap.status != 0')
       // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
       .groupBy('pt.patientID')
       .getRawMany()
       console.log(data)
       return data
   }
+
+async getAllPatientForMedtech(medtechID: number) {
+  let data= await this.serviceAppointmentRepository
+    .createQueryBuilder("sa")
+    .leftJoin(Patient, "pt", "sa.patientID = pt.id")
+
+    // join direct services
+    .leftJoin(Service, "s",
+      `JSON_CONTAINS(sa.service_list, CAST(s.id AS JSON))`
+    )
+
+    // join packages
+    .leftJoin(ServicePackages, "sp",
+      `JSON_CONTAINS(sa.package_list, CAST(sp.id AS JSON))`
+    )
+
+    // join services inside packages
+    .leftJoin(Service, "ps",
+      `JSON_CONTAINS(JSON_EXTRACT(sp.selected_modules, '$[*].id'), CAST(ps.id AS JSON))`
+    )
+
+    .select([
+      `IF(
+        !ISNULL(pt.m_name),
+        CONCAT(pt.f_name, ' ', SUBSTRING(pt.m_name, 1, 1), '. ', pt.l_name),
+        CONCAT(pt.f_name, ' ', pt.l_name)
+      ) AS name`,
+      "pt.*",
+      "sa.service_list",
+      "sa.package_list",
+
+      // services directly selected
+      `
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'id', s.id,
+          'type', s.service_type,
+          'description', s.service_description,
+          'price', s.service_price
+        )
+      ) AS availed_services
+      `,
+
+      // packages + inner services
+      `
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'id', sp.id,
+          'description', sp.description,
+          'price', sp.price,
+          'services',
+            (
+              SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                  'id', ps2.id,
+                  'type', ps2.service_type,
+                  'description', ps2.service_description,
+                  'price', ps2.service_price
+                )
+              )
+              FROM service ps2
+              WHERE JSON_CONTAINS(JSON_EXTRACT(sp.selected_modules, '$[*].id'), CAST(ps2.id AS JSON))
+            )
+        )
+      ) AS availed_packages
+      `
+    ])
+    .where("sa.medtechID = :medtechID", { medtechID })
+    .groupBy("pt.id")
+    .getRawMany();
+
+    console.log(data[1].availed_packages)
+    return data
+}
+
+
+
+
 
   async getAllPatientByRole(doctorID: number, user:any) {
 
@@ -561,13 +630,18 @@ export class AppointmentService {
     .createQueryBuilder('ap')
     .select([
       "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+      "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
       "pt.*",
       "ap.id as appointmentID",
+      "ap.date as date",
+      "ap.time as time",
     ])
     .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
+    .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
     .where('ap.doctorID = :doctorID', { doctorID })
         // query.andWhere('ap.status IN (0,1, 2)');
         .andWhere('ap.status = 1')
+        .orderBy('ap.date', 'DESC')
         // .andWhere('ap.medtechID IS NULL')
         .groupBy('pt.patientID')
     // query.andWhere('pt.medtechID IS EQUAL NULL');
@@ -705,6 +779,7 @@ let data = await this.appointmentRepository
   }else{
     data.andWhere('ap.status != 0')
   }
+  data.orderBy('ap.date', 'DESC')
   let newData = await data.getRawMany();
   console.log(newData)
   return newData
@@ -912,6 +987,7 @@ async getAllMedtechAppointment(id: number) {
           contact_no: updatePatientDto.contact_no,
           b_date: updatePatientDto.b_date,
           address: updatePatientDto.address,
+          spouse:updatePatientDto.spouse
      })
      return{
        msg:'Updated successfully!', status:HttpStatus.CREATED
@@ -975,11 +1051,13 @@ async getAllMedtechAppointment(id: number) {
   }
 
     async confirmAppointment(id: number, updateAppointmentDto: UpdateAppointmentDto){
-        
+          // console.log(id,updateAppointmentDto)
         try {
           const isExist = await this.appointmentRepository.findOneBy({id});
           await this.dataSource.manager.update(Appointment, id,{
           status:updateAppointmentDto.status,
+          date:updateAppointmentDto.date,
+          time:updateAppointmentDto.time,
           })
         return{
         msg:'Updated successfully!', status:HttpStatus.OK,

@@ -98,8 +98,8 @@ export class AppointmentController {
         content_type = 'application/octet-stream'; 
       }
 
-      // const file = createReadStream(join(process.cwd(), '/lab_result_attachment/' + data));
-      const file = createReadStream(join(process.cwd(), '/../lab_result_attachment/' + data));
+      const file = createReadStream(join(process.cwd(), '/lab_result_attachment/' + data));
+      // const file = createReadStream(join(process.cwd(), '/../lab_result_attachment/' + data));
 
       res.set({
         'Content-Type': content_type,
@@ -143,13 +143,13 @@ getFile(
 
   content_type = mimeTypes[ext] || 'application/octet-stream';
 
-  // const file = createReadStream(
-  //   join(process.cwd(), '/lab_result_attachment/' + data),
-  // );
-
-    const file = createReadStream(
-    join(process.cwd(), '/../lab_result_attachment/' + data),
+  const file = createReadStream(
+    join(process.cwd(), '/lab_result_attachment/' + data),
   );
+
+  //   const file = createReadStream(
+  //   join(process.cwd(), '/../lab_result_attachment/' + data),
+  // );
 
   res.set({
     'Content-Type': content_type,

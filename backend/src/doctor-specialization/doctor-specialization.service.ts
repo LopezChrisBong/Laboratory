@@ -29,7 +29,7 @@ export class DoctorSpecializationService {
           await queryRunner.startTransaction();
           try {
             let specialization = createDoctorSpecializationDto;
-            const isExist = await this.doctorSpecializationRepository.findOneBy({specialty:specialization.specialty,doctorID:specialization.doctorID });
+            const isExist = await this.doctorSpecializationRepository.findOneBy({doctorID:specialization.doctorID });
       
             if(!isExist){
               const data = queryRunner.manager.create(DoctorSpecialization, {
@@ -53,7 +53,7 @@ export class DoctorSpecializationService {
             }else{
             await queryRunner.rollbackTransaction();
             return {
-              msg: 'Experty already exist please select another date!',
+              msg: 'Doctor already added a specialization, Saving failed!',
               status: HttpStatus.BAD_REQUEST,
             };
             }

@@ -700,7 +700,7 @@ export default {
     saveAppointment() {
       let data = {
         patientID: this.data.id,
-        status: 0,
+        status: 1,
         date: this.form.date,
         time: this.form.time,
         clinic: this.clinicDecription.specialty

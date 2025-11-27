@@ -12,7 +12,7 @@ export class DoctorSpecialization {
         @Column({ type: "varchar"})
         specialty: string
 
-         @Column({ type: "varchar"})
+         @Column({ type: "longtext"})
         specialty_description: string
 
         @CreateDateColumn({

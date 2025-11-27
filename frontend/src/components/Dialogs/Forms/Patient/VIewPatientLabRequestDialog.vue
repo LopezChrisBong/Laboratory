@@ -104,7 +104,7 @@
                       block
                       >Assign Doctor</v-btn
                     > -->
-                    <v-btn
+                    <!-- <v-btn
                       v-if="tabulet == 2 && item.status != 2"
                       x-small
                       class="mt-1"
@@ -113,7 +113,7 @@
                       color="orange"
                       block
                       >Assign Med-Tech</v-btn
-                    >
+                    > -->
                     <!-- <v-btn
                       x-small
                       v-if="tabulet == 2 && item.status == 0"

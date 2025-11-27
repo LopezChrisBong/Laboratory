@@ -18,22 +18,14 @@
               >
             </v-card-title>
             <v-form v-model="valid" @submit.prevent="submitForm">
-              <v-col cols="12" md="5" class="pa-0" v-if="info == 2">
-                <!-- <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
-                  <v-tab
-                    v-for="tab in tabList"
-                    :key="tab.id"
-                    @click="changeTab(tab)"
-                    >{{ tab.name }}</v-tab
-                  >
-                </v-tabs> -->
-              </v-col>
+              <v-col cols="12" md="5" class="pa-0" v-if="info == 2"> </v-col>
               <v-card outlined class="scrollable-card pa-4" max-height="90vh">
                 <v-row class="">
                   <v-col cols="12" md="4" sm="12" v-show="info == 1">
                     <v-text-field
                       label="*First Name"
                       v-model="form.f_name"
+                      dense
                       :rules="[formRules.required]"
                       class="text-uppercase"
                       @input="toUppercase('f_name', $event)"
@@ -46,6 +38,7 @@
                       label="Middle Name"
                       v-model="form.m_name"
                       class="text-uppercase"
+                      dense
                       @input="toUppercase('m_name', $event)"
                     />
                   </v-col>
@@ -55,6 +48,7 @@
                       v-model="form.l_name"
                       :rules="[formRules.required]"
                       class="text-uppercase"
+                      dense
                       required
                       @input="toUppercase('l_name', $event)"
                     />
@@ -64,6 +58,7 @@
                       label="Suffix"
                       v-model="form.suffix"
                       class="text-uppercase"
+                      dense
                       required
                       @input="toUppercase('suffix', $event)"
                     />
@@ -73,6 +68,7 @@
                       label="*Birth Date"
                       v-model="form.b_date"
                       :rules="[formRules.required]"
+                      dense
                       required
                       type="date"
                       class="text-uppercase"
@@ -86,29 +82,61 @@
                       :rules="[formRules.required]"
                       required
                       readonly
+                      dense
                       type="number"
                       class="text-uppercase"
                     />
                   </v-col>
-                  <!-- <v-col cols="12" md="6" sm="12" v-show="info == 1">
-                    <v-text-field
-                      label="Civil Status"
-                      v-model="form.civil_status"
-                      :rules="[formRules.required]"
-                      class="text-uppercase"
+
+                  <v-col cols="12" md="4" sm="12" v-show="info == 1">
+                    <v-select
+                      label="*Sex"
+                      :items="genderList"
+                      dense
+                      v-model="form.gender"
+                      :rules="[(v) => !!v || 'Gender is required']"
                       required
-                      @input="toUppercase('civil_status', $event)"
+                      class="text-uppercase"
                     />
-                  </v-col> -->
-                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
+                  </v-col>
+                  <v-col cols="12" md="4" sm="12" v-show="info == 1">
+                    <v-text-field
+                      v-model="form.contact_no"
+                      label="*Contact No."
+                      color="#6DB249"
+                      dense
+                      type="text"
+                      maxlength="11"
+                      @keypress="onlyDigits"
+                      @input="cleanDigits"
+                      :rules="[contactNoRule]"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="4" sm="12" v-show="info == 1">
                     <v-select
                       label="*Civil Status"
                       :items="statusList"
+                      dense
                       v-model="form.civil_status"
                       :rules="[(v) => !!v || 'Gender is required']"
                       required
                       class="text-uppercase"
                     />
+                  </v-col>
+
+                  <v-col
+                    cols="12"
+                    md="12"
+                    sm="12"
+                    v-if="form.civil_status == 'Married'"
+                  >
+                    <v-text-field
+                      v-model="form.spouse"
+                      label="*Spouse"
+                      color="#6DB249"
+                      dense
+                      :rules="[(v) => !!v || 'Spouse is required']"
+                    ></v-text-field>
                   </v-col>
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
                     <v-text-field
@@ -116,50 +144,13 @@
                       v-model="form.occupation"
                       :rules="[formRules.required]"
                       class="text-uppercase"
+                      dense
                       required
                       @input="toUppercase('occupation', $event)"
                     />
                   </v-col>
 
                   <v-col cols="12" md="6" sm="12" v-show="info == 1">
-                    <v-select
-                      label="*Sex"
-                      :items="genderList"
-                      v-model="form.gender"
-                      :rules="[(v) => !!v || 'Gender is required']"
-                      required
-                      class="text-uppercase"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
-                    <!-- <v-text-field
-                      label="*Contact No."
-                      v-model="form.contact_no"
-                      :rules="[formRules.required]"
-                      required
-                      type="number"
-                      class="text-uppercase"
-                    /> -->
-                    <v-text-field
-                      v-model="form.contact_no"
-                      label="*Contact No."
-                      color="#6DB249"
-                      type="text"
-                      maxlength="11"
-                      @keypress="onlyDigits"
-                      :rules="[contactNoRule]"
-                    ></v-text-field>
-                  </v-col>
-
-                  <v-col cols="12" md="6" sm="12" v-show="info == 1">
-                    <!-- <v-text-field
-                      label="*Address"
-                      v-model="form.address"
-                      :rules="[formRules.required]"
-                      class="text-uppercase"
-                      required
-                      @input="toUppercase('address', $event)"
-                    /> -->
                     <v-autocomplete
                       v-model="form.region"
                       :rules="[formRules.required]"
@@ -225,6 +216,7 @@
                       :rules="[formRules.required]"
                       class="text-uppercase"
                       required
+                      dense
                       @input="toUppercase('address', $event)"
                     />
                   </v-col>
@@ -341,14 +333,6 @@
                         </v-menu>
                       </v-col>
                       <v-col cols="12" md="6" sm="12">
-                        <!-- <v-select
-                      label="Select Time"
-                      :items="availableTimes"
-                      v-model="form.time"
-                      :rules="[(v) => !!v || 'Time is required']"
-                      required
-                    /> -->
-
                         <v-autocomplete
                           v-model="form.time"
                           small-chips
@@ -363,18 +347,38 @@
                     </v-row>
                     <v-row v-else>
                       <v-col cols="12" md="6">
-                        <v-autocomplete
-                          v-model="doctors_date"
-                          small-chips
-                          deletable-chips
-                          :rules="[(v) => !!v || 'required']"
-                          label="Select Date"
-                          item-text="date"
-                          :items="doctors_schedList"
-                          class="rounded-lg"
-                          @change="changeDoctorList()"
-                          color="#6DB249"
-                        ></v-autocomplete>
+                        <v-menu
+                          v-model="menuDoctorDate"
+                          :close-on-content-click="false"
+                          transition="scale-transition"
+                          offset-y
+                          min-width="auto"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-text-field
+                              v-model="doctors_date"
+                              label="Select Date"
+                              prepend-icon="mdi-calendar"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"
+                              :rules="[(v) => !!v || 'required']"
+                              class="rounded-lg"
+                              color="#6DB249"
+                            />
+                          </template>
+
+                          <v-date-picker
+                            v-model="doctors_date"
+                            color="green"
+                            :allowed-dates="allowedDoctorDates"
+                            @input="
+                              menuDoctorDate = false;
+                              changeDoctorList();
+                            "
+                          />
+                        </v-menu>
+
                         <br />
                         <v-autocomplete
                           v-model="doctor_selected"
@@ -410,7 +414,6 @@
                               :key="item.id"
                             >
                               <div>
-                                <!-- <p>image {{ item.profile }}</p> -->
                                 <v-img
                                   style="width: 200px; height: 150px;"
                                   :src="item.profile"
@@ -478,94 +481,77 @@
         </v-col>
       </v-row>
 
-      <v-dialog v-model="confirmationDialog" max-width="450">
-        <v-card>
-          <div class="pt-4">
-            <p style="text-align: center; font-size: 24px;">
-              <b>Thank you for your submission!</b>
+      <v-dialog v-model="confirmationDialog" max-width="550" persistent>
+        <v-card class="pa-6 rounded-xl email-card">
+          <div class="d-flex align-center mb-4">
+            <v-icon color="deep-purple-accent-4" size="36"
+              >mdi-email-outline</v-icon
+            >
+            <h2 class="ml-3 text-h6 font-weight-bold">
+              Appointment Confirmation
+            </h2>
+          </div>
+
+          <div class="email-content pa-4">
+            <p class="text-body-2 mb-4">
+              <strong>Subject:</strong> Submission of Appointment to PARAGON
+            </p>
+
+            <p class="text-body-2 mb-4">Hi {{ form.f_name }},</p>
+
+            <p class="text-body-2 mb-4">
+              Thank you for booking with
+              <strong>Paragon Diagnostics & Multi-Specialty Clinic</strong>!
+              Here are your appointment details:
+            </p>
+
+            <p class="text-body-2">
+              <strong>Date:</strong> {{ doctors_date || form.date }} <br />
+              <strong>Time:</strong> {{ doctor_time || form.time }} <br />
+
+              <strong v-if="doc_profile.length">
+                Doctor:
+              </strong>
+              <span v-for="d in doc_profile" :key="d.id">
+                {{ d.name }}
+              </span>
+              <br />
+
+              <strong v-if="clinicDecription.specialty !== 'Others'">
+                Specialization:
+              </strong>
+              {{ clinicDecription.specialty }}
+            </p>
+
+            <p class="text-body-2 mt-4">
+              ⚠ Please make sure to <strong>take a screenshot</strong> of this
+              message and present it along with a valid ID upon arrival.
+            </p>
+            <p class="text-body-2 mt-4">
+              After your submission is successful, an SMS notification will be
+              sent to your mobile number. Please ensure that the number you
+              entered is correct and valid.
+            </p>
+
+            <p class="text-body-2 mt-4">
+              For questions or clarifications, message us on our official
+              Facebook page:
+              <strong>Paragon Diagnostics and Multi-Specialty Clinic</strong>
             </p>
           </div>
-          <v-card-text>
-            <v-row>
-              <!-- Booking Details -->
-              <v-col cols="12" class="mb-2">
-                <div style=" font-size: 12px;">
-                  <v-row>
-                    <v-col cols="12" md="6">
-                      <span>
-                        <b>Patient Name:</b> {{ form.f_name }} {{ form.l_name }}
-                      </span></v-col
-                    >
-                    <v-col cols="12" md="6">
-                      <span
-                        ><b>Scheduled Date:</b>
-                        {{ doctors_date ? doctors_date : form.date }}</span
-                      ></v-col
-                    >
-                    <v-col cols="12" md="6"
-                      ><span
-                        ><b>Scheduled Time:</b>
-                        {{ doctor_time ? doctor_time : form.time }}</span
-                      ></v-col
-                    >
-                    <v-col cols="12" md="6" v-if="doc_profile.length">
-                      <b>Doctor:</b>
-                      <span v-for="item in doc_profile" :key="item.id">
-                        {{ item.name }}
-                      </span>
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="clinicDecription.specialty != 'Others'"
-                    >
-                      <span
-                        ><b>Department:</b>
-                        {{ clinicDecription.specialty }}</span
-                      ></v-col
-                    >
-                  </v-row>
-                </div>
-              </v-col>
 
-              <!-- Screenshot Note -->
-              <v-col cols="12" class="mb-1">
-                <div>
-                  <p style="text-align: center; font-size: 14px;" class="px-2">
-                    Please <b>take a screenshot</b> of this confirmation
-                    receipt. You will need to present it together with your
-                    valid ID when you arrive at the clinic for validation.
-                  </p>
-                </div>
-              </v-col>
-
-              <!-- Contact Info -->
-              <v-col cols="12" class="mb-1">
-                <div>
-                  <p style="text-align: center; font-size: 14px;" class="px-2">
-                    For any question and concerns, feel free to message us on
-                    our official facebook page,
-                    <br />
-                    <b>Paragon Diagnostics and Multi-speciality Clinic</b>
-                  </p>
-                </div>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-card-actions>
+          <v-card-actions class="mt-4">
+            <v-spacer></v-spacer>
             <v-btn
+              variant="text"
               color="red"
-              class="mt-4 px-6"
               @click="confirmationDialog = false"
-              >Cancel</v-btn
             >
-            <v-spacer />
-            <v-btn
-              color="green darken-1"
-              class="mt-4 px-6"
-              @click="confirmBooking"
-              >Confirm</v-btn
-            >
+              Cancel
+            </v-btn>
+            <v-btn color="deep-purple-accent-4" @click="confirmBooking">
+              Confirm
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -591,6 +577,7 @@ export default {
       serviceTotalPrice: null,
       packageTotalPrice: null,
       doctors_date: null,
+      menuDoctorDate: false,
       doc_profile: [],
       doctor_time: null,
       doctors_schedList: [],
@@ -610,6 +597,7 @@ export default {
       provinceList: [],
       city_muniList: [],
       form: {
+        spouse: null,
         f_name: null,
         suffix: null,
         l_name: null,
@@ -638,7 +626,7 @@ export default {
       selectedIndex: null,
       dataPackages: [],
       genderList: ["Male", "Female"],
-      statusList: ["Single", "Married"],
+      statusList: ["Single", "Married", "Widow"],
       Laboratory_services: [],
       Imaging_services: [],
       Package_services: [],
@@ -691,9 +679,14 @@ export default {
     };
   },
   computed: {
+    allowedDoctorDates() {
+      const allowedDatesArray = this.doctors_schedList.map((item) => item.date);
+      return (date) => allowedDatesArray.includes(date);
+    },
     contactNoRule() {
       return (v) => {
         if (!v || v.length !== 11) return "Contact number must be 11 digits";
+        if (!/^0/.test(v)) return "Contact number must start with 0.";
         return true;
       };
     },
@@ -774,7 +767,7 @@ export default {
 
     minDate() {
       const today = new Date();
-      today.setMonth(today.getMonth() - 1);
+      today.setMonth(today.getMonth());
       return today.toISOString().substr(0, 10);
     },
     maxDate() {
@@ -837,9 +830,12 @@ export default {
         baranggay,
         purok,
         address,
+        spouse,
       } = this.form;
 
-      const contactValid = contact_no && contact_no.length === 11;
+      const contactValid =
+        contact_no && contact_no.length === 11 && /^0/.test(contact_no);
+
       const allFieldsFilled =
         f_name &&
         l_name &&
@@ -854,7 +850,8 @@ export default {
         city_muni &&
         baranggay &&
         purok &&
-        address;
+        address &&
+        spouse;
 
       if (allFieldsFilled) {
         this.next();
@@ -862,6 +859,7 @@ export default {
         this.alerts();
       }
     },
+
     onImageError(item) {
       item.profile =
         this.envProcess + "/user-details/getProfileImg/img_avatar.png";
@@ -1026,6 +1024,30 @@ export default {
       });
     },
     confirmBooking() {
+      const baranggayData = this.baranggayList.find(
+        (item) => item.code === this.form.baranggay
+      );
+      const regionData = this.regionList.find(
+        (item) => item.code === this.form.region
+      );
+      const provinceData = this.provinceList.find(
+        (item) => item.code === this.form.province
+      );
+      const cityMuniData = this.city_muniList.find(
+        (item) => item.code === this.form.city_muni
+      );
+
+      this.form.address =
+        regionData.regionName +
+        " " +
+        provinceData.name +
+        " " +
+        cityMuniData.name +
+        " " +
+        baranggayData.name +
+        " " +
+        this.form.purok;
+
       let data = {
         f_name: this.form.f_name,
         l_name: this.form.l_name,
@@ -1042,16 +1064,8 @@ export default {
         city_muni: this.form.city_muni,
         baranggay: this.form.baranggay,
         purok: this.form.purok,
-        address:
-          this.form.region +
-          " " +
-          this.form.province +
-          ", " +
-          this.form.city_muni +
-          ", " +
-          this.form.baranggay +
-          " " +
-          this.purok,
+        address: this.form.address,
+        spouse: this.form.spouse,
       };
 
       // console.log("Data Passed", data);
@@ -1070,8 +1084,10 @@ export default {
             "GET"
           ).then((res) => {
             if (res) {
-              // console.log("Patient", res.data);
-
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "System Message";
+              this.fadeAwayMessage.message = res.data.message;
               let data2 = {
                 patientID: res.data.id,
                 date:
@@ -1100,21 +1116,33 @@ export default {
                 data2
               ).then((res) => {
                 if (res.data.status == 200) {
+                  this.fadeAwayMessage.show = true;
+                  this.fadeAwayMessage.type = "success";
+                  this.fadeAwayMessage.header = "System Message";
+                  this.fadeAwayMessage.message = res.data.message;
                   let notif_data = {
                     title: "Patient Appointment",
                     message: "View patient appointment!",
-                    route: "/appointment",
-                    assignedID: 1,
+                    route:
+                      this.clinicDecription.specialty == "Others"
+                        ? "/appointment"
+                        : "/patient",
+                    assignedID:
+                      this.clinicDecription.specialty == "Others"
+                        ? 1
+                        : this.doc_profile[0].doctorID,
                   };
                   this.axiosCall("/notification", "POST", notif_data).then(
                     (res) => {
                       if (res.data.status == 200) {
                         this.fadeAwayMessage.show = true;
                         this.fadeAwayMessage.type = "success";
-                        this.fadeAwayMessage.header = "Successfully Saved";
-                        this.info = 1;
+                        this.fadeAwayMessage.header = "System Message";
+                        this.fadeAwayMessage.message = res.data.message;
                         this.confirmationDialog = false;
+                        this.info = 1;
                         this.resetForm();
+
                         setTimeout(() => {
                           location.reload();
                         }, 1000);
@@ -1135,6 +1163,10 @@ export default {
             }
           });
         } else {
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "success";
+          this.fadeAwayMessage.header = "System Message";
+          this.fadeAwayMessage.message = res.data.message;
           let data2 = {
             patientID: res.data.id,
             date:
@@ -1156,15 +1188,24 @@ export default {
                 ? null
                 : this.doc_profile[0].doctorID,
           };
-
           this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
             (res) => {
               if (res.data.status == 200) {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "success";
+                this.fadeAwayMessage.header = "System Message";
+                this.fadeAwayMessage.message = res.data.message;
                 let notif_data = {
                   title: "Patient Appointment",
                   message: "View patient appointment!",
-                  route: "/appointment",
-                  assignedID: 1,
+                  route:
+                    this.clinicDecription.specialty == "Others"
+                      ? "/appointment"
+                      : "/patient",
+                  assignedID:
+                    this.clinicDecription.specialty == "Others"
+                      ? 1
+                      : this.doc_profile[0].doctorID,
                 };
                 this.axiosCall("/notification", "POST", notif_data).then(
                   (res) => {
@@ -1172,8 +1213,8 @@ export default {
                       this.fadeAwayMessage.show = true;
                       this.fadeAwayMessage.type = "success";
                       this.fadeAwayMessage.header = "Successfully Saved";
-                      this.info = 1;
                       this.confirmationDialog = false;
+                      this.info = 1;
                       this.resetForm();
                       setTimeout(() => {
                         location.reload();
@@ -1252,6 +1293,7 @@ export default {
       this.doctor_selected = null;
       this.form.date = null;
       this.doc_profile = [];
+      this.doctors_schedList = [];
       this.allTimes1 = [
         "01:00 AM",
         "02:00 AM",
@@ -1317,11 +1359,19 @@ export default {
           this.baranggayList = res.data;
         });
     },
+    // onlyDigits(event) {
+    //   const char = String.fromCharCode(event.keyCode);
+    //   if (!/[0-9]/.test(char)) {
+    //     event.preventDefault();
+    //   }
+    // },
     onlyDigits(event) {
-      const char = String.fromCharCode(event.keyCode);
-      if (!/[0-9]/.test(char)) {
+      if (!/^\d$/.test(event.key)) {
         event.preventDefault();
       }
+    },
+    cleanDigits(event) {
+      event.target.value = event.target.value.replace(/\D/g, "");
     },
   },
 };
@@ -1349,5 +1399,15 @@ export default {
 .selected {
   background-color: #0d6933 !important;
   color: white !important;
+}
+.email-card {
+  background: white;
+  border-radius: 14px !important;
+}
+
+.email-content {
+  border-left: 4px solid #a463f2;
+  background: #faf8ff;
+  border-radius: 8px;
 }
 </style>

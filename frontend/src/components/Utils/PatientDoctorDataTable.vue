@@ -34,7 +34,7 @@
     </v-row>
     <v-card class="ma-5 dt-container" elevation="0" outlined>
       <v-data-table
-        :headers="assignedModuleID == 3 ? headers : headers1"
+        :headers="assignedModuleID != 5 ? headers : headers1"
         :items="data"
         :items-per-page="10"
         :search="search"
@@ -43,10 +43,23 @@
         @pagination="pagination"
         hide-default-footer
       >
-        <template v-slot:[`item.fname`]="{ item }">
+        <template v-slot:[`item.name`]="{ item }">
           <p class="text-uppercase">
-            {{ item.fname }} {{ item.mname }} {{ item.lname }}
+            {{ item.name }}
           </p>
+        </template>
+        <template v-slot:[`item.date`]="{ item }">
+          {{ formatDate(item.date) }} {{ item.time }}
+        </template>
+        <template v-slot:[`item.services`]="{ item }">
+          <v-chip v-for="element in item.availed_services" :key="element.id"
+            >{{ element.description }}
+          </v-chip>
+        </template>
+        <template v-slot:[`item.packages`]="{ item }">
+          <v-chip v-for="element in item.availed_packages" :key="element.id"
+            >{{ element.description }}
+          </v-chip>
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-chip
@@ -212,7 +225,15 @@
         <!-- Header -->
         <v-card-title class="d-flex align-center justify-space-between py-3">
           <span class="text-h6 font-weight-bold">Patient Options</span>
-          <v-btn icon variant="text" color="red" @click="dialog = false">
+          <v-btn
+            icon
+            variant="text"
+            color="red"
+            @click="
+              dialog = false;
+              initialize();
+            "
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -268,7 +289,11 @@
               </v-col>
 
               <!-- Examine -->
-              <v-col cols="12" sm="6" v-if="assignedModuleID == 2">
+              <v-col
+                cols="12"
+                sm="6"
+                v-if="assignedModuleID == 2 || assignedModuleID == 5"
+              >
                 <v-card
                   class="action-card text-center pa-4"
                   variant="outlined"
@@ -284,7 +309,7 @@
               </v-col>
 
               <!-- Appointment -->
-              <v-col cols="12" sm="6" v-if="assignedModuleID != 2">
+              <v-col cols="12" md="12" sm="12" v-if="assignedModuleID != 2">
                 <v-card
                   class="action-card text-center pa-4"
                   variant="outlined"
@@ -357,12 +382,12 @@ export default {
     medicalInfo: null,
     headers: [
       { text: "Name", value: "name" },
-      { text: "Identification No.", value: "patientID" },
-      { text: "Last Visit", value: "lastVisit" },
-      { text: "Status", value: "status" },
-      { text: "Next Visit", value: "nextVisit" },
-      { text: "Recent Topic", value: "recentTopic" },
-      { text: "Recent Doctor", value: "recentDoctor" },
+
+      { text: "Services Availed", value: "services" },
+      { text: "Packages Availed", value: "packages" },
+      // { text: "Next Visit", value: "nextVisit" },
+      // { text: "Recent Topic", value: "recentTopic" },
+      // { text: "Recent Doctor", value: "recentDoctor" },
       {
         text: "Action",
         value: "actions",
@@ -374,8 +399,8 @@ export default {
 
     headers1: [
       { text: "Name", value: "name" },
-      // { text: "Identification No.", value: "patientID" },
-      // { text: "Last Visit", value: "lastVisit" },
+      { text: "Date", value: "date" },
+      { text: "Doctor Name", value: "doctor_name" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
@@ -430,24 +455,35 @@ export default {
 
   mounted() {
     this.eventHub.$on("closeAddPatient", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
+    this.eventHub.$on("closePrescrioptionDialog", () => {
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
+      this.initialize();
+    });
+
     this.eventHub.$on("closeViewMedicalInformationDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
     this.eventHub.$on("closePatientLaboratoryDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
     this.eventHub.$on("closepatientAppointmentDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
 
     this.eventHub.$on("closeExamineDataDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
   },
@@ -457,6 +493,7 @@ export default {
     this.eventHub.$off("closePatientLaboratoryDialog");
     this.eventHub.$off("closepatientAppointmentDialog");
     this.eventHub.$off("closeExamineDataDialog");
+    this.eventHub.$off("closePrescrioptionDialog");
   },
 
   watch: {
@@ -527,6 +564,7 @@ export default {
       this.action = "View";
     },
     viewAll(item) {
+      localStorage.setItem("PatientData", JSON.stringify(item));
       this.patientItem = item;
       this.dialog = true;
     },
@@ -535,7 +573,6 @@ export default {
     },
 
     patientAppointment(item) {
-      // console.log(item);
       this.patientAppointement = item;
     },
     examinePatient(item) {

@@ -40,6 +40,9 @@ export class CreatePatientDto {
     @ApiProperty()
   purok: string;
 
+     @ApiProperty()
+  spouse: string;
+
   @ApiProperty()
   contact_no: number;
 

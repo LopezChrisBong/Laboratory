@@ -298,6 +298,7 @@ export default {
       });
     },
     deleteToken: function() {
+      localStorage.removeItem("PatientData");
       localStorage.removeItem("token");
       localStorage.removeItem("vuex");
       localStorage.removeItem("_secure__ls__metadata");

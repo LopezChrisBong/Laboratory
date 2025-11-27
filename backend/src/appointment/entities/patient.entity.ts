@@ -54,6 +54,9 @@ export class Patient {
 
     @Column({ type: "varchar" })
     purok: string
+
+    @Column({ type: "varchar", nullable:true })
+    spouse: string
     
     @Column({ type: "bigint" })
     contact_no: number

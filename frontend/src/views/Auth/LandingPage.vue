@@ -1,39 +1,54 @@
 <template>
   <v-app>
-    <v-app-bar app>
-      <v-toolbar-title style="margin:0 auto; width:250px">
-        <div class="d-flex justify-center align-center">
-          <v-img
-            src="../../assets/img/paragon logo website.png"
-            style="width: 2%;"
-          ></v-img>
-          <div v-if="$vuetify.breakpoint.smAndUp" align="center">
-            <h1 style="color: black;">PARAGON</h1>
-            <p style="color: black; margin-top: -15px; font-size: 11px;">
-              Diagnostics And Multi-Specialty Clinic
-            </p>
-          </div>
+    <v-app-bar app dense>
+      <v-app-bar-nav-icon
+        v-if="$vuetify.breakpoint.xsOnly"
+        @click="drawer = !drawer"
+      ></v-app-bar-nav-icon>
+
+      <v-toolbar-title class="d-flex align-center">
+        <v-img
+          src="../../assets/img/paragon logo website.png"
+          max-width="35"
+          class="mr-2"
+        ></v-img>
+        <div v-if="$vuetify.breakpoint.smAndDown">PARAGON</div>
+
+        <div v-if="$vuetify.breakpoint.smAndUp">
+          <h2 class="mb-0" style="color:black; font-size:20px;">PARAGON</h2>
+          <p class="ma-0" style="color:black; margin-top:-5px; font-size:12px;">
+            Diagnostics And Multi-Specialty Clinic
+          </p>
         </div>
       </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn text @click="mainData = 1"
-        ><RouterLink to="/landing-page" style="text-decoration: none;">
-          <b style="color: black;">Home</b></RouterLink
-        ></v-btn
-      >
-      <!-- <v-btn text
-        ><RouterLink to="/patient-appointment" style="text-decoration: none;">
-          <b style="color: black;">Appointment</b></RouterLink
-        ></v-btn
-      > -->
-      <v-btn text @click="mainData = 2"> <b>Appointment</b></v-btn>
 
-      <!-- <v-btn text
-        ><RouterLink to="/login" style="text-decoration: none;">
-          <b style="color: black;">Login</b></RouterLink
-        ></v-btn
-      > -->
+      <v-spacer></v-spacer>
+      <div v-if="$vuetify.breakpoint.smAndUp">
+        <v-btn text @click="mainData = 1">
+          <RouterLink to="/landing-page" style="text-decoration:none;">
+            <b style="color:black;">Home</b>
+          </RouterLink>
+        </v-btn>
+
+        <v-btn text @click="mainData = 2">
+          <b style="color:black;">Appointment</b>
+        </v-btn>
+      </div>
     </v-app-bar>
+
+    <v-navigation-drawer v-model="drawer" app temporary>
+      <v-list>
+        <v-list-item @click="mainData = 1">
+          <RouterLink to="/landing-page" style="text-decoration:none;">
+            <v-list-item-title>Home</v-list-item-title>
+          </RouterLink>
+        </v-list-item>
+
+        <v-list-item @click="mainData = 2">
+          <v-list-item-title>Appointment</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <v-main>
       <div v-if="mainData == 1">
@@ -60,7 +75,6 @@
                 <p class="headline" style="color: blue;">{{ item.subtitle }}</p>
               </v-col>
               <v-col cols="12" class="d-flex  justify-center item-center">
-                <!-- <v-btn color="blue" large>BOOK NOW!</v-btn> -->
               </v-col>
             </v-row>
           </v-carousel-item>
@@ -159,6 +173,7 @@ export default {
     PatientAppointment: () => import("../Auth/PatientAppointment.vue"),
   },
   data: () => ({
+    drawer: false,
     mainData: 1,
     slides: [
       {
