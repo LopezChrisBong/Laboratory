@@ -1082,7 +1082,7 @@ export default {
               this.fadeAwayMessage.show = true;
               this.fadeAwayMessage.type = "success";
               this.fadeAwayMessage.header = "System Message";
-              this.fadeAwayMessage.message = res.data.message;
+              this.fadeAwayMessage.message = "Succesfully saved!";
               let data2 = {
                 patientID: res.data.id,
                 date:
@@ -1114,7 +1114,7 @@ export default {
                   this.fadeAwayMessage.show = true;
                   this.fadeAwayMessage.type = "success";
                   this.fadeAwayMessage.header = "System Message";
-                  this.fadeAwayMessage.message = res.data.message;
+                  this.fadeAwayMessage.message = "Succesfully saved!";
                   let notif_data = {
                     title: "Patient Appointment",
                     message: "View patient appointment!",
@@ -1133,7 +1133,7 @@ export default {
                         this.fadeAwayMessage.show = true;
                         this.fadeAwayMessage.type = "success";
                         this.fadeAwayMessage.header = "System Message";
-                        this.fadeAwayMessage.message = res.data.message;
+                        this.fadeAwayMessage.message = "Succesfully saved!";
                         this.confirmationDialog = false;
                         this.info = 1;
                         this.resetForm();
@@ -1161,7 +1161,7 @@ export default {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.message;
+          this.fadeAwayMessage.message = "Succesfully saved!";
           let data2 = {
             patientID: res.data.id,
             date:
@@ -1189,7 +1189,7 @@ export default {
                 this.fadeAwayMessage.show = true;
                 this.fadeAwayMessage.type = "success";
                 this.fadeAwayMessage.header = "System Message";
-                this.fadeAwayMessage.message = res.data.message;
+                this.fadeAwayMessage.message = "Succesfully saved!";
                 let notif_data = {
                   title: "Patient Appointment",
                   message: "View patient appointment!",
@@ -1208,6 +1208,7 @@ export default {
                       this.fadeAwayMessage.show = true;
                       this.fadeAwayMessage.type = "success";
                       this.fadeAwayMessage.header = "Successfully Saved";
+                      this.fadeAwayMessage.message = "Succesfully saved!";
                       this.confirmationDialog = false;
                       this.info = 1;
                       this.resetForm();

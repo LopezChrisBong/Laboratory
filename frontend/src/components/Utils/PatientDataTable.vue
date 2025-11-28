@@ -652,7 +652,8 @@ export default {
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
-      { text: "Recent Doctor", value: "doctor_name" },
+      // { text: "Laboratory Request", value: "services" },
+      // { text: "Packages Availed", value: "packages" },
       {
         text: "Action",
         value: "actions",
@@ -663,8 +664,8 @@ export default {
     ],
     headers2: [
       { text: "Name", value: "name" },
-      { text: "Laboratory Request", value: "services" },
-      { text: "Packages Availed", value: "packages" },
+      // { text: "Laboratory Request", value: "services" },
+      // { text: "Packages Availed", value: "packages" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
       // { text: "Recent Doctor", value: "recentDoctor" },
