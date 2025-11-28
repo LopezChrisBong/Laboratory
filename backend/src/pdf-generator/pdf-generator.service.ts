@@ -100,7 +100,6 @@ hbs.registerHelper('formatDate', function (value) {
 
   return new Intl.DateTimeFormat('en-PH', {
     dateStyle: 'medium',
-    timeStyle: 'short',
   }).format(date);
 });
 
@@ -474,7 +473,8 @@ export class PdfGeneratorService {
       timeStyle: 'short',
     }).format(now);
 
-    const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
+    const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
+    // const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
 
     const data = {
@@ -607,11 +607,25 @@ export class PdfGeneratorService {
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
+             `IF (
+          !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
+          CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
+          CONCAT(ud.fname, ' ', ud.lname)
+      ) AS doctor_name`,
         'mid.*',
+        'p.b_date as b_date',
+        'p.gender as sex',
+        'p.address as address',
+        'p.civil_status as civil_status',
+        'p.contact_no as contact_no',
+        'p.occupation as occupation',
       ])
       .leftJoin(Patient, 'p', 'mid.patientId = p.id')
+      .leftJoin(UserDetail, 'ud', 'mid.doctorID = ud.id')
       .where('mid.id = :id', { id })
       .getRawOne();
+      console.log(patientData)
+
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
       dateStyle: 'medium',

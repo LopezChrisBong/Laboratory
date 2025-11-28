@@ -41,8 +41,8 @@ export class AppointmentController {
       );
     }
   
-@Get('view/attachment/:data')
-    getFile(
+@Get('getFileDownload/attachment/:data')
+    getFileDownload(
       @Param('data') data: string,
       @Res({ passthrough: true }) res,
     ): StreamableFile {
@@ -107,6 +107,57 @@ export class AppointmentController {
 
       return new StreamableFile(file);
     }
+@Get('view/attachment/:data')
+getFile(
+  @Param('data') data: string,
+  @Res({ passthrough: true }) res,
+): StreamableFile {
+  
+  let content_type = '';
+  const ext = data.split('.').pop().toLowerCase();
+
+  const mimeTypes = {
+    jpeg: 'image/jpeg',
+    jpg: 'image/jpg',
+    png: 'image/png',
+    pdf: 'application/pdf',
+    mp4: 'video/mp4',
+    avi: 'video/x-msvideo',
+    mov: 'video/quicktime',
+    wmv: 'video/x-ms-wmv',
+    '3gp': 'video/3gpp',
+    flv: 'video/x-flv',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    csv: 'text/csv',
+    txt: 'text/plain',
+    json: 'application/json',
+    zip: 'application/zip',
+    rar: 'application/vnd.rar',
+    '7z': 'application/x-7z-compressed',
+  };
+
+  content_type = mimeTypes[ext] || 'application/octet-stream';
+
+  // const file = createReadStream(
+  //   join(process.cwd(), '/lab_result_attachment/' + data),
+  // );
+
+    const file = createReadStream(
+    join(process.cwd(), '/../lab_result_attachment/' + data),
+  );
+
+  res.set({
+    'Content-Type': content_type,
+    'Content-Disposition': 'inline; filename="' + data + '"'
+  });
+
+  return new StreamableFile(file);
+}
 
   
 
@@ -257,6 +308,13 @@ export class AppointmentController {
       confirmAppointment(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
         return this.appointmentService.confirmAppointment(+id, updateAppointmentDto);
       }
+
+       @Patch('doneCheckup/:id')
+      doneCheckup(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
+        return this.appointmentService.doneCheckup(+id, updateAppointmentDto);
+      }
+
+      
 
         @Patch('updateAppointmentStatus/:id')
         updateAppointmentStatus(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {

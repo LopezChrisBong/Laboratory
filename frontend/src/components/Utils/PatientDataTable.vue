@@ -323,9 +323,7 @@
                   variant="outlined"
                   @click="prescription(patientItem)"
                 >
-                  <v-icon size="60" color="deep-purple">
-                    mdi-file-sign
-                  </v-icon>
+                  <v-icon size="60" color="deep-purple"> mdi-file-sign </v-icon>
                   <div class="mt-2 text-subtitle-1 font-weight-medium">
                     Prescription
                   </div>
@@ -379,7 +377,7 @@
 
           <v-divider></v-divider>
 
-          <v-card-text class="pt-4 pb-6" style="font-size: 16px;">
+          <v-card-text class="pt-4 pb-6" style="font-size: 16px">
             <v-row>
               <v-col cols="12" class="text-center">
                 <v-icon size="60" color="teal-darken-2" class="mb-3"
@@ -447,7 +445,9 @@
           Please select another date to re-schedule the canceled appointment
         </v-card-title>
 
-        <v-card-text style="font-size: 17px">
+        <v-divider></v-divider>
+
+        <v-card-text class="pt-4 pb-6" style="font-size: 16px">
           <v-row>
             <v-col cols="12" md="6"
               >Appointment date: <b>{{ canceledData.date }}</b></v-col
@@ -532,6 +532,8 @@
           </v-row>
         </v-card-text>
 
+        <v-divider></v-divider>
+
         <v-card-actions>
           <v-spacer></v-spacer>
 
@@ -598,7 +600,7 @@ export default {
       import("../../components/Dialogs/Forms/Patient/PrescriptionDialog.vue"),
   },
   filters: {
-    highlight: function(value, query) {
+    highlight: function (value, query) {
       return value.replace(
         new RegExp(query, ""),
         "<span class='blue'>" + query + "</span>"
@@ -645,11 +647,12 @@ export default {
 
     headers1: [
       { text: "Name", value: "name" },
-      { text: "Laboratory Request", value: "services" },
-      { text: "Packages Availed", value: "packages" },
+      // { text: "Identification No.", value: "patientID" },
+      // { text: "Last Visit", value: "lastVisit" },
+      // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
-      // { text: "Recent Doctor", value: "recentDoctor" },
+      { text: "Recent Doctor", value: "doctor_name" },
       {
         text: "Action",
         value: "actions",
@@ -660,8 +663,11 @@ export default {
     ],
     headers2: [
       { text: "Name", value: "name" },
-      { text: "Date", value: "date" },
-      // { text: "Time", value: "time" },
+      { text: "Laboratory Request", value: "services" },
+      { text: "Packages Availed", value: "packages" },
+      // { text: "Next Visit", value: "nextVisit" },
+      // { text: "Recent Topic", value: "recentTopic" },
+      // { text: "Recent Doctor", value: "recentDoctor" },
       {
         text: "Action",
         value: "actions",
@@ -1001,6 +1007,7 @@ export default {
         this.fadeAwayMessage.message = "Please fill-up the remarks field!";
       }
     },
+
     getAllPatients() {
       this.userRoleID = this.$store.state.user.user.user_roleID;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;

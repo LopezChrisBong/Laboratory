@@ -11,6 +11,12 @@ export class CreateAppointmentDto {
     @ApiProperty()
     time: string;
 
+    @ApiProperty()
+    data: string;
+
+    @ApiProperty()
+    remarks: string;
+
     // @ApiProperty()
     // service: string;
 

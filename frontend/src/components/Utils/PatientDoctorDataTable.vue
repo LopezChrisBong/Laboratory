@@ -87,7 +87,7 @@
 
         <template v-slot:[`item.actions`]="{ item }">
           <v-btn
-            class="ma-1 "
+            class="ma-1"
             x-small
             color="green"
             outlined
@@ -355,7 +355,7 @@
                     v-for="item in dataServices"
                     :key="item.id"
                     class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div
                       v-if="item.data.length <= 0"
@@ -408,7 +408,7 @@
                     v-for="item in dataServices"
                     :key="item.id"
                     class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div
                       v-if="item.data.length <= 0"
@@ -460,7 +460,7 @@
                     sm="12"
                     v-for="item in dataPackages"
                     :key="item.id"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div class="d-flex justify-center align-center">
                       <div>
@@ -475,7 +475,7 @@
                       <br />
                     </div>
                     <div class="mb-2">
-                      <strong style="font-size: 14px;">List of Service:</strong>
+                      <strong style="font-size: 14px">List of Service:</strong>
                     </div>
                     <v-row>
                       <v-col
@@ -484,7 +484,7 @@
                         v-for="items in JSON.parse(item.assign_mods)"
                         :key="items.id"
                       >
-                        <span style="font-size: 20px;">
+                        <span style="font-size: 20px">
                           <strong>&#x2022;</strong></span
                         >
                         <v-chip
@@ -550,7 +550,7 @@ export default {
       import("../../components/Dialogs/Forms/Patient/PrescriptionDialog.vue"),
   },
   filters: {
-    highlight: function(value, query) {
+    highlight: function (value, query) {
       return value.replace(
         new RegExp(query, ""),
         "<span class='blue'>" + query + "</span>"

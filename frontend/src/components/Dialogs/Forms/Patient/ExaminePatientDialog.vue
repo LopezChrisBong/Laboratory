@@ -28,7 +28,7 @@
                   Add
                 </v-btn> -->
               </v-col>
-              <v-col cols="12" class=" pt-2 px-4">
+              <v-col cols="12" class="pt-2 px-4">
                 <v-data-table
                   :headers="headers"
                   :items="dataItem"
@@ -139,9 +139,7 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" outlined @click="cancelDelete()">
-            Close
-          </v-btn>
+          <v-btn color="red" outlined @click="cancelDelete()"> Close </v-btn>
           <v-btn
             :disabled="isButtonLoading"
             :loading="isButtonLoading"
@@ -180,7 +178,7 @@
                     v-for="item in dataServices"
                     :key="item.id"
                     class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div
                       v-if="item.data.length <= 0"
@@ -233,7 +231,7 @@
                     v-for="item in dataServices"
                     :key="item.id"
                     class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div
                       v-if="item.data.length <= 0"
@@ -285,7 +283,7 @@
                     sm="12"
                     v-for="item in dataPackages"
                     :key="item.id"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div class="d-flex justify-center align-center">
                       <div>
@@ -300,7 +298,7 @@
                       <br />
                     </div>
                     <div class="mb-2">
-                      <strong style="font-size: 14px;">List of Service:</strong>
+                      <strong style="font-size: 14px">List of Service:</strong>
                     </div>
                     <v-row>
                       <v-col
@@ -309,7 +307,7 @@
                         v-for="items in JSON.parse(item.assign_mods)"
                         :key="items.id"
                       >
-                        <span style="font-size: 20px;">
+                        <span style="font-size: 20px">
                           <strong>&#x2022;</strong></span
                         >
                         <v-chip
@@ -342,7 +340,7 @@
     >
       <v-card outlined class="pa-4">
         <v-card-title>
-          {{ !currentFileUrl ? "Upload" : "View" }} Attachment {{ booleanPDF }}
+          {{ !currentFileUrl ? "Upload" : "View" }} Attachment
 
           <v-spacer></v-spacer>
           <v-btn
@@ -400,7 +398,15 @@
               v-if="booleanPDF == 0"
               :href="currentFileUrlDownload"
               download
-              style="border: 1px solid black; padding: 3px 5px; display: inline-block; cursor: pointer; border-radius: 20px; margin-left: 1rem; margin-bottom: 1rem;"
+              style="
+                border: 1px solid black;
+                padding: 3px 5px;
+                display: inline-block;
+                cursor: pointer;
+                border-radius: 20px;
+                margin-left: 1rem;
+                margin-bottom: 1rem;
+              "
             >
               Download
             </a>
@@ -689,10 +695,7 @@ export default {
             "/appointment/view/attachment/" +
             attachment;
 
-          const ext = attachment
-            .split(".")
-            .pop()
-            .toLowerCase();
+          const ext = attachment.split(".").pop().toLowerCase();
           const officeExt = ["xls", "xlsx", "doc", "docx", "ppt", "pptx"];
           if (officeExt.includes(ext)) {
             this.currentFileUrl =

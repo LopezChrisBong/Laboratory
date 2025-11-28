@@ -6,14 +6,17 @@
           <v-card
             max-width="1000"
             class="rounded-card pa-4"
-            style=" border-left: #6ac5fe 1px solid; border-top: #6ac5fe 1px solid;"
+            style="
+              border-left: #6ac5fe 1px solid;
+              border-top: #6ac5fe 1px solid;
+            "
             align="start"
           >
             <v-card-title
               >{{ info == 1 ? "Patient Information" : "Book a Schedule" }}
 
               <v-spacer></v-spacer>
-              <span style="font-size: 12px; color: blue;">
+              <span style="font-size: 12px; color: blue">
                 (please type N/A if Not Applicable)</span
               >
             </v-card-title>
@@ -222,7 +225,7 @@
                   </v-col>
                   <v-col cols="12" v-show="info == 2">
                     <div>
-                      <p style="font-size: 24px;">
+                      <p style="font-size: 24px">
                         Please Select a Clinic Specialty to Visit
                       </p>
                     </div>
@@ -231,11 +234,11 @@
                   <v-col cols="12" v-show="info == 2">
                     <v-row>
                       <v-col cols="12" md="5">
-                        <ul style="list-style-type: none; padding: 0;">
+                        <ul style="list-style-type: none; padding: 0">
                           <li
                             v-for="(item, index) in clinicList"
                             :key="item.id || index"
-                            style="margin-bottom: 8px;"
+                            style="margin-bottom: 8px"
                             :class="{ selected: selectedIndex === index }"
                           >
                             <v-btn
@@ -260,7 +263,7 @@
                             >
                             <div
                               class="d-flex justify-center align-center"
-                              style="text-align: justify;"
+                              style="text-align: justify"
                             >
                               <p>
                                 {{ clinicDecription.description }}
@@ -288,20 +291,16 @@
                   </v-col>
 
                   <v-col cols="12" md="6" v-show="info == 3">
-                    <div class="mt-8">
-                      Select date and time:
-                    </div></v-col
+                    <div class="mt-8">Select date and time:</div></v-col
                   >
                   <v-col cols="12" md="6" v-show="info == 3">
-                    <div class="mt-8">
-                      Profile:
-                    </div></v-col
+                    <div class="mt-8">Profile:</div></v-col
                   >
                   <v-col cols="12" v-show="info == 3">
                     <v-row
                       v-if="
                         !clinicDecription.doctors ||
-                          clinicDecription.specialty == 'Others'
+                        clinicDecription.specialty == 'Others'
                       "
                     >
                       <v-col cols="12" md="6" sm="12">
@@ -415,7 +414,7 @@
                             >
                               <div>
                                 <v-img
-                                  style="width: 200px; height: 150px;"
+                                  style="width: 200px; height: 150px"
                                   :src="item.profile"
                                   @error="onImageError(item)"
                                 ></v-img>
@@ -509,9 +508,7 @@
               <strong>Date:</strong> {{ doctors_date || form.date }} <br />
               <strong>Time:</strong> {{ doctor_time || form.time }} <br />
 
-              <strong v-if="doc_profile.length">
-                Doctor:
-              </strong>
+              <strong v-if="doc_profile.length"> Doctor: </strong>
               <span v-for="d in doc_profile" :key="d.id">
                 {{ d.name }}
               </span>

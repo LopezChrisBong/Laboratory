@@ -8,6 +8,7 @@ export class PaymentService {
   constructor(private dataSource: DataSource) {}
   async create(createPaymentDto: CreatePaymentDto) {
     let patientID = createPaymentDto.patientId;
+    // console.log(createPaymentDto)
 
     if (createPaymentDto.data) {
       console.log('dria');
@@ -116,12 +117,14 @@ export class PaymentService {
       .select([
         "IF (!ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a', CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name), CONCAT(p.f_name, ' ', p.l_name)) AS name",
         'p.id AS patientId',
+        'pay.created_at AS created_at',
         'GROUP_CONCAT(pay.id SEPARATOR ", ") AS all_paymentIDs',
         'SUM(pay.amount) AS total_amount',
         'COUNT(pay.id) AS total_payments',
       ])
       .leftJoin(Patient, 'p', 'pay.patientId = p.id')
       .where('pay.status = 0')
+      .orderBy('pay.created_at', 'DESC')
       .groupBy('pay.patientId')
       .getRawMany();
 
@@ -171,6 +174,7 @@ export class PaymentService {
         'inv.*',
       ])
       .leftJoin(Patient, 'p', 'inv.patientId = p.id')
+      .orderBy('inv.created_at', 'DESC')
       .getRawMany();
 
     // console.log(data);
@@ -455,7 +459,7 @@ export class PaymentService {
             await this.dataSource.manager.update(
               ServiceAppointment,
               serviceAppointmentId,
-              { status: 1 },
+              { status: 1, medtechID:12 },
             );
           }
         } catch (err) {

@@ -4,7 +4,7 @@
       <v-col cols="12">
         <v-card class="rounded-xl shadow-sm pa-4">
           <div class="d-flex justify-space-between align-center mb-4">
-            <h2 class="text-h5 font-weight-bold" style="color:#1565C0;">
+            <h2 class="text-h5 font-weight-bold" style="color: #1565c0">
               Specialization
             </h2>
 
@@ -31,7 +31,7 @@
             class="rounded-lg mb-3 pa-3 hover-card"
           >
             <div class="d-flex justify-space-between">
-              <div style="width: 80%;">
+              <div style="width: 80%">
                 <div class="text-h6 font-weight-bold">{{ item.specialty }}</div>
                 <div class="text-caption">{{ item.specialty_description }}</div>
               </div>
@@ -52,7 +52,7 @@
       <v-col cols="12">
         <v-card class="rounded-xl shadow-sm pa-4">
           <div class="d-flex justify-space-between align-center mb-4">
-            <h2 class="text-h5 font-weight-bold" style="color:#1565C0;">
+            <h2 class="text-h5 font-weight-bold" style="color: #1565c0">
               Schedule
             </h2>
 
@@ -82,7 +82,7 @@
             >
               <v-card class="rounded-lg mb-3 pa-3 hover-card">
                 <div class="d-flex justify-space-between">
-                  <div style="width: 80%;">
+                  <div style="width: 80%">
                     <div class="text-h6 font-weight-bold">
                       {{ formatDate(item.date) }}
                     </div>
@@ -108,6 +108,119 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-dialog v-model="scheduleDialog" max-width="800" persistent>
+      <v-card>
+        <v-card-title>{{ action }} Schedule</v-card-title>
+        <v-card-text>
+          <div>
+            <v-form ref="addSchedule">
+              <v-row>
+                <v-col cols="12" v-if="action == 'Add'">
+                  <v-menu
+                    ref="menu"
+                    v-model="menu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    :nudge-right="40"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        label="Pick dates"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        :value="
+                          dates.length
+                            ? dates.length + ' dates selected'
+                            : 'Select dates'
+                        "
+                        :rules="[
+                          (v) => (dates && dates.length > 0) || 'required',
+                        ]"
+                      />
+                    </template>
+
+                    <v-date-picker
+                      v-model="dates"
+                      :min="minDate"
+                      :max="maxDate"
+                      multiple
+                      :allowed-dates="allowedDates"
+                      @input="onDatePicked"
+                    />
+                  </v-menu>
+
+                  <!-- Show chips outside the text field -->
+                  <v-chip-group v-if="dates.length" multiple class="mt-2">
+                    <v-chip
+                      v-for="(d, index) in dates"
+                      :key="index"
+                      close
+                      @click:close="removeDate(index)"
+                    >
+                      {{ new Date(d).toLocaleDateString() }}
+                    </v-chip>
+                  </v-chip-group>
+                </v-col>
+
+                <!-- <v-col cols="12">
+                  <v-text-field
+                    v-model="day"
+                    required
+                    readonly
+                    label="Day"
+                    class="rounded-lg"
+                    color="#6DB249"
+                  ></v-text-field>
+                </v-col> -->
+                <v-col cols="12">
+                  <v-autocomplete
+                    v-model="timeFrom"
+                    small-chips
+                    deletable-chips
+                    :rules="[(v) => !!v || 'time from is required']"
+                    label="from:"
+                    :items="allTimes"
+                    :readonly="action == 'View'"
+                    class="rounded-lg"
+                    color="#6DB249"
+                  ></v-autocomplete>
+                </v-col>
+                <v-col cols="12">
+                  <v-autocomplete
+                    v-model="timeTo"
+                    small-chips
+                    deletable-chips
+                    :rules="[(v) => !!v || 'time to is required']"
+                    label="to:"
+                    :items="allTimes"
+                    :readonly="action == 'View'"
+                    class="rounded-lg"
+                    color="#6DB249"
+                  ></v-autocomplete>
+                </v-col>
+              </v-row>
+            </v-form>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn @click="resetForm()" color="red" outlined class="">
+            Cancel</v-btn
+          >
+          <v-btn
+            v-if="action != 'View'"
+            class="white--text ml-2 rounded-lg d-flex justify-center"
+            color="blue darken-1"
+            @click="action == 'Add' ? submitSchedule() : updateSchedule()"
+            >{{ action == "Add" ? "Submit" : "Update" }}</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-dialog v-model="scheduleDialog" max-width="600" persistent>
       <v-card class="rounded-xl">

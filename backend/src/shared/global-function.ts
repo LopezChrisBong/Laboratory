@@ -15,6 +15,33 @@ export function getCurrentDateTimeString() {
   );
 }
 
+export function newDateFormat(date_val) {
+  var mL = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const date = new Date(date_val);
+    return (
+      mL[date.getMonth()] +
+      ' ' +
+      date.getDate().toString().padStart(2, '0') +
+      ', ' +
+      date.getFullYear()
+    );
+  
+}
+
 export function getCurrentDateString() {
   const date = new Date();
   return (

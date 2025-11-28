@@ -7,6 +7,7 @@ import {Notification, Appointment, Patient, Service, ServiceAppointment, Service
 @Module({
       imports: [TypeOrmModule.forFeature([Notification,Service,ServicePackages, ServiceCategory, Appointment,ServiceAppointment,ServiceLabResult,Patient,UserDetail,Users])],
   controllers: [NotificationController],
-  providers: [NotificationService]
+  providers: [NotificationService],
+  exports:[NotificationService]
 })
 export class NotificationModule {}
