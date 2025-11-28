@@ -74,7 +74,9 @@
                 class="white--text  d-flex justify-center rounded-lg"
                 @click="addExperty()"
               >
-                <v-icon right color="#2196F3"> mdi-plus-box-outline </v-icon>
+                <v-icon v-if="dataSpecialty.length == 0" right color="#2196F3">
+                  mdi-plus-box-outline
+                </v-icon>
               </button>
             </div>
 
@@ -113,14 +115,14 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-dialog v-model="scheduleDialog" max-width="400" persistent>
+    <v-dialog v-model="scheduleDialog" max-width="800" persistent>
       <v-card>
         <v-card-title>{{ action }} Schedule</v-card-title>
         <v-card-text>
           <div>
             <v-form ref="addSchedule">
               <v-row>
-                <v-col cols="12">
+                <v-col cols="12" v-if="action == 'Add'">
                   <v-menu
                     ref="menu"
                     v-model="menu"
@@ -132,26 +134,46 @@
                   >
                     <template v-slot:activator="{ on, attrs }">
                       <v-text-field
-                        v-model="date"
-                        label="Pick a date"
+                        label="Pick dates"
                         prepend-icon="mdi-calendar"
                         readonly
                         v-bind="attrs"
-                        :rules="[(v) => !!v || 'required']"
                         v-on="on"
+                        :value="
+                          dates.length
+                            ? dates.length + ' dates selected'
+                            : 'Select dates'
+                        "
+                        :rules="[
+                          (v) => (dates && dates.length > 0) || 'required',
+                        ]"
                       />
                     </template>
+
                     <v-date-picker
-                      v-model="date"
+                      v-model="dates"
                       :min="minDate"
                       :max="maxDate"
-                      :readonly="action == 'View'"
-                      @change="menu = false"
+                      multiple
+                      :allowed-dates="allowedDates"
                       @input="onDatePicked"
                     />
                   </v-menu>
+
+                  <!-- Show chips outside the text field -->
+                  <v-chip-group v-if="dates.length" multiple class="mt-2">
+                    <v-chip
+                      v-for="(d, index) in dates"
+                      :key="index"
+                      close
+                      @click:close="removeDate(index)"
+                    >
+                      {{ new Date(d).toLocaleDateString() }}
+                    </v-chip>
+                  </v-chip-group>
                 </v-col>
-                <v-col cols="12">
+
+                <!-- <v-col cols="12">
                   <v-text-field
                     v-model="day"
                     required
@@ -160,7 +182,7 @@
                     class="rounded-lg"
                     color="#6DB249"
                   ></v-text-field>
-                </v-col>
+                </v-col> -->
                 <v-col cols="12">
                   <v-autocomplete
                     v-model="timeFrom"
@@ -233,7 +255,6 @@
                   <v-text-field
                     v-model="specialtyDescription"
                     required
-                    readonly
                     label="Description"
                     class="rounded-lg"
                     color="#6DB249"
@@ -285,7 +306,8 @@ export default {
     day: null,
     timeFrom: null,
     timeTo: null,
-    date: null,
+    dates: [],
+    disabledDates: [],
     menu: false,
     scheduleDialog: false,
     specialtyDialog: false,
@@ -420,9 +442,18 @@ export default {
     this.initialize();
   },
   computed: {
+    formattedDates() {
+      if (!this.dates || this.dates.length === 0) return "";
+      // Sort dates and format them
+      return this.dates
+        .slice()
+        .sort()
+        .map((date) => new Date(date).toLocaleDateString())
+        .join(", ");
+    },
     minDate() {
       const today = new Date();
-      today.setMonth(today.getMonth());
+      today.setDate(today.getDate() + 1); // Tomorrow
       return today.toISOString().substr(0, 10);
     },
     maxDate() {
@@ -438,15 +469,21 @@ export default {
     },
     getAllSchedule() {
       let userRoleID = this.$store.state.user.id;
+
       this.axiosCall(
         "/doctors-schedule/getMySchedule/" + userRoleID,
         "GET"
       ).then((res) => {
         if (res) {
           this.dataSchedule = res.data;
+
+          this.disabledDates = res.data.map((item) => item.date);
+
+          console.log("Disabled dates:", this.disabledDates);
         }
       });
     },
+
     getAllSpecialty() {
       let userRoleID = this.$store.state.user.id;
       this.axiosCall(
@@ -469,7 +506,7 @@ export default {
     viewSchedule(item) {
       // console.log(item);
       this.action = "View";
-      this.date = item.date;
+      this.dates = item.date;
       this.day = item.day;
       this.timeFrom = item.timeFrom;
       this.timeTo = item.timeTo;
@@ -493,7 +530,7 @@ export default {
     editSchedule(item) {
       // console.log(item);
       this.action = "Update";
-      this.date = item.date;
+      this.dates = item.date;
       this.day = item.day;
       this.timeFrom = item.timeFrom;
       this.timeTo = item.timeTo;
@@ -501,55 +538,64 @@ export default {
       this.scheduleDialog = true;
     },
     onDatePicked(value) {
-      this.date = value;
-      this.menu = false;
-      this.checkDay();
+      console.log(value);
+      this.dates = value;
+      // // this.menu = false;
+      // this.checkDay();
     },
-    checkDay() {
-      const selected = new Date(this.date);
+    removeDate(index) {
+      this.dates.splice(index, 1);
+    },
+    checkDay(item) {
+      const selected = new Date(item);
       const day = selected.getDay();
       if (day === 1) {
-        this.day = "Monday";
+        return "Monday";
       } else if (day === 2) {
-        this.day = "Tuesday";
+        return "Tuesday";
       } else if (day === 3) {
-        this.day = "Wednesday";
+        return "Wednesday";
       } else if (day === 4) {
-        this.day = "Thursday";
+        return "Thursday";
       } else if (day === 5) {
-        this.day = "Friday";
+        return "Friday";
       } else if (day === 6) {
-        this.day = "Saturday";
+        return "Saturday";
       } else if (day === 0) {
-        this.day = "Sunday";
+        return "Sunday";
       }
+      return;
+    },
+    allowedDates(date) {
+      return !this.disabledDates.includes(date);
     },
     submitSchedule() {
       if (this.$refs.addSchedule.validate()) {
         let userRoleID = this.$store.state.user.id;
-        let data = {
-          doctorID: userRoleID,
-          date: this.date,
-          day: this.day,
-          timeFrom: this.timeFrom,
-          timeTo: this.timeTo,
-        };
-        // // console.log(data);
-
-        this.axiosCall("/doctors-schedule", "POST", data).then((res) => {
-          if (res.data.status == 200) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "Successfully Saved";
-            this.scheduleDialog = false;
-            this.resetForm();
-            this.initialize();
-          } else if (res.data.status == 400) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.header = res.data.msg;
-          }
-        });
+        for (let i = 0; i < this.dates.length; i++) {
+          let data = {
+            doctorID: userRoleID,
+            date: this.dates[i],
+            day: this.checkDay(this.dates[i]),
+            timeFrom: this.timeFrom,
+            timeTo: this.timeTo,
+          };
+          console.log(data);
+          this.axiosCall("/doctors-schedule", "POST", data).then((res) => {
+            if (res.data.status == 200) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "Successfully Saved";
+              this.scheduleDialog = false;
+              this.resetForm();
+              this.initialize();
+            } else if (res.data.status == 400) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "error";
+              this.fadeAwayMessage.header = res.data.msg;
+            }
+          });
+        }
       }
     },
     submitSpecialty() {
@@ -561,7 +607,6 @@ export default {
           specialty_description: this.specialtyDescription,
         };
         // console.log(data);
-
         this.axiosCall("/doctor-specialization", "POST", data).then((res) => {
           if (res.data.status == 200) {
             this.fadeAwayMessage.show = true;
@@ -580,14 +625,10 @@ export default {
     },
     updateSchedule() {
       if (this.$refs.addSchedule.validate()) {
-        // let userRoleID = this.$store.state.user.id;
         let data = {
-          date: this.date,
-          day: this.day,
           timeFrom: this.timeFrom,
           timeTo: this.timeTo,
         };
-        // console.log(data);
 
         this.axiosCall(
           "/doctors-schedule/" + this.updateID,
@@ -595,11 +636,11 @@ export default {
           data
         ).then((res) => {
           if (res.data.status == 201) {
+            this.initialize();
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "success";
             this.fadeAwayMessage.header = "Successfully Updated";
             this.scheduleDialog = false;
-            this.initialize();
             this.resetForm();
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.show = true;
@@ -687,12 +728,13 @@ export default {
       this.scheduleDialog = false;
       this.specialtyDialog = false;
       this.day = null;
-      this.date = null;
+      this.dates = [];
       this.timeFrom = null;
       this.timeTo = null;
       this.updateID = null;
       this.specialtyDescription = null;
       this.experty = null;
+      this.getAllSchedule();
     },
   },
 };

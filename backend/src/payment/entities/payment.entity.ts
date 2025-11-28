@@ -19,6 +19,9 @@ export class Payment {
   @Column({type:'boolean', default: false })
   status: Boolean;
 
+  @Column({type:'int', nullable: true })
+  doctorID: number;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
 

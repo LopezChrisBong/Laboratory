@@ -88,47 +88,94 @@ export class DoctorsScheduleService {
     return data
   }
 
-  async getAllDoctorsSched(data:string){
+  // async getAllDoctorsSched(data:string){
 
-    const today = new Date();
-    let newDocList = JSON.parse(data)
-    let newArr = []
+  //   const today = new Date();
+  //   let newDocList = JSON.parse(data)
+  //   let newArr = []
  
-    for (let i = 0; i < newDocList.length; i++) {
-      let id = newDocList[i].id
-      let arrData = []
-     let data = await this.doctorsScheduleRepository
-      .createQueryBuilder('ds')
-      .select([
-        'ds.*',
-        "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname), concat(ud.fname, ' ', ud.lname)) as name",
-        'ud.profile_img as profile',
-        'JSON_ARRAY() as specialization'
-      ])
-      .leftJoin(UserDetail, 'ud', 'ud.id = '+id)
-      .leftJoin(Users, 'us', 'us.id = ud.userID')
-      .where('ds.doctorID = :id', {id})
-      .andWhere('ds.date >= :today', { today: today.toISOString().split('T')[0] })
-      .andWhere('us.isAdminApproved = 1')
-      .andWhere('us.assignedModuleID = 5')
-      .orderBy('ds.date', 'ASC')
-      .groupBy('ds.date')
-      .getRawMany();
+  //   for (let i = 0; i < newDocList.length; i++) {
+  //     let id = newDocList[i].id
+  //     let arrData = []
+  //    let data = await this.doctorsScheduleRepository
+  //     .createQueryBuilder('ds')
+  //     .select([
+  //       'ds.*',
+  //       "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname), concat(ud.fname, ' ', ud.lname)) as name",
+  //       'ud.profile_img as profile',
+  //       'JSON_ARRAY() as specialization'
+  //     ])
+  //     .leftJoin(UserDetail, 'ud', 'ud.id = '+id)
+  //     .leftJoin(Users, 'us', 'us.id = ud.userID')
+  //     .where('ds.doctorID = :id', {id})
+  //     .andWhere('ds.date >= :today', { today: today.toISOString().split('T')[0] })
+  //     .andWhere('us.isAdminApproved = 1')
+  //     .andWhere('us.assignedModuleID = 5')
+  //     .orderBy('ds.date', 'ASC')
+  //     .groupBy('ds.date')
+  //     .getRawMany();
 
-      for (let j = 0; j < data.length; j++) {
-        let newData = await this.doctorSpecializationRepository.createQueryBuilder('ds')
-        .where('ds.doctorID = :doctorID', {doctorID:data[j].doctorID}).getMany();
-        data[j].specialization = newData
-      }
+  //     for (let j = 0; j < data.length; j++) {
+  //       let newData = await this.doctorSpecializationRepository.createQueryBuilder('ds')
+  //       .where('ds.doctorID = :doctorID', {doctorID:data[j].doctorID}).getMany();
+  //       data[j].specialization = newData
+  //     }
       
-      newArr.push(data)
-    }
+  //     newArr.push(data)
+  //   }
    
-    const flatData = newArr.flat();
-      console.log(flatData)
-     return flatData
+  //   const flatData = newArr.flat();
+  //     console.log(flatData)
+  //    return flatData
     
+  // }
+
+  async getAllDoctorsSched(data: string) {
+
+    const today = new Date().toISOString().split('T')[0];
+    let doctorList = JSON.parse(data);
+    let allSchedules: any[] = [];
+
+    for (let i = 0; i < doctorList.length; i++) {
+      let id = doctorList[i].id;
+
+      const schedules = await this.doctorsScheduleRepository
+        .createQueryBuilder('ds')
+        .select([
+          'ds.*',
+          "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname), concat(ud.fname, ' ', ud.lname)) as name",
+          'ud.profile_img as profile',
+        ])
+        .leftJoin(UserDetail, 'ud', 'ud.id = ' + id)
+        .leftJoin(Users, 'us', 'us.id = ud.userID')
+        .where('ds.doctorID = :id', { id })
+        .andWhere('ds.date >= :today', { today })
+        .andWhere('us.isAdminApproved = 1')
+        .andWhere('us.assignedModuleID = 5')
+        .orderBy('ds.date', 'ASC')
+        .getRawMany();
+
+      allSchedules.push(...schedules); 
+    }
+
+    const grouped = Object.values(
+      allSchedules.reduce((acc: any, item: any) => {
+        if (!acc[item.date]) {
+          acc[item.date] = {
+            date: item.date,
+            doctors: []
+          };
+        }
+        acc[item.date].doctors.push(item);
+        return acc;
+      }, {})
+    );
+
+    console.log('GROUPED:', grouped);
+
+    return grouped;
   }
+
 
 async getAllDoctorsDashboard() {
   const today = new Date().toISOString().split('T')[0];

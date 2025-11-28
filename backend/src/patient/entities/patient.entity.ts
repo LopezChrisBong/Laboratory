@@ -21,6 +21,16 @@ export class Patient {
   gender: string;
   @Column({ default: null })
   age: string;
+  @Column({ default: null })
+  region: string;
+  @Column({ default: null })
+  province: string;
+  @Column({ default: null })
+  city_muni: string;
+  @Column({ default: null })
+  baranggay: string;
+  @Column({ default: null })
+  purok: string;
   @CreateDateColumn({ name: 'created_at', type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
 

@@ -39,7 +39,13 @@
     </v-row>
     <v-card class="ma-5 dt-container" elevation="0" outlined>
       <v-data-table
-        :headers="assignedModuleID == 3 ? headers : headers1"
+        :headers="
+          assignedModuleID == 3 && tab != 2
+            ? headers
+            : assignedModuleID == 5
+            ? headers2
+            : headers1
+        "
         :items="data"
         :items-per-page="10"
         :search="search"
@@ -53,6 +59,10 @@
             {{ item.fname }} {{ item.mname }} {{ item.lname }}
           </p>
         </template>
+        <template v-slot:[`item.date`]="{ item }">
+          {{ formatDate(item.date) }} {{ item.time }}
+        </template>
+
         <template v-slot:[`item.status`]="{ item }">
           <v-chip
             :color="
@@ -82,7 +92,7 @@
               x-small
               color="green"
               outlined
-              v-if="userRoleID != 3"
+              v-if="userRoleID != 3 && tab != 3"
               @click="view(item)"
             >
               <v-icon size="14" class="mr-1">mdi-pencil</v-icon>
@@ -108,6 +118,17 @@
             >
               <v-icon size="14" class="mr-1">mdi-check-decagram</v-icon>Done
               Check-up
+            </v-btn>
+            <v-btn
+              class="ma-1 d-flex justify-center"
+              x-small
+              color="red"
+              outlined
+              v-if="userRoleID == 3"
+              @click="cancelPatient(item)"
+            >
+              <v-icon size="14" class="mr-1">mdi-timer-cancel</v-icon
+              >Re-Schedule
             </v-btn>
 
             <!-- <v-btn
@@ -160,7 +181,7 @@
               color="green"
               outlined
               @click="laboratoryRequest(item)"
-              v-if="assignedModuleID == 3 && tab != 3"
+              v-if="assignedModuleID == 3"
             >
               <v-icon size="14" class="mr-1">mdi-account-arrow-left</v-icon>
             </v-btn>
@@ -336,35 +357,45 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogConfirmDone" max-width="500">
-      <v-card>
-        <v-card-title class="text-h5"> Service Fee </v-card-title>
+    <v-dialog v-model="dialogConfirmDone" max-width="480" persistent>
+      <v-card class="pa-2">
+        <v-card-title class="text-h6 font-weight-bold">
+          Confirm Completion
+        </v-card-title>
 
-        <v-card-text style="font-size: 17px">
+        <v-divider></v-divider>
+
+        <v-card-text class="pt-4 pb-6" style="font-size: 16px;">
           <v-row>
-            <!-- <v-col cols="12"><b>Service Fee</b></v-col> -->
-            <v-col cols="12">
-              <v-text-field
-                v-model="service_fee"
-                :rules="[formRules.required]"
-                dense
-                outlined
-                required
-                type="number"
-                label="Service Fee"
-                class="rounded-lg"
-                color="blue"
-              ></v-text-field>
+            <v-col cols="12" class="text-center">
+              <v-icon size="60" color="teal-darken-2" class="mb-3"
+                >mdi-check-circle</v-icon
+              >
+
+              <p class="text-body-1">
+                Are you sure you want to mark this check-up as
+                <strong>completed</strong>?
+              </p>
+
+              <p class="text-body-2 text-grey-darken-1 mt-2">
+                This action will finalize the record and cannot be undone.
+              </p>
+
+              <p class="text-caption text-red mt-3">
+                ⚠ Please note: this action is irreversible and cannot be undone.
+              </p>
             </v-col>
           </v-row>
         </v-card-text>
+
+        <v-divider></v-divider>
 
         <v-card-actions>
           <v-spacer></v-spacer>
 
           <v-btn
-            color="teal darken-3"
-            outlined
+            variant="tonal"
+            color="grey-darken-1"
             @click="dialogConfirmDone = false"
           >
             Cancel
@@ -373,9 +404,112 @@
           <v-btn
             :color="$vuetify.theme.themes.light.submitBtns"
             class="white--text"
-            :disabled="service_fee != null ? false : true"
             @click="
-              confirmDialog();
+              () => {
+                confirmDialog();
+                dialogConfirmDone = false;
+              }
+            "
+          >
+            Confirm
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="cancelDialog" max-width="700" persistent>
+      <v-card>
+        <v-card-title class="text-h6">
+          Please select another date to re-schedule the canceled appointment
+        </v-card-title>
+
+        <v-card-text style="font-size: 17px">
+          <v-row>
+            <v-col cols="12" md="6"
+              >Appointment date: <b>{{ canceledData.date }}</b></v-col
+            >
+            <v-col cols="12" md="6"
+              >Appointment time: <b>{{ canceledData.time }}</b></v-col
+            >
+            <v-col cols="12" md="6">
+              <v-menu
+                ref="menu"
+                v-model="menu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+                :nudge-right="40"
+                offset-y
+                min-width="auto"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="cancelDate"
+                    label="Please update new appointment date"
+                    prepend-icon="mdi-calendar"
+                    readonly
+                    dense
+                    v-bind="attrs"
+                    class="rounded-lg"
+                    outlined
+                    v-on="on"
+                  />
+                </template>
+                <v-date-picker
+                  v-model="cancelDate"
+                  :min="minDate"
+                  :max="maxDate"
+                  @change="menu = false"
+                />
+              </v-menu>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-autocomplete
+                v-model="cancelTime"
+                small-chips
+                :rules="[(v) => !!v || 'Time is required']"
+                label="Select Time"
+                :items="filteredTimes"
+                dense
+                outlined
+                class="rounded-lg"
+                color="#6DB249"
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-textarea
+                v-model="cancelRemarks"
+                :rules="[formRules.required]"
+                dense
+                outlined
+                required
+                type="text"
+                label="Remarks"
+                class="rounded-lg"
+                color="blue"
+                counter="100"
+                maxlength="100"
+              ></v-textarea>
+            </v-col>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="teal darken-3" outlined @click="cancelDialog = false">
+            Cancel
+          </v-btn>
+
+          <v-btn
+            :color="$vuetify.theme.themes.light.submitBtns"
+            class="white--text"
+            :disabled="
+              cancelRemarks != null && cancelDate != null && cancelTime != null
+                ? false
+                : true
+            "
+            @click="
+              confirmCancelAppointment();
               dialogConfirmDone = false;
             "
           >
@@ -435,7 +569,12 @@ export default {
   data: () => ({
     search: "",
     dialog: false,
+    menu: false,
+    cancelDialog: false,
+    cancelDate: null,
+    cancelTime: null,
     service_fee: null,
+    cancelRemarks: null,
     patientItem: [],
     deadline_date: null,
     resetDeadlineDialog: false,
@@ -450,7 +589,24 @@ export default {
     selectedPackage: [],
     headers: [
       { text: "Name", value: "name" },
-      { text: "Identification No.", value: "patientID" },
+      { text: "Date", value: "date" },
+      { text: "Specialization", value: "clinic" },
+      // { text: "Status", value: "status" },
+      // { text: "Next Visit", value: "nextVisit" },
+      // { text: "Recent Topic", value: "recentTopic" },
+      { text: "Recent Doctor", value: "doctor_name" },
+      {
+        text: "Action",
+        value: "actions",
+        align: "end",
+        sortable: false,
+        width: 60,
+      },
+    ],
+
+    headers1: [
+      { text: "Name", value: "name" },
+      // { text: "Identification No.", value: "patientID" },
       // { text: "Last Visit", value: "lastVisit" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
@@ -464,15 +620,10 @@ export default {
         width: 60,
       },
     ],
-
-    headers1: [
+    headers2: [
       { text: "Name", value: "name" },
-      { text: "Identification No.", value: "patientID" },
-      // { text: "Last Visit", value: "lastVisit" },
-      // { text: "Status", value: "status" },
-      // { text: "Next Visit", value: "nextVisit" },
-      // { text: "Recent Topic", value: "recentTopic" },
-      // { text: "Recent Doctor", value: "recentDoctor" },
+      { text: "Date", value: "date" },
+      // { text: "Time", value: "time" },
       {
         text: "Action",
         value: "actions",
@@ -503,6 +654,7 @@ export default {
     ],
 
     totalCount: 0,
+    canceledData: [],
     checkupData: null,
     deleteData: null,
     updateData: null,
@@ -515,6 +667,32 @@ export default {
     tar_toID: null,
     paginationData: {},
     dialogConfirmDone: false,
+    allTimes: [
+      "12:00 AM",
+      "01:00 AM",
+      "02:00 AM",
+      "03:00 AM",
+      "04:00 AM",
+      "05:00 AM",
+      "06:00 AM",
+      "07:00 AM",
+      "08:00 AM",
+      "09:00 AM",
+      "10:00 AM",
+      "11:00 AM",
+      "12:00 PM",
+      "01:00 PM",
+      "02:00 PM",
+      "03:00 PM",
+      "04:00 PM",
+      "05:00 PM",
+      "06:00 PM",
+      "07:00 PM",
+      "08:00 PM",
+      "09:00 PM",
+      "10:00 PM",
+      "11:00 PM",
+    ],
 
     fadeAwayMessage: {
       show: false,
@@ -524,32 +702,72 @@ export default {
       top: 10,
     },
   }),
+  computed: {
+    filteredTimes() {
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+      // Convert time like "02:00 PM" → total minutes
+      const timeToMinutes = (t) => {
+        const [time, modifier] = t.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (modifier === "PM" && hours !== 12) hours += 12;
+        if (modifier === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      };
+
+      if (this.cancelDate === todayStr) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return this.allTimes.filter((t) => timeToMinutes(t) > nowMinutes);
+      }
+      return this.allTimes;
+    },
+    // minDate() {
+    //   const today = new Date();
+    //   today.setMonth(today.getMonth());
+    //   return today.toISOString().substr(0, 10);
+    // },
+    minDate() {
+      return this.canceledData?.date ?? new Date().toISOString().substr(0, 10);
+    },
+    maxDate() {
+      const today = new Date();
+      today.setMonth(today.getMonth() + 4);
+      return today.toISOString().substr(0, 10);
+    },
+  },
 
   mounted() {
     this.eventHub.$on("closePrescrioptionDialog", () => {
-      this.initialize();
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
+      // this.initialize();
     });
 
     this.eventHub.$on("closeAddPatient", () => {
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
-      this.dialog = false;
     });
     this.eventHub.$on("closeViewMedicalInformationDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
     this.eventHub.$on("closePatientLaboratoryDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
     this.eventHub.$on("closepatientAppointmentDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
 
     this.eventHub.$on("closeExamineDataDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
   },
@@ -573,6 +791,13 @@ export default {
   },
 
   methods: {
+    cancelPatient(item) {
+      this.cancelDate = null;
+      this.cancelTime = null;
+      this.cancelRemarks = null;
+      this.canceledData = item;
+      this.cancelDialog = true;
+    },
     pagination(data) {
       this.paginationData = data;
     },
@@ -603,29 +828,29 @@ export default {
         data
       ).then((res) => {
         if (res.data.status == 200) {
-          let newData = {
-            patientId: this.checkupData.id,
-            amount: this.service_fee,
-          };
-          this.axiosCall("/payment", "POST", newData).then((res) => {
-            console.log(res.data);
-            if (res.data.status == 200) {
-              this.initialize();
-              this.updateID = null;
-              this.fadeAwayMessage.show = true;
-              this.fadeAwayMessage.type = "success";
-              this.fadeAwayMessage.header = "System Message";
-              this.fadeAwayMessage.message = res.data.msg;
-              setTimeout(() => {
-                location.reload();
-              }, 1000);
-            } else {
-              this.fadeAwayMessage.show = true;
-              this.fadeAwayMessage.type = "error";
-              this.fadeAwayMessage.header = "System Message";
-              this.fadeAwayMessage.message = res.data.msg;
-            }
-          });
+          // let newData = {
+          //   patientId: this.checkupData.id,
+          //   amount: this.service_fee,
+          // };
+          // this.axiosCall("/payment", "POST", newData).then((res) => {
+          //   console.log(res.data);
+          //   if (res.data.status == 200) {
+          this.initialize();
+          this.updateID = null;
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "success";
+          this.fadeAwayMessage.header = "System Message";
+          this.fadeAwayMessage.message = res.data.msg;
+          // setTimeout(() => {
+          //   location.reload();
+          // }, 1000);
+          //   } else {
+          //     this.fadeAwayMessage.show = true;
+          //     this.fadeAwayMessage.type = "error";
+          //     this.fadeAwayMessage.header = "System Message";
+          //     this.fadeAwayMessage.message = res.data.msg;
+          //   }
+          // });
         } else {
           this.fadeAwayMessage.show = true;
           this.fadeAwayMessage.type = "error";
@@ -633,6 +858,47 @@ export default {
           this.fadeAwayMessage.message = res.data.msg;
         }
       });
+    },
+    confirmCancelAppointment() {
+      if (this.cancelRemarks != "") {
+        let data = {
+          date: this.cancelDate,
+          time: this.cancelTime,
+          // remarks: this.cancelRemarks,
+        };
+        console.log(data);
+        this.axiosCall(
+          "/appointment/confirmAppointment/" + this.canceledData.appointmentID,
+          "PATCH",
+          data
+        ).then((res) => {
+          if (res.data.status == 200) {
+            this.initialize();
+            this.updateID = null;
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+            this.cancelDialog = false;
+            this.cancelDate = null;
+            this.cancelTime = null;
+            this.cancelRemarks = null;
+            // setTimeout(() => {
+            //   location.reload();
+            // }, 1000);
+          } else {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+          }
+        });
+      } else {
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "error";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Please fill-up the remarks field!";
+      }
     },
     getAllPatients() {
       this.userRoleID = this.$store.state.user.user.user_roleID;
@@ -710,6 +976,7 @@ export default {
       this.action = "View";
     },
     viewPatient(item) {
+      localStorage.setItem("PatientData", JSON.stringify(item));
       this.patientItem = item;
       this.dialog = true;
     },

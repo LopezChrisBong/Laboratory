@@ -141,10 +141,15 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="laboratoryDialog" max-width="600px">
+    <v-dialog
+      v-model="laboratoryDialog"
+      :fullscreen="currentFileUrl ? true : false"
+      :max-width="currentFileUrl ? '2000px' : '600px'"
+    >
       <v-card outlined class="pa-4">
         <v-card-title>
           {{ !currentFileUrl ? "Upload" : "View" }} Attachment
+
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
@@ -155,13 +160,22 @@
           >
             Save
           </v-btn>
+          <v-btn
+            color="red"
+            class="white--text"
+            @click="laboratoryDialog = false"
+            small
+            v-if="currentFileUrl"
+          >
+            close
+          </v-btn>
         </v-card-title>
 
         <v-divider></v-divider>
 
         <v-card-text>
           <!-- File Picker -->
-          <v-file-input
+          <!-- <v-file-input
             v-if="!currentFileUrl"
             v-model="selectedFile"
             label="Choose attachment"
@@ -169,12 +183,53 @@
             dense
             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
             prepend-icon="mdi-paperclip"
-          ></v-file-input>
+          ></v-file-input> -->
+          <v-file-input
+            v-if="!currentFileUrl"
+            :key="fileInputKey"
+            v-model="selectedFile"
+            label="Choose attachment"
+            outlined
+            dense
+            accept=".pdf"
+            prepend-icon="mdi-paperclip"
+            @change="selectedFileChange"
+          />
 
           <!-- Preview existing file -->
           <div v-if="currentFileUrl" class="mt-4">
-            <strong>Uploaded File:</strong><br />
-            <a :href="currentFileUrl" target="_blank">{{ currentFileName }}</a>
+            <strong>Uploaded File:</strong>
+            <a
+              v-if="booleanPDF == 0"
+              :href="currentFileUrlDownload"
+              download
+              style="border: 1px solid black; padding: 3px 5px; display: inline-block; cursor: pointer; border-radius: 20px; margin-left: 1rem; margin-bottom: 1rem;"
+            >
+              Download
+            </a>
+            <br />
+            <!-- <a :href="currentFileUrl" target="_blank">{{ currentFileName }}</a> -->
+            <iframe
+              v-if="booleanPDF == 1"
+              width="100%"
+              height="600"
+              :src="currentFileUrlDownload"
+              title="LIS Reports"
+            ></iframe>
+            <!-- <iframe
+              v-if="booleanPDF == 0"
+              width="100%"
+              height="600"
+              :src="currentFileUrl"
+              title="LIS Reports"
+            ></iframe> -->
+            <iframe
+              v-if="booleanPDF == 0"
+              width="100%"
+              height="600"
+              src="https://docs.google.com/spreadsheets/d/1Yb3lOvrlONVzwG8OH7Wp_P4NbPXqIAABTAr9doKeQww/edit?usp=sharing"
+              title="LIS Reports"
+            ></iframe>
           </div>
         </v-card-text>
       </v-card>
@@ -212,7 +267,8 @@ export default {
         top: 10,
       },
       dialog: false,
-
+      booleanPDF: 0,
+      currentFileUrlDownload: null,
       medicalData: null,
       id: null,
       isButtonLoading: false,
@@ -257,9 +313,10 @@ export default {
           width: 90,
         },
       ],
-      selectedFile: null, // new file selected
-      currentFileUrl: null, // existing file URL from server
-      currentFileName: null, // existing file name
+      fileInputKey: 0,
+      selectedFile: null,
+      currentFileUrl: null,
+      currentFileName: null,
       loading: false,
     };
   },
@@ -287,6 +344,21 @@ export default {
   mounted() {},
 
   methods: {
+    selectedFileChange(file) {
+      if (!file) return;
+
+      if (file.type !== "application/pdf") {
+        alert("Invalid file. Please upload a PDF.");
+
+        this.selectedFile = null;
+
+        this.fileInputKey++;
+
+        return;
+      }
+
+      console.log("Valid PDF!");
+    },
     initialize() {
       this.loading = true;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
@@ -374,11 +446,41 @@ export default {
     async loadExistingFile(attachment) {
       try {
         if (attachment) {
-          this.currentFileUrl =
+          this.getFileDownload(attachment);
+
+          const baseUrl =
             process.env.VUE_APP_SERVER +
             "/appointment/view/attachment/" +
             attachment;
+
+          const ext = attachment
+            .split(".")
+            .pop()
+            .toLowerCase();
+          const officeExt = ["xls", "xlsx", "doc", "docx", "ppt", "pptx"];
+          if (officeExt.includes(ext)) {
+            this.currentFileUrl =
+              "https://view.officeapps.live.com/op/embed.aspx?src=" +
+              encodeURIComponent(baseUrl);
+          } else {
+            this.currentFileUrl = baseUrl;
+          }
+
           this.currentFileName = attachment;
+          const isPdf = attachment.toLowerCase().endsWith(".pdf");
+          this.booleanPDF = isPdf ? 1 : 0;
+        }
+      } catch (err) {
+        console.error("Error fetching file:", err);
+      }
+    },
+    async getFileDownload(attachment) {
+      try {
+        if (attachment) {
+          this.currentFileUrlDownload =
+            process.env.VUE_APP_SERVER +
+            "/appointment/view/attachment/" +
+            attachment;
         }
       } catch (err) {
         console.error("Error fetching file:", err);
@@ -418,6 +520,12 @@ export default {
           res.data.filePath;
         this.currentFileName = res.data.originalName;
         this.selectedFile = null;
+        this.initialize();
+        this.laboratoryDialog = false;
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "success";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Submitted successfully!";
         this.closeD();
       } catch (err) {
         console.error("Upload failed:", err);

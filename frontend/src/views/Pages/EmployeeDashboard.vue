@@ -14,7 +14,7 @@
       <MedtechDashboard />
     </div>
 
-    <!-- Medtech Dashboard -->
+    <!-- Cashier Dashboard -->
     <div v-else-if="assignModule == 7">
       <CashierDashboard />
     </div>

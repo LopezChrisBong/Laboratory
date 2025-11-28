@@ -11,6 +11,8 @@ import { CreatePatientMedtechDto } from './dto/create-patient-medtech.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { UpdateServiceResultsDto } from './dto/update-service-result.dto';
 import * as dayjs from 'dayjs';
+import { SmsService } from 'src/sms/sms.service';
+import { newDateFormat } from 'src/shared/global-function';
 @Injectable()
 export class AppointmentService {
   constructor(
@@ -25,6 +27,7 @@ export class AppointmentService {
     @InjectRepository(ServiceAppointment) private readonly serviceAppointmentRepository: Repository<ServiceAppointment>,
     @InjectRepository(ServiceLabResult) private readonly serviceLabResultRepository: Repository<ServiceLabResult>,
     private dataSource: DataSource,
+    private readonly SMSServices:SmsService
   ){}
 
    async upload_lab_attachment( body:any, filename: any){
@@ -54,6 +57,7 @@ export class AppointmentService {
   }
 
  async addPatient(createPatientDto:CreatePatientDto){
+  console.log(createPatientDto)
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -73,6 +77,12 @@ export class AppointmentService {
           contact_no: patient.contact_no,
           b_date: patient.b_date,
           address: patient.address,
+          region: patient.region,
+          province: patient.province,
+          city_muni: patient.city_muni,
+          baranggay: patient.baranggay,
+          purok: patient.purok,
+          spouse: patient.spouse
         });
 
         let savedCategory = await queryRunner.manager.save(data);
@@ -84,7 +94,7 @@ export class AppointmentService {
         id:savedCategory.id,
         duplicate:false,
       };
-      }
+              }
 
         // // console.log(savedCategory.id);
       await queryRunner.commitTransaction();
@@ -104,13 +114,6 @@ export class AppointmentService {
       };
     }
 
-//     catch (error) {
-//   if (error.code === '23505') { // Postgres unique violation
-//     throw new ConflictException('Email already exists');
-//   }
-//   throw error; // rethrow if not handled
-// }
-    
     finally {
       await queryRunner.release();
     }
@@ -131,12 +134,21 @@ export class AppointmentService {
           date: appointment.date,
           time: appointment.time,
           clinic:appointment.clinic,
-          status:appointment.status ? appointment.status : 0,
-          doctorID:appointment.doctorID
+          status:appointment.status ? appointment.status : appointment.clinic != 'Others' ? 1 : 0,
+          doctorID:appointment.doctorID,
         });
-
-        await queryRunner.manager.save(data);
+          await queryRunner.manager.save(data);
+        let patient = await queryRunner.manager.createQueryBuilder(Patient, 'pt')
+        .where('pt.id = :id',{id:appointment.patientID})
+        .getOne()
         
+        let sms= {
+            recipient: patient.contact_no.toString(),
+            message: 'You have an appointment on \nDate: '+ newDateFormat(appointment.date)+"\nTime: "+appointment.time,
+        }
+        await this.SMSServices.sendSms(sms)
+
+      
       await queryRunner.manager.update(Patient, { id: appointment.patientID}, {
       status:0,
       });
@@ -412,15 +424,19 @@ export class AppointmentService {
       .createQueryBuilder('pt')
       .select([
         "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+        " ap.date as date",
+        " ap.time as time",
+        " ap.clinic as clinic",
+        "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
         " pt.*",
       ])
+      .leftJoin(Appointment, 'ap', 'ap.patientID = pt.id')
+      .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
+      .orderBy('ap.date', "DESC")
       .groupBy('pt.patientID')
       .getRawMany()
-
-
       }
       else{
-       
       data = await this.patientRepository
       .createQueryBuilder('pt')
       .select([
@@ -469,13 +485,20 @@ export class AppointmentService {
               .createQueryBuilder('pt')
               .select([
                 "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-                " pt.*",
+                "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
+                " ap.*",
                 " ap.id as appointmentID",
+                " ap.date as date",
+                " ap.clinic as clinic",
               ])
               .leftJoin(Appointment, 'ap', 'ap.patientID = pt.id')
+              .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
               .where('ap.status = 1')
+              .andWhere('ap.doctorID IS NOT NULL')
+              .orderBy('ap.date', "DESC")
               .groupBy('pt.patientID')
               .getRawMany()
+
             }else{
                  console.log('NAA')
              data = []
@@ -493,45 +516,138 @@ export class AppointmentService {
       .getRawMany()
   }
 
-     
       return data
   }
 
     async getAllPatientForDoctor(doctorID:number){
-      console.log(doctorID)
-      let data = await this.appointmentRepository
-      .createQueryBuilder('ap')
-      .select([
-        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-        " pt.*",
-      ])
-      .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
-      // .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-      .where('ap.doctorID = :doctorID', { doctorID })
-      // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-      .groupBy('pt.patientID')
-      .getRawMany()
-      
-      return data
-  }
+      const data = await this.appointmentRepository
+        .createQueryBuilder("ap")
+        .innerJoin(
+          qb =>
+            qb
+              .from(Appointment, "sub")
+              .select("sub.patientID", "patientID")
+              .addSelect("MAX(sub.date)", "latestDate")
+              .where("sub.doctorID = :doctorID", { doctorID })
+              .andWhere("sub.status != 0")
+              .groupBy("sub.patientID"),
+          "latest",
+          "latest.patientID = ap.patientID AND latest.latestDate = ap.date"
+        )
+        .leftJoin(Patient, "pt", "pt.id = ap.patientID")
+        .leftJoin(UserDetail, "ud", "ud.id = ap.doctorID")
+        .select([
+          "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+          "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
+          "pt.*",
+          "ap.date as date",
+        ])
+        .orderBy("ap.date", "DESC")
+        .getRawMany();
 
-      async getAllPatientForMedtech(medtechID:number){
-         console.log(medtechID)
-      let data = await this.serviceAppointmentRepository
-      .createQueryBuilder('sa')
-      .select([
-        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-        " pt.*",
-      ])
-      .leftJoin(Patient, 'pt', 'sa.patientID = pt.id')
-      // .where('(pt.doctorID = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-      .where('sa.medtechID = :medtechID', { medtechID })
-      // .andWhere('(pt.status = :doctorID OR pt.medtechID = :doctorID)', { doctorID })
-      .groupBy('pt.patientID')
-      .getRawMany()
       console.log(data)
       return data
   }
+
+async getAllPatientForMedtech(medtechID: number) {
+  // Step 1: Get latest appointment per patient
+  const data = await this.serviceAppointmentRepository
+    .createQueryBuilder("sa")
+    .innerJoin(
+      qb => qb
+        .from("service_appointment", "latest")
+        .select("MAX(latest.id)", "latestId")
+        .addSelect("latest.patientID", "patientID")
+        .where("latest.medtechID = :medtechID", { medtechID })
+        .groupBy("latest.patientID"),
+      "l",
+      "l.latestId = sa.id"
+    )
+
+    // Join patient
+    .leftJoin(Patient, "pt", "pt.id = sa.patientID")
+
+    // Join services & packages
+    .leftJoin(Service, "s",
+      `JSON_CONTAINS(sa.service_list, CAST(s.id AS JSON))`
+    )
+    .leftJoin(ServicePackages, "sp",
+      `JSON_CONTAINS(sa.package_list, CAST(sp.id AS JSON))`
+    )
+    .leftJoin(Service, "ps",
+      `JSON_CONTAINS(JSON_EXTRACT(sp.selected_modules, '$[*].id'), CAST(ps.id AS JSON))`
+    )
+
+    // Select patient info + lists
+    .select([
+      `IF(
+        !ISNULL(pt.m_name),
+        CONCAT(pt.f_name, ' ', SUBSTRING(pt.m_name,1,1), '. ', pt.l_name),
+        CONCAT(pt.f_name, ' ', pt.l_name)
+      ) AS name`,
+      "pt.*",
+      "pt.id AS patientID",
+      "sa.service_list",
+      "sa.package_list",
+
+      // Latest services only, sorted by description
+      `
+      (
+        SELECT JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', ss.id,
+            'type', ss.service_type,
+            'description', ss.service_description,
+            'price', ss.service_price
+          )
+        )
+        FROM service ss
+        WHERE JSON_CONTAINS(sa.service_list, CAST(ss.id AS JSON))
+        ORDER BY ss.service_description ASC
+      ) AS availed_services
+      `,
+
+      // Latest packages only, sorted by description
+      `
+      (
+        SELECT JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', spp.id,
+            'description', spp.description,
+            'price', spp.price,
+            'services',
+              (
+                SELECT JSON_ARRAYAGG(
+                  JSON_OBJECT(
+                    'id', ps2.id,
+                    'type', ps2.service_type,
+                    'description', ps2.service_description,
+                    'price', ps2.service_price
+                  )
+                )
+                FROM service ps2
+                WHERE JSON_CONTAINS(JSON_EXTRACT(spp.selected_modules, '$[*].id'), CAST(ps2.id AS JSON))
+                ORDER BY ps2.service_description ASC
+              )
+          )
+        )
+        FROM service_packages spp
+        WHERE JSON_CONTAINS(sa.package_list, CAST(spp.id AS JSON))
+        ORDER BY spp.description ASC
+      ) AS availed_packages
+      `
+    ])
+
+    .setParameter("medtechID", medtechID)
+    .groupBy("pt.id")
+    .getRawMany();
+
+  return data;
+}
+
+
+
+
 
   async getAllPatientByRole(doctorID: number, user:any) {
 
@@ -540,36 +656,114 @@ export class AppointmentService {
     //  console.log(role, doctorID)
 
     if (role === 2) {
-    query = this.serviceAppointmentRepository
-    .createQueryBuilder('ap')
-    .select([
-      "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-      "pt.*",
-    ])
-    .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
-    .where('ap.medtechID = :doctorID', { doctorID })
-    .andWhere('(ap.status = 0 OR ap.status = 1)')
-    .groupBy('pt.patientID')
+      query = this.serviceAppointmentRepository
+        .createQueryBuilder("sa")
+        .leftJoin(Patient, "pt", "pt.id = sa.patientID")
+
+        .leftJoin(
+          Service,
+          "s",
+          `JSON_CONTAINS(sa.service_list, CAST(s.id AS JSON))`
+        )
+
+        .leftJoin(
+          ServicePackages,
+          "sp",
+          `JSON_CONTAINS(sa.package_list, CAST(sp.id AS JSON))`
+        )
+
+        .leftJoin(
+          Service,
+          "ps",
+          `JSON_CONTAINS(JSON_EXTRACT(sp.selected_modules, '$[*].id'), CAST(ps.id AS JSON))`
+        )
+
+        .select([
+          `IF(
+            !ISNULL(pt.m_name),
+            CONCAT(pt.f_name, ' ', SUBSTRING(pt.m_name, 1, 1), '. ', pt.l_name),
+            CONCAT(pt.f_name, ' ', pt.l_name)
+          ) AS name`,
+
+          "pt.*",
+          "pt.id AS patientID",
+
+          "sa.service_list AS sa_service_list",
+          "sa.package_list AS sa_package_list",
+
+          "sa.status",
+          "sa.doctorID",
+          "sa.medtechID",
+          "sa.created_at",
+          "sa.updated_at",
+          "sa.attachment",
+          `
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'id', s.id,
+              'type', s.service_type,
+              'description', s.service_description,
+              'price', s.service_price
+            )
+          ) AS availed_services
+          `,
+
+          `
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'id', sp.id,
+              'description', sp.description,
+              'price', sp.price,
+              'services',
+                (
+                  SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                      'id', ps2.id,
+                      'type', ps2.service_type,
+                      'description', ps2.service_description,
+                      'price', ps2.service_price
+                    )
+                  )
+                  FROM service ps2
+                  WHERE JSON_CONTAINS(JSON_EXTRACT(sp.selected_modules, '$[*].id'), CAST(ps2.id AS JSON))
+                )
+            )
+          ) AS availed_packages
+          `
+        ])
+
+        .where("sa.medtechID = :doctorID", { doctorID })
+        .andWhere("sa.status IN (0,1)")
+        .groupBy("pt.id");
+  
   } 
   else if (role === 5) {
        query = this.appointmentRepository
     .createQueryBuilder('ap')
     .select([
       "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+      "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
       "pt.*",
       "ap.id as appointmentID",
+      "ap.date as date",
+      "ap.time as time",
+      "pt.id as patientID",
+      
     ])
     .leftJoin(Patient, 'pt', 'pt.id = ap.patientID')
+    .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
     .where('ap.doctorID = :doctorID', { doctorID })
         // query.andWhere('ap.status IN (0,1, 2)');
         .andWhere('ap.status = 1')
+        .orderBy('ap.date', 'DESC')
         // .andWhere('ap.medtechID IS NULL')
         .groupBy('pt.patientID')
     // query.andWhere('pt.medtechID IS EQUAL NULL');
     // query.andWhere('pt.medtechID == :empty', { empty: '' })
   }  
-  
+
   const data = await query.getRawMany();
+   console.log(data)
   return data;
 }
 
@@ -600,6 +794,7 @@ export class AppointmentService {
       .where('ap.patientID = :id',{id})
       .andWhere('ap.date != "null" ')
       .andWhere('ap.date != "null" ')
+      .orderBy('ap.date', 'DESC')
       .getRawMany()
       // // console.log(data)
       return data
@@ -643,7 +838,7 @@ export class AppointmentService {
       .where('sa.medtechID = :id',{id})
       .andWhere('sa.patientID = :patientID',{patientID})
       .getRawMany()
-      // // console.log(data)
+      console.log(data)
       return data
   }
 
@@ -689,16 +884,20 @@ let data = await this.appointmentRepository
   .select([
     'ap.*',
     "IF (!ISNULL(p.m_name), concat(p.f_name, ' ',SUBSTRING(p.m_name, 1, 1) ,'. ',p.l_name) ,concat(p.f_name, ' ', p.l_name)) as name",
-    'p.patientID as unique_patientID'
+    'p.patientID as unique_patientID',
+     "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname) ,concat(ud.fname, ' ', ud.lname)) as doctor_name",
   ])
   .leftJoin(Patient, 'p', 'p.id = ap.patientID')
+  .leftJoin(UserDetail, 'ud', 'ud.id = ap.doctorID')
   .where('ap.medtechID IS NULL')
   if(tab == 1){
     data.andWhere('ap.status = 0')
   }else{
     data.andWhere('ap.status != 0')
   }
+  data.orderBy('ap.date', 'DESC')
   let newData = await data.getRawMany();
+  console.log(newData)
   return newData
   }
 
@@ -806,22 +1005,23 @@ async getAllDoctorsAppointment(id: number) {
   const events = data.map(item => {
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    const startDate = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A').format('YYYY-MM-DD HH:mm');
-    const endDate = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A').format('YYYY-MM-DD HH:mm');
+    const start = dayjs(`${item.date} ${item.time}`, 'YYYY-MM-DD hh:mm A');
+    const end = start.add(30, 'minute'); 
 
     return {
       name: item.name,
       status: item.status,
-      start: startDate, 
-      end: endDate,    
+      start: start.format('YYYY-MM-DD HH:mm'),
+      end: end.format('YYYY-MM-DD HH:mm'),
       color: randomColor,
-      time:item.time,
-      date:item.date
+      time: item.time,
+      date: item.date
     };
   });
-    // console.log(events)
+
   return events;
 }
+
 
 async getAllMedtechAppointment(id: number) {
   const data = await this.serviceAppointmentRepository
@@ -903,6 +1103,7 @@ async getAllMedtechAppointment(id: number) {
           contact_no: updatePatientDto.contact_no,
           b_date: updatePatientDto.b_date,
           address: updatePatientDto.address,
+          spouse:updatePatientDto.spouse
      })
      return{
        msg:'Updated successfully!', status:HttpStatus.CREATED
@@ -966,12 +1167,53 @@ async getAllMedtechAppointment(id: number) {
   }
 
     async confirmAppointment(id: number, updateAppointmentDto: UpdateAppointmentDto){
+          // console.log(id,updateAppointmentDto)
+        try {
+          // const isExist = await this.appointmentRepository.findOneBy({id});
+          
+          let updated = await this.dataSource.manager.update(Appointment, id,{
+          status:updateAppointmentDto.status,
+          date:updateAppointmentDto.date,
+          time:updateAppointmentDto.time,
+          dataRescheduled:updateAppointmentDto.data,
+          isRescheduled:true
+          })
+
+
+        if(updated.affected == 1){
+        let patient = await this.dataSource.manager.createQueryBuilder(Patient, 'pt')
+        .where('pt.id = :id',{id:updateAppointmentDto.patientID})
+        .getOne()
+
+        let sms= {
+            recipient: patient.contact_no.toString(),
+            message: updateAppointmentDto.remarks ,
+          }
+        await this.SMSServices.sendSms(sms)
+        }
+
         
+        return{
+        msg:'Updated successfully!', status:HttpStatus.OK,
+        updateAppointment:{
+        // id:isExist.doctorID,
+        }
+        }
+       
+        } catch (error) {
+        return{
+       msg:'Something went wrong!'+ error, status:HttpStatus.BAD_REQUEST
+     }
+   }
+        
+    }
+    async doneCheckup(id: number,  updateAppointmentDto: UpdateAppointmentDto){
         try {
           const isExist = await this.appointmentRepository.findOneBy({id});
-          await this.dataSource.manager.update(Appointment, id,{
+           await this.dataSource.manager.update(Appointment, id,{
           status:updateAppointmentDto.status,
           })
+        
         return{
         msg:'Updated successfully!', status:HttpStatus.OK,
         updateAppointment:{
@@ -983,9 +1225,8 @@ async getAllMedtechAppointment(id: number) {
         return{
        msg:'Something went wrong!'+ error, status:HttpStatus.BAD_REQUEST
      }
-   }
-        
     }
+  }
 
  async updatePatientStatus(id: number, updatePatientDto: UpdatePatientDto) {
       // // console.log('Data ID',id)

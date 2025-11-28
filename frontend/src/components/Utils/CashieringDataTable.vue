@@ -507,12 +507,25 @@ export default {
                     newData
                   ).then((res) => {
                     if (res.data.status == 200) {
-                      this.fadeAwayMessage.show = true;
-                      this.fadeAwayMessage.type = "success";
-                      this.fadeAwayMessage.header = "Payment Confirmed";
-                      this.fadeAwayMessage.message = res.data.msg;
-                      this.initialize();
-                      this.dialogConfirmDone = false;
+                      let notif_data = {
+                        patientID: this.id,
+                        title: "Patient Appointment",
+                        message: "You Have Appoitnment",
+                        route: "/patient",
+                        assignedID: 12,
+                      };
+                      this.axiosCall("/notification", "POST", notif_data).then(
+                        (res) => {
+                          if (res.data.status == 200) {
+                            this.fadeAwayMessage.show = true;
+                            this.fadeAwayMessage.type = "success";
+                            this.fadeAwayMessage.header = "Payment Confirmed";
+                            this.fadeAwayMessage.message = res.data.msg;
+                            this.initialize();
+                            this.dialogConfirmDone = false;
+                          }
+                        }
+                      );
                     } else if (res.data.status == 400) {
                       this.fadeAwayMessage.show = true;
                       this.fadeAwayMessage.type = "error";
