@@ -62,6 +62,17 @@
         <template v-slot:[`item.date`]="{ item }">
           {{ formatDate(item.date) }} {{ item.time }}
         </template>
+        <template v-slot:[`item.services`]="{ item }">
+          <v-chip v-for="element in filteredServices(item)" :key="element.id">
+            {{ element.description }}
+          </v-chip>
+        </template>
+
+        <template v-slot:[`item.packages`]="{ item }">
+          <v-chip v-for="element in filteredPackages(item)" :key="element.id">
+            {{ element.description }}
+          </v-chip>
+        </template>
 
         <template v-slot:[`item.status`]="{ item }">
           <v-chip
@@ -312,9 +323,7 @@
                   variant="outlined"
                   @click="prescription(patientItem)"
                 >
-                  <v-icon size="60" color="deep-purple">
-                    mdi-file-sign
-                  </v-icon>
+                  <v-icon size="60" color="deep-purple"> mdi-file-sign </v-icon>
                   <div class="mt-2 text-subtitle-1 font-weight-medium">
                     Prescription
                   </div>
@@ -358,63 +367,76 @@
     </v-dialog>
 
     <v-dialog v-model="dialogConfirmDone" max-width="480" persistent>
-      <v-card class="pa-2">
-        <v-card-title class="text-h6 font-weight-bold">
-          Confirm Completion
-        </v-card-title>
+      <v-form ref="submitServiceFee" @submit.prevent>
+        <v-card class="pa-2">
+          <v-card-title class="text-h6 font-weight-bold">
+            Confirm Completion
+            <v-spacer> </v-spacer>
+            <v-switch v-model="addInvoice" label="Add to Invoice"></v-switch>
+          </v-card-title>
 
-        <v-divider></v-divider>
+          <v-divider></v-divider>
 
-        <v-card-text class="pt-4 pb-6" style="font-size: 16px;">
-          <v-row>
-            <v-col cols="12" class="text-center">
-              <v-icon size="60" color="teal-darken-2" class="mb-3"
-                >mdi-check-circle</v-icon
-              >
+          <v-card-text class="pt-4 pb-6" style="font-size: 16px">
+            <v-row>
+              <v-col cols="12" class="text-center">
+                <v-icon size="60" color="teal-darken-2" class="mb-3"
+                  >mdi-check-circle</v-icon
+                >
 
-              <p class="text-body-1">
-                Are you sure you want to mark this check-up as
-                <strong>completed</strong>?
-              </p>
+                <p class="text-body-1">
+                  Are you sure you want to mark this check-up as
+                  <strong>completed</strong>?
+                </p>
 
-              <p class="text-body-2 text-grey-darken-1 mt-2">
-                This action will finalize the record and cannot be undone.
-              </p>
+                <p class="text-body-2 text-grey-darken-1 mt-2">
+                  This action will finalize the record and cannot be undone.
+                </p>
 
-              <p class="text-caption text-red mt-3">
-                ⚠ Please note: this action is irreversible and cannot be undone.
-              </p>
-            </v-col>
-          </v-row>
-        </v-card-text>
+                <p class="text-caption text-red mt-3">
+                  ⚠ Please note: this action is irreversible and cannot be
+                  undone.
+                </p>
+              </v-col>
+              <v-col cols="12" v-if="addInvoice == true">
+                <v-text-field
+                  v-model="service_fee"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  type="number"
+                  required
+                  label="*Service Fee"
+                  class="rounded-lg"
+                  color="blue"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-card-text>
 
-        <v-divider></v-divider>
+          <v-divider></v-divider>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-card-actions>
+            <v-spacer></v-spacer>
 
-          <v-btn
-            variant="tonal"
-            color="grey-darken-1"
-            @click="dialogConfirmDone = false"
-          >
-            Cancel
-          </v-btn>
+            <v-btn
+              variant="tonal"
+              color="grey-darken-1"
+              @click="dialogConfirmDone = false"
+            >
+              Cancel
+            </v-btn>
 
-          <v-btn
-            :color="$vuetify.theme.themes.light.submitBtns"
-            class="white--text"
-            @click="
-              () => {
-                confirmDialog();
-                dialogConfirmDone = false;
-              }
-            "
-          >
-            Confirm
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+            <v-btn
+              :color="$vuetify.theme.themes.light.submitBtns"
+              class="white--text"
+              @click="confirmDialog()"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-form>
     </v-dialog>
 
     <v-dialog v-model="cancelDialog" max-width="700" persistent>
@@ -423,7 +445,9 @@
           Please select another date to re-schedule the canceled appointment
         </v-card-title>
 
-        <v-card-text style="font-size: 17px">
+        <v-divider></v-divider>
+
+        <v-card-text class="pt-4 pb-6" style="font-size: 16px">
           <v-row>
             <v-col cols="12" md="6"
               >Appointment date: <b>{{ canceledData.date }}</b></v-col
@@ -431,6 +455,7 @@
             <v-col cols="12" md="6"
               >Appointment time: <b>{{ canceledData.time }}</b></v-col
             >
+
             <v-col cols="12" md="6">
               <v-menu
                 ref="menu"
@@ -476,22 +501,38 @@
               ></v-autocomplete>
             </v-col>
             <v-col cols="12">
+              <v-text-field
+                v-model="doctor_comment"
+                :rules="[formRules.required]"
+                dense
+                outlined
+                maxlength="54"
+                required
+                label="*Reason of re-scheduling"
+                class="rounded-lg"
+                color="blue"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
               <v-textarea
-                v-model="cancelRemarks"
+                v-model="newMessage"
                 :rules="[formRules.required]"
                 dense
                 outlined
                 required
+                readonly
                 type="text"
-                label="Remarks"
+                label="Message to Send"
                 class="rounded-lg"
                 color="blue"
-                counter="100"
-                maxlength="100"
+                counter="139"
+                maxlength="139"
               ></v-textarea>
             </v-col>
           </v-row>
         </v-card-text>
+
+        <v-divider></v-divider>
 
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -504,7 +545,7 @@
             :color="$vuetify.theme.themes.light.submitBtns"
             class="white--text"
             :disabled="
-              cancelRemarks != null && cancelDate != null && cancelTime != null
+              doctor_comment != null && cancelDate != null && cancelTime != null
                 ? false
                 : true
             "
@@ -559,7 +600,7 @@ export default {
       import("../../components/Dialogs/Forms/Patient/PrescriptionDialog.vue"),
   },
   filters: {
-    highlight: function(value, query) {
+    highlight: function (value, query) {
       return value.replace(
         new RegExp(query, ""),
         "<span class='blue'>" + query + "</span>"
@@ -571,8 +612,8 @@ export default {
     dialog: false,
     menu: false,
     cancelDialog: false,
-    cancelDate: null,
-    cancelTime: null,
+    cancelDate: "",
+    cancelTime: "",
     service_fee: null,
     cancelRemarks: null,
     patientItem: [],
@@ -611,7 +652,7 @@ export default {
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
-      // { text: "Recent Doctor", value: "recentDoctor" },
+      { text: "Recent Doctor", value: "doctor_name" },
       {
         text: "Action",
         value: "actions",
@@ -622,8 +663,11 @@ export default {
     ],
     headers2: [
       { text: "Name", value: "name" },
-      { text: "Date", value: "date" },
-      // { text: "Time", value: "time" },
+      { text: "Laboratory Request", value: "services" },
+      { text: "Packages Availed", value: "packages" },
+      // { text: "Next Visit", value: "nextVisit" },
+      // { text: "Recent Topic", value: "recentTopic" },
+      // { text: "Recent Doctor", value: "recentDoctor" },
       {
         text: "Action",
         value: "actions",
@@ -654,11 +698,13 @@ export default {
     ],
 
     totalCount: 0,
+    addInvoice: false,
     canceledData: [],
     checkupData: null,
     deleteData: null,
     updateData: null,
     viewData: null,
+    doctor_comment: null,
     userRoleID: null,
     assignedModuleID: null,
     loading: false,
@@ -703,6 +749,44 @@ export default {
     },
   }),
   computed: {
+    filteredServices() {
+      return (item) => {
+        if (!item?.availed_services) return [];
+
+        const seen = new Set();
+
+        return item.availed_services
+          .filter((s) => s.description) // remove null/empty
+          .filter((s) => {
+            if (seen.has(s.description)) return false; // skip duplicates
+            seen.add(s.description);
+            return true;
+          });
+      };
+    },
+
+    filteredPackages() {
+      return (item) => {
+        if (!item?.availed_packages) return [];
+
+        const seen = new Set();
+
+        return item.availed_packages
+          .filter((p) => p.description)
+          .filter((p) => {
+            if (seen.has(p.description)) return false;
+            seen.add(p.description);
+            return true;
+          });
+      };
+    },
+    newMessage() {
+      let message = "Your appointment has been reschedule to: \n";
+      message += "Date: " + this.formatDate(this.cancelDate) + "\n";
+      message += "Time: " + this.cancelTime + "\n";
+      message += "Reason: " + this.doctor_comment;
+      return message;
+    },
     filteredTimes() {
       const now = new Date();
       const todayStr = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
@@ -722,14 +806,14 @@ export default {
       }
       return this.allTimes;
     },
-    // minDate() {
-    //   const today = new Date();
-    //   today.setMonth(today.getMonth());
-    //   return today.toISOString().substr(0, 10);
-    // },
     minDate() {
-      return this.canceledData?.date ?? new Date().toISOString().substr(0, 10);
+      const today = new Date();
+      today.setMonth(today.getMonth());
+      return today.toISOString().substr(0, 10);
     },
+    // minDate() {
+    //   return this.canceledData?.date ?? new Date().toISOString().substr(0, 10);
+    // },
     maxDate() {
       const today = new Date();
       today.setMonth(today.getMonth() + 4);
@@ -819,52 +903,75 @@ export default {
       console.log(item);
     },
     confirmDialog() {
-      let data = {
-        status: 3,
-      };
-      this.axiosCall(
-        "/appointment/confirmAppointment/" + this.checkupData.appointmentID,
-        "PATCH",
-        data
-      ).then((res) => {
-        if (res.data.status == 200) {
-          // let newData = {
-          //   patientId: this.checkupData.id,
-          //   amount: this.service_fee,
-          // };
-          // this.axiosCall("/payment", "POST", newData).then((res) => {
-          //   console.log(res.data);
-          //   if (res.data.status == 200) {
-          this.initialize();
-          this.updateID = null;
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-          // setTimeout(() => {
-          //   location.reload();
-          // }, 1000);
-          //   } else {
-          //     this.fadeAwayMessage.show = true;
-          //     this.fadeAwayMessage.type = "error";
-          //     this.fadeAwayMessage.header = "System Message";
-          //     this.fadeAwayMessage.message = res.data.msg;
-          //   }
-          // });
-        } else {
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "error";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-        }
-      });
+      if (this.$refs.submitServiceFee.validate()) {
+        let data = {
+          status: 3,
+        };
+        this.axiosCall(
+          "/appointment/doneCheckup/" + this.checkupData.appointmentID,
+          "PATCH",
+          data
+        ).then((res) => {
+          if (res.data.status == 200) {
+            if (this.addInvoice == true) {
+              let newData = {
+                doctorID: this.checkupData.doctorID,
+                patientId: this.checkupData.patientID,
+                amount: this.service_fee,
+              };
+              this.axiosCall("/payment", "POST", newData).then((res) => {
+                if (res.data.status == 200) {
+                  this.initialize();
+                  this.updateID = null;
+                  this.fadeAwayMessage.show = true;
+                  this.fadeAwayMessage.type = "success";
+                  this.fadeAwayMessage.header = "System Message";
+                  this.fadeAwayMessage.message = res.data.msg;
+                  this.dialogConfirmDone = false;
+                  setTimeout(() => {
+                    location.reload();
+                  }, 1000);
+                } else {
+                  this.fadeAwayMessage.show = true;
+                  this.fadeAwayMessage.type = "error";
+                  this.fadeAwayMessage.header = "System Message";
+                  this.fadeAwayMessage.message = res.data.msg;
+                }
+              });
+            } else {
+              this.initialize();
+              this.updateID = null;
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "System Message";
+              this.fadeAwayMessage.message = res.data.msg;
+              this.dialogConfirmDone = false;
+              setTimeout(() => {
+                location.reload();
+              }, 1000);
+            }
+          } else {
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+          }
+        });
+      } else {
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "error";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Please type your service fee.";
+      }
     },
     confirmCancelAppointment() {
-      if (this.cancelRemarks != "") {
+      if (this.cancelRemarks != "" && this.doctor_comment != "") {
         let data = {
+          patientID: this.canceledData.id,
           date: this.cancelDate,
           time: this.cancelTime,
-          // remarks: this.cancelRemarks,
+          remarks: this.newMessage,
+          data: JSON.stringify(this.canceledData),
         };
         console.log(data);
         this.axiosCall(
@@ -900,6 +1007,7 @@ export default {
         this.fadeAwayMessage.message = "Please fill-up the remarks field!";
       }
     },
+
     getAllPatients() {
       this.userRoleID = this.$store.state.user.user.user_roleID;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
