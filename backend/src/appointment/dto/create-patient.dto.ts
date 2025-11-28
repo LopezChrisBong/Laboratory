@@ -31,20 +31,20 @@ export class CreatePatientDto {
     @ApiProperty()
   province: string;
 
-    @ApiProperty()
+  @ApiProperty()
   city_muni: string;
 
-    @ApiProperty()
+  @ApiProperty()
   baranggay: string;
 
-    @ApiProperty()
+  @ApiProperty()
   purok: string;
 
-     @ApiProperty()
+  @ApiProperty()
   spouse: string;
 
   @ApiProperty()
-  contact_no: number;
+  contact_no: string;
 
   @ApiProperty()
   status: number;

@@ -11,8 +11,8 @@ export class CreatePaymentDto {
   @ApiProperty()
   amount: number;
 
-  // @ApiProperty()
-  // payment_method: string;
+  @ApiProperty()
+  doctorID: number;
 
   @ApiProperty()
   invoice_no: string;

@@ -58,8 +58,8 @@ export class Patient {
     @Column({ type: "varchar", nullable:true })
     spouse: string
     
-    @Column({ type: "bigint" })
-    contact_no: number
+    @Column({ type: "varchar" })
+    contact_no: string
 
     @Column({ type: "varchar" })
     b_date: string

@@ -221,6 +221,6 @@ export class PhilSmsProvider {
   }
 
   private formatMesage(message: string) {
-    return (message += '\n\n-PARAGON Diagnostics And Multi-Specialty Clinic');
+    return (message += '\n\n-PARAGON');
   }
 }

@@ -41,8 +41,8 @@ export class Helper {
   }
 
     static lab_result_attachment(req, file, cb) {
-    cb(null, join(process.cwd(), '/lab_result_attachment/'));
-    // cb(null, join(process.cwd(), '/../lab_result_attachment/'));
+    // cb(null, join(process.cwd(), '/lab_result_attachment/'));
+    cb(null, join(process.cwd(), '/../lab_result_attachment/'));
 }
 
   // static esign_filepath(req, file, cb) {

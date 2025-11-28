@@ -30,6 +30,12 @@ export class Appointment {
         @Column({ type: "int", nullable:true })
         medtechID:number
 
+        @Column({ type: "boolean", default:false })
+        isRescheduled:boolean
+
+        @Column({ type: "longtext", nullable:true})
+        dataRescheduled: string
+        
         @Column({ type: "int", default: 0}) //(0 = pending) (1 = done) (2 = working) 
         status: number
         
