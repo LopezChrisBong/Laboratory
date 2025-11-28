@@ -214,6 +214,8 @@
                         v-model="pregnant"
                         :readonly="action === 'View'"
                         :disabled="!date"
+                        true-value="1"
+                        false-value="0"
                         label="Patient is Pregnant"
                         @change="changeMedical()"
                       />

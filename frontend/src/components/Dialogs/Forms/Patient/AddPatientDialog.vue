@@ -27,7 +27,7 @@
                     dense
                     outlined
                     required
-                    label="First Name"
+                    label="*First Name"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
@@ -49,7 +49,7 @@
                     dense
                     outlined
                     required
-                    label="Last Name"
+                    label="*Last Name"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
@@ -65,7 +65,7 @@
                     color="blue"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="4">
+                <!-- <v-col cols="4">
                   <v-menu
                     ref="menu"
                     :close-on-content-click="false"
@@ -83,7 +83,7 @@
                         chips
                         color="blue"
                         small-chips
-                        label="Date of Birth"
+                        label="*Date of Birth"
                         readonly
                         v-bind="attrs"
                         v-on="on"
@@ -104,9 +104,21 @@
                       </v-btn>
                     </v-date-picker>
                   </v-menu>
+                </v-col> -->
+                <v-col cols="12" md="4" sm="12">
+                  <v-text-field
+                    label="*Birth Date"
+                    v-model="bdate"
+                    :rules="[formRules.required]"
+                    required
+                    type="date"
+                    dense
+                    outlined
+                    class="text-uppercase rounded-lg"
+                    @input="calculateAge(bdate)"
+                  />
                 </v-col>
-
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="3">
                   <v-text-field
                     v-model="age"
                     type="number"
@@ -114,9 +126,39 @@
                     dense
                     outlined
                     required
-                    label="Age"
+                    label="*Age"
                     class="rounded-lg"
                     color="blue"
+                  ></v-text-field> </v-col
+                ><v-col cols="12" md="3">
+                  <v-autocomplete
+                    v-model="gender"
+                    :rules="[formRules.required]"
+                    dense
+                    outlined
+                    label="*Sex"
+                    class="rounded-lg"
+                    item-text="description"
+                    item-value="description"
+                    color="#96CB5B"
+                    :items="genderList"
+                  >
+                  </v-autocomplete>
+                </v-col>
+
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="number"
+                    label="*Contact No."
+                    color="#6DB249"
+                    type="text"
+                    maxlength="11"
+                    dense
+                    outlined
+                    class="rounded-lg"
+                    @keypress="onlyDigits"
+                    @input="cleanDigits"
+                    :rules="[contactNoRule]"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" md="6">
@@ -135,7 +177,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
-                    label="Civil Status"
+                    label="*Civil Status"
                     class="rounded-lg"
                     item-text="description"
                     item-value="description"
@@ -143,63 +185,128 @@
                     :items="[
                       { id: 1, description: 'Single' },
                       { id: 2, description: 'Married' },
+                      { id: 3, description: 'Wiidow' },
                     ]"
                   >
                   </v-autocomplete>
                 </v-col>
-
-                <v-col cols="12" md="6">
-                  <v-autocomplete
-                    v-model="gender"
-                    :rules="[formRules.required]"
-                    dense
-                    outlined
-                    label="Sex"
-                    class="rounded-lg"
-                    item-text="description"
-                    item-value="description"
-                    color="#96CB5B"
-                    :items="genderList"
-                  >
-                  </v-autocomplete>
-                </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="12" v-if="cstatus == 'Married'">
                   <v-text-field
-                    v-model="number"
+                    v-model="spouse"
                     :rules="[formRules.required]"
                     dense
                     outlined
-                    type="number"
                     required
-                    label="Contanct Number"
+                    label="*Spouse"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12" :md="action == 'Add' ? '6' : '12'">
                   <v-text-field
                     v-model="occupation"
                     :rules="[formRules.required]"
                     dense
                     outlined
                     required
-                    label="Occupation"
+                    label="*Occupation"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field>
                 </v-col>
-
-                <v-col cols="12" md="12">
+                <v-col v-if="action != 'Add'" cols="12" md="12" sm="12">
                   <v-text-field
+                    label="*Address"
                     v-model="address"
                     :rules="[formRules.required]"
+                    class="text-uppercase rounded-lg"
                     dense
                     outlined
                     required
-                    label="Address"
+                  />
+                </v-col>
+
+                <v-col cols="12" md="6" v-if="action == 'Add'">
+                  <!-- <v-text-field
+                      label="*Address"
+                      v-model="form.address"
+                      :rules="[formRules.required]"
+                      class="text-uppercase"
+                      required
+                      @input="toUppercase('address', $event)"
+                    /> -->
+                  <v-autocomplete
+                    v-model="region"
+                    :rules="[formRules.required]"
+                    dense
                     class="rounded-lg"
-                    color="blue"
-                  ></v-text-field>
+                    outlined
+                    item-text="regionName"
+                    item-value="code"
+                    label="*Region"
+                    color="#93CB5B"
+                    :items="regionList"
+                    @change="changeRegion()"
+                  >
+                  </v-autocomplete>
+                </v-col>
+                <v-col cols="12" md="6" v-if="action == 'Add'">
+                  <v-autocomplete
+                    v-model="province"
+                    :rules="[formRules.required]"
+                    dense
+                    class="rounded-lg"
+                    item-text="name"
+                    item-value="code"
+                    label="*Province"
+                    outlined
+                    color="#93CB5B"
+                    :items="provinceList"
+                    @change="changeProvince()"
+                  >
+                  </v-autocomplete>
+                </v-col>
+                <v-col cols="12" md="6" v-if="action == 'Add'">
+                  <v-autocomplete
+                    v-model="city_muni"
+                    :rules="[formRules.required]"
+                    dense
+                    class="rounded-lg"
+                    item-text="name"
+                    outlined
+                    item-value="code"
+                    label="*City/Municipality"
+                    color="#93CB5B"
+                    :items="city_muniList"
+                    @change="changeCityMuni()"
+                  >
+                  </v-autocomplete>
+                </v-col>
+                <v-col cols="12" md="6" v-if="action == 'Add'">
+                  <v-autocomplete
+                    v-model="baranggay"
+                    :rules="[formRules.required]"
+                    dense
+                    class="rounded-lg"
+                    item-text="name"
+                    item-value="code"
+                    outlined
+                    label="*Baranggay"
+                    color="#93CB5B"
+                    :items="baranggayList"
+                  >
+                  </v-autocomplete>
+                </v-col>
+                <v-col cols="12" md="6" v-if="action == 'Add'">
+                  <v-text-field
+                    label="*Street/Purok"
+                    v-model="purok"
+                    :rules="[formRules.required]"
+                    outlined
+                    class="text-uppercase rounded-lg"
+                    required
+                    dense
+                  />
                 </v-col>
               </v-row>
             </v-container>
@@ -248,6 +355,7 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   components: {},
   props: {
@@ -259,9 +367,19 @@ export default {
       updateID: null,
       //   pregnant: false,
       assignedModuleID: null,
+      region: null,
+      regionList: [],
+      province: null,
+      provinceList: [],
+      city_muni: null,
+      purok: null,
+      city_muniList: [],
+      baranggay: null,
+      baranggayList: [],
       dialog: false,
       bdate: null,
       medicalDate: null,
+      spouse: null,
       genderList: [],
       gender: null,
       suffix: null,
@@ -284,12 +402,20 @@ export default {
     };
   },
 
-  computed: {},
+  computed: {
+    contactNoRule() {
+      return (v) => {
+        if (!v || v.length !== 11) return "Contact number must be 11 digits";
+        if (!/^0/.test(v)) return "Contact number must start with 0.";
+        return true;
+      };
+    },
+  },
   watch: {
     data: {
       handler(data) {
         this.dialog = true;
-        // console.log("View Data", data);
+        console.log("View Data", data);
 
         if (data.id) {
           this.initialize();
@@ -304,6 +430,12 @@ export default {
           this.cstatus = data.civil_status;
           this.occupation = data.occupation;
           this.bdate = data.b_date;
+          this.region = data.region.toString();
+          this.province = data.province.toString();
+          this.city_muni = data.city_muni.toString();
+          this.baranggay = data.baranggay.toString();
+          this.purok = data.purok;
+          this.spouse = data.spouse;
         } else {
           this.$refs.AddPatient.reset();
           this.initialize();
@@ -317,6 +449,7 @@ export default {
           this.age = null;
           this.occupation = null;
           this.bdate = null;
+          this.spouse = null;
         }
       },
       deep: true,
@@ -325,6 +458,7 @@ export default {
 
   methods: {
     initialize() {
+      this.getRegion();
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       this.genderList = [
         { id: 1, description: "Male" },
@@ -350,72 +484,116 @@ export default {
     },
     add(type) {
       if (type == "ADD") {
-        let data = {
-          f_name: this.fname,
-          suffix: this.suffix,
-          l_name: this.lname,
-          m_name: this.mname,
-          age: this.age,
-          civil_status: this.cstatus,
-          gender: this.gender,
-          address: this.address,
-          contact_no: this.number,
-          occupation: this.occupation,
-          b_date: this.bdate,
-        };
-        this.axiosCall("/appointment/addPatient", "POST", data).then((res) => {
-          let errorCode = res.data.duplicate;
-          if (errorCode == true) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.header = "Patient Already Exist!";
-          } else {
-            if (res.data.status == 200) {
+        if (this.$refs.AddPatient.validate()) {
+          const baranggayData = this.baranggayList.find(
+            (item) => item.code === this.baranggay
+          );
+          const regionData = this.regionList.find(
+            (item) => item.code === this.region
+          );
+          const provinceData = this.provinceList.find(
+            (item) => item.code === this.province
+          );
+          const cityMuniData = this.city_muniList.find(
+            (item) => item.code === this.city_muni
+          );
+          this.address =
+            regionData.regionName +
+            " " +
+            provinceData.name +
+            " " +
+            cityMuniData.name +
+            " " +
+            baranggayData.name +
+            " " +
+            this.purok;
+          let data = {
+            f_name: this.fname,
+            suffix: this.suffix,
+            l_name: this.lname,
+            m_name: this.mname,
+            age: this.age,
+            civil_status: this.cstatus,
+            gender: this.gender,
+            address: this.address,
+            contact_no: this.number,
+            occupation: this.occupation,
+            b_date: this.bdate,
+            region: this.region,
+            province: this.province,
+            city_muni: this.city_muni,
+            baranggay: this.baranggay,
+            purok: this.purok,
+            spouse: this.spouse,
+          };
+          // console.log(data);
+          this.axiosCall("/appointment/addPatient", "POST", data).then(
+            (res) => {
+              let errorCode = res.data.duplicate;
+              if (errorCode == true) {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "error";
+                this.fadeAwayMessage.header = "Patient Already Exist!";
+              } else {
+                if (res.data.status == 200) {
+                  this.fadeAwayMessage.show = true;
+                  this.fadeAwayMessage.type = "success";
+                  this.fadeAwayMessage.header = "Successfully Updated";
+                  this.dialog = false;
+                  this.closeD();
+                } else if (res.data.status == 400) {
+                  this.fadeAwayMessage.show = true;
+                  this.fadeAwayMessage.type = "error";
+                  this.fadeAwayMessage.header = res.data.msg;
+                }
+              }
+            }
+          );
+        } else {
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "error";
+          this.fadeAwayMessage.header = "Please fill all field before saving!";
+        }
+      } else if (type == "UPDATE") {
+        // alert(this.data.id);
+        if (this.$refs.AddPatient.validate()) {
+          let data = {
+            f_name: this.fname,
+            suffix: this.suffix,
+            l_name: this.lname,
+            m_name: this.mname,
+            age: this.age,
+            civil_status: this.cstatus,
+            gender: this.gender,
+            address: this.address,
+            contact_no: this.number,
+            occupation: this.occupation,
+            b_date: this.bdate,
+            spouse: this.spouse,
+            //   pregnant: this.pregnant,
+          };
+          this.axiosCall(
+            "/appointment/updatePatientInfo/" + this.data.id,
+            "PATCH",
+            data
+          ).then((res) => {
+            if (res.data.status == 201) {
               this.fadeAwayMessage.show = true;
               this.fadeAwayMessage.type = "success";
-              this.fadeAwayMessage.header = "Successfully Updated";
-              this.dialog = false;
+              this.fadeAwayMessage.header = "System Message";
+              this.fadeAwayMessage.message = "Successfully Updated";
               this.closeD();
             } else if (res.data.status == 400) {
               this.fadeAwayMessage.show = true;
               this.fadeAwayMessage.type = "error";
               this.fadeAwayMessage.header = res.data.msg;
             }
-          }
-        });
-      } else if (type == "UPDATE") {
-        // alert(this.data.id);
-        let data = {
-          f_name: this.fname,
-          suffix: this.suffix,
-          l_name: this.lname,
-          m_name: this.mname,
-          age: this.age,
-          civil_status: this.cstatus,
-          gender: this.gender,
-          address: this.address,
-          contact_no: this.number,
-          occupation: this.occupation,
-          b_date: this.bdate,
-          //   pregnant: this.pregnant,
-        };
-        this.axiosCall(
-          "/appointment/updatePatientInfo/" + this.data.id,
-          "PATCH",
-          data
-        ).then((res) => {
-          if (res.data.status == 201) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "System Message";
-            this.fadeAwayMessage.message = "Successfully Updated";
-            this.closeD();
-          } else if (res.data.status == 400) {
-            this.fadeAwayMessage.show = true;
-            this.fadeAwayMessage.type = "error";
-            this.fadeAwayMessage.header = res.data.msg;
-          }
-        });
+          });
+        } else {
+          this.fadeAwayMessage.show = true;
+          this.fadeAwayMessage.type = "error";
+          this.fadeAwayMessage.header = "Please fill all field before saving!";
+        }
       }
     },
     generateUUID() {
@@ -428,6 +606,58 @@ export default {
     closeD() {
       this.eventHub.$emit("closeAddPatient", false);
       this.dialog = false;
+    },
+    getRegion() {
+      axios.get("https://psgc.gitlab.io/api/regions.json").then((res) => {
+        this.regionList = res.data;
+      });
+    },
+    changeRegion() {
+      axios
+        .get(
+          "https://psgc.gitlab.io/api/regions/" +
+            this.region +
+            "/provinces.json"
+        )
+        .then((res) => {
+          this.provinceList = res.data;
+        });
+    },
+    changeProvince() {
+      axios
+        .get(
+          "https://psgc.gitlab.io/api/provinces/" +
+            this.province +
+            "/cities-municipalities.json"
+        )
+        .then((res) => {
+          this.city_muniList = res.data;
+        });
+    },
+    changeCityMuni() {
+      axios
+        .get(
+          "https://psgc.gitlab.io/api/municipalities/" +
+            this.city_muni +
+            "/barangays.json"
+        )
+        .then((res) => {
+          this.baranggayList = res.data;
+        });
+    },
+    // onlyDigits(event) {
+    //   const char = String.fromCharCode(event.keyCode);
+    //   if (!/[0-9]/.test(char)) {
+    //     event.preventDefault();
+    //   }
+    // },
+    onlyDigits(event) {
+      if (!/^\d$/.test(event.key)) {
+        event.preventDefault();
+      }
+    },
+    cleanDigits(event) {
+      event.target.value = event.target.value.replace(/\D/g, "");
     },
   },
 };

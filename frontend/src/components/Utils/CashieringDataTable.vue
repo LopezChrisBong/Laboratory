@@ -51,6 +51,9 @@
                     {{ item.status }}
                   </v-chip>
                 </template>
+                <template v-slot:[`item.created_at`]="{ item }">
+                  {{ formatDate(item.created_at) }}
+                </template>
                 <template v-slot:[`item.service_availed`]="{ item }">
                   <div
                     class="text-caption"
@@ -350,7 +353,7 @@ export default {
         { text: "Name", value: "name", align: "start" },
         { text: "Service Availed", value: "service_availed", align: "center" },
         { text: "Total Amount", value: "total_amount", align: "center" },
-        // { text: "Total Payments", value: "total_payments", align: "center" },
+        { text: "Date", value: "created_at", align: "center" },
         { text: "Action", value: "action", align: "end" },
       ],
 
@@ -359,6 +362,7 @@ export default {
         { text: "Invoice #", value: "invoice_no", align: "center" },
         { text: "Service Availed", value: "service_availed", align: "center" },
         { text: "Total Amount", value: "total_amount", align: "center" },
+        { text: "Date", value: "created_at", align: "center" },
         { text: "Action", value: "action", align: "end" },
       ],
 
@@ -507,12 +511,25 @@ export default {
                     newData
                   ).then((res) => {
                     if (res.data.status == 200) {
-                      this.fadeAwayMessage.show = true;
-                      this.fadeAwayMessage.type = "success";
-                      this.fadeAwayMessage.header = "Payment Confirmed";
-                      this.fadeAwayMessage.message = res.data.msg;
-                      this.initialize();
-                      this.dialogConfirmDone = false;
+                      let notif_data = {
+                        patientID: this.id,
+                        title: "Patient Appointment",
+                        message: "You Have Appoitnment",
+                        route: "/patient",
+                        assignedID: 12,
+                      };
+                      this.axiosCall("/notification", "POST", notif_data).then(
+                        (res) => {
+                          if (res.data.status == 200) {
+                            this.fadeAwayMessage.show = true;
+                            this.fadeAwayMessage.type = "success";
+                            this.fadeAwayMessage.header = "Payment Confirmed";
+                            this.fadeAwayMessage.message = res.data.msg;
+                            this.initialize();
+                            this.dialogConfirmDone = false;
+                          }
+                        }
+                      );
                     } else if (res.data.status == 400) {
                       this.fadeAwayMessage.show = true;
                       this.fadeAwayMessage.type = "error";

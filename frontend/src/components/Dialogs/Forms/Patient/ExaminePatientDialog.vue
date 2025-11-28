@@ -3,7 +3,7 @@
     <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span>Patient Examination Data Table</span>
+          <span>Patient Examination Data Table of {{ data && data.name }}</span>
           <v-spacer></v-spacer>
           <v-btn icon dark @click="closeD()">
             <v-icon>mdi-close</v-icon>
@@ -74,7 +74,21 @@
                       <v-icon small
                         >{{ !item.attachment ? "mdi-pencil" : "mdi-eye" }}
                       </v-icon>
-                      {{ !item.attachment ? "Upload" : "View" }}</v-btn
+                      {{
+                        !item.attachment
+                          ? "Upload Lab Reult"
+                          : "View Lab Result"
+                      }}</v-btn
+                    >
+                    <v-btn
+                      v-if="assignedModuleID == 2"
+                      x-small
+                      class="mt-1"
+                      @click="availed(item)"
+                      outlined
+                      color="green"
+                      block
+                      ><v-icon small> mdi-eye</v-icon>Availed Laboratory</v-btn
                     >
                     <v-btn
                       v-if="assignedModuleID == 5 && item.attachment"
@@ -84,7 +98,7 @@
                       outlined
                       color="green"
                       block
-                      ><v-icon small> mdi-eye</v-icon>View</v-btn
+                      ><v-icon small> mdi-eye</v-icon>View Lab Result</v-btn
                     >
                   </template>
                 </v-data-table>
@@ -140,11 +154,196 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="laboratoryAvailedDialog" max-width="800" persistent>
+      <v-card>
+        <v-card-title>Services</v-card-title>
+        <v-card-text>
+          <div>
+            <v-row>
+              <v-col cols="12" md="6" class="pa-0">
+                <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
+                  <v-tab
+                    v-for="tab in tabList"
+                    :key="tab.id"
+                    @click="changeTab(tab)"
+                    >{{ tab.name }}</v-tab
+                  >
+                </v-tabs>
+              </v-col>
+              <!--Laboratory Services Area-->
+              <v-col cols="12" v-if="tab == 1">
+                <v-row>
+                  <v-col
+                    cols="12"
+                    :md="item.data.length <= 0 ? 3 : 12"
+                    sm="12"
+                    v-for="item in dataServices"
+                    :key="item.id"
+                    class="my-1 mx-1"
+                    style="border: 1px solid black; border-radius: 10px;"
+                  >
+                    <div
+                      v-if="item.data.length <= 0"
+                      class="d-flex justify-center align-center"
+                    >
+                      <div>
+                        <v-checkbox
+                          v-model="selected"
+                          :readonly="action != 'Pay' ? true : false"
+                          :label="item.description"
+                          :value="item.id"
+                        ></v-checkbox>
+                      </div>
+                      <div class="mx-2">&#8369;{{ item.price }}</div>
+                    </div>
+                    <div v-if="item.data.length > 0" class="">
+                      <strong> {{ item.description }}</strong>
+                      <v-row>
+                        <v-col
+                          cols="3"
+                          v-for="items in item.data"
+                          :key="items.id"
+                        >
+                          <div class="d-flex justify-center align-center">
+                            <div>
+                              <v-checkbox
+                                v-model="selected"
+                                :label="items.description"
+                                :value="items.id"
+                                :readonly="action != 'Pay' ? true : false"
+                              ></v-checkbox>
+                            </div>
+                            <div class="mx-2">&#8369;{{ items.price }}</div>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <!-- :rules="[(v) => !!v || 'Service is required']" -->
+              <!--Imaging Services Area-->
 
-    <v-dialog v-model="laboratoryDialog" max-width="600px">
+              <v-col cols="12" v-if="tab == 2">
+                <v-row>
+                  <v-col
+                    cols="12"
+                    :md="item.data.length <= 0 ? 3 : 12"
+                    sm="12"
+                    v-for="item in dataServices"
+                    :key="item.id"
+                    class="my-1 mx-1"
+                    style="border: 1px solid black; border-radius: 10px;"
+                  >
+                    <div
+                      v-if="item.data.length <= 0"
+                      class="d-flex justify-center align-center"
+                    >
+                      <div>
+                        <v-checkbox
+                          v-model="selected"
+                          :label="item.description"
+                          :value="item.id"
+                          :readonly="action != 'Pay' ? true : false"
+                        ></v-checkbox>
+                      </div>
+                      <div class="mx-2">&#8369;{{ item.price }}</div>
+                    </div>
+                    <div v-if="item.data.length > 0" class="">
+                      <strong>{{ item.description }}</strong>
+                      <v-row>
+                        <v-col
+                          cols="3"
+                          v-for="items in item.data"
+                          :key="items.id"
+                        >
+                          <div class="d-flex justify-center align-center">
+                            <div>
+                              <v-checkbox
+                                v-model="selected"
+                                :label="items.description"
+                                :value="items.id"
+                                :readonly="action != 'Pay' ? true : false"
+                              ></v-checkbox>
+                            </div>
+                            <div class="mx-2">&#8369;{{ items.price }}</div>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+
+              <!--Package Services Area-->
+
+              <v-col cols="12" v-if="tab == 3">
+                <v-row>
+                  <v-col
+                    cols="12"
+                    md="6"
+                    sm="12"
+                    v-for="item in dataPackages"
+                    :key="item.id"
+                    style="border: 1px solid black; border-radius: 10px;"
+                  >
+                    <div class="d-flex justify-center align-center">
+                      <div>
+                        <v-checkbox
+                          v-model="selectedPackage"
+                          :label="item.description"
+                          :value="item.id"
+                          :readonly="action != 'Pay' ? true : false"
+                        ></v-checkbox>
+                      </div>
+                      <div class="mx-2">&#8369;{{ item.price }}</div>
+                      <br />
+                    </div>
+                    <div class="mb-2">
+                      <strong style="font-size: 14px;">List of Service:</strong>
+                    </div>
+                    <v-row>
+                      <v-col
+                        cols="4"
+                        class="pa-2"
+                        v-for="items in JSON.parse(item.assign_mods)"
+                        :key="items.id"
+                      >
+                        <span style="font-size: 20px;">
+                          <strong>&#x2022;</strong></span
+                        >
+                        <v-chip
+                          small
+                          class="pa-2"
+                          color="blue"
+                          text-color="white"
+                        >
+                          {{ items.service_description }}
+                        </v-chip>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="laboratoryAvailedDialog = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="laboratoryDialog"
+      :fullscreen="currentFileUrl ? true : false"
+      :max-width="currentFileUrl ? '2000px' : '600px'"
+    >
       <v-card outlined class="pa-4">
         <v-card-title>
-          {{ !currentFileUrl ? "Upload" : "View" }} Attachment
+          {{ !currentFileUrl ? "Upload" : "View" }} Attachment {{ booleanPDF }}
+
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
@@ -155,13 +354,25 @@
           >
             Save
           </v-btn>
+          <v-btn
+            color="red"
+            class="white--text"
+            @click="
+              laboratoryDialog = false;
+              currentFileUrl = null;
+            "
+            small
+            v-if="currentFileUrl"
+          >
+            close
+          </v-btn>
         </v-card-title>
 
         <v-divider></v-divider>
 
         <v-card-text>
           <!-- File Picker -->
-          <v-file-input
+          <!-- <v-file-input
             v-if="!currentFileUrl"
             v-model="selectedFile"
             label="Choose attachment"
@@ -169,12 +380,53 @@
             dense
             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
             prepend-icon="mdi-paperclip"
-          ></v-file-input>
+          ></v-file-input> -->
+          <v-file-input
+            v-if="!currentFileUrl"
+            :key="fileInputKey"
+            v-model="selectedFile"
+            label="Choose attachment"
+            outlined
+            dense
+            accept=".pdf"
+            prepend-icon="mdi-paperclip"
+            @change="selectedFileChange"
+          />
 
           <!-- Preview existing file -->
           <div v-if="currentFileUrl" class="mt-4">
-            <strong>Uploaded File:</strong><br />
-            <a :href="currentFileUrl" target="_blank">{{ currentFileName }}</a>
+            <strong>Uploaded File:</strong>
+            <a
+              v-if="booleanPDF == 0"
+              :href="currentFileUrlDownload"
+              download
+              style="border: 1px solid black; padding: 3px 5px; display: inline-block; cursor: pointer; border-radius: 20px; margin-left: 1rem; margin-bottom: 1rem;"
+            >
+              Download
+            </a>
+            <br />
+            <!-- <a :href="currentFileUrl" target="_blank">{{ currentFileName }}</a> -->
+            <iframe
+              v-if="booleanPDF == 1"
+              width="100%"
+              height="600"
+              :src="currentFileUrlDownload"
+              title="LIS Reports"
+            ></iframe>
+            <!-- <iframe
+              v-if="booleanPDF == 0"
+              width="100%"
+              height="600"
+              :src="currentFileUrl"
+              title="LIS Reports"
+            ></iframe> -->
+            <iframe
+              v-if="booleanPDF == 0"
+              width="100%"
+              height="600"
+              src="https://docs.google.com/spreadsheets/d/1Yb3lOvrlONVzwG8OH7Wp_P4NbPXqIAABTAr9doKeQww/edit?usp=sharing"
+              title="LIS Reports"
+            ></iframe>
           </div>
         </v-card-text>
       </v-card>
@@ -199,6 +451,14 @@ export default {
   },
   data() {
     return {
+      dataPackages: [],
+      activeTab: { id: 1, name: "Laboratory" },
+      tab: 1,
+      tabList: [
+        { id: 1, name: "Laboratory" },
+        { id: 2, name: "Imaging" },
+        { id: 3, name: "Packages" },
+      ],
       updateID: null,
       action: null,
       itemToDelete: null,
@@ -212,11 +472,16 @@ export default {
         top: 10,
       },
       dialog: false,
-
+      booleanPDF: 0,
+      currentFileUrlDownload: null,
       medicalData: null,
       id: null,
       isButtonLoading: false,
       assignedModuleID: null,
+      oldSelected: [],
+      selected: [],
+      oldSelectedPackage: [],
+      selectedPackage: [],
       dataItem: [],
       headers: [
         {
@@ -257,10 +522,13 @@ export default {
           width: 90,
         },
       ],
-      selectedFile: null, // new file selected
-      currentFileUrl: null, // existing file URL from server
-      currentFileName: null, // existing file name
+      fileInputKey: 0,
+      selectedFile: null,
+      currentFileUrl: null,
+      currentFileName: null,
       loading: false,
+      dataServices: [],
+      laboratoryAvailedDialog: false,
     };
   },
   // created() {
@@ -287,18 +555,33 @@ export default {
   mounted() {},
 
   methods: {
+    selectedFileChange(file) {
+      if (!file) return;
+
+      if (file.type !== "application/pdf") {
+        alert("Invalid file. Please upload a PDF.");
+
+        this.selectedFile = null;
+
+        this.fileInputKey++;
+
+        return;
+      }
+
+      console.log("Valid PDF!");
+    },
     initialize() {
       this.loading = true;
       this.assignedModuleID = this.$store.state.user.user.assignedModuleID;
       let userID = this.$store.state.user.id;
-      // console.log(userID);
-      // alert(this.assignedModuleID);
+      this.getAllServices();
+      this.getAllPackages();
       if (this.assignedModuleID == 2) {
         this.axiosCall(
           "/appointment/getAssignedBookedAppointment/Medtech/" +
             userID +
             "/" +
-            this.data.id,
+            this.data.patientID,
           "GET"
         ).then((res) => {
           if (res) {
@@ -322,6 +605,25 @@ export default {
           }
         });
       }
+    },
+    getAllServices() {
+      this.axiosCall(
+        "/services/getAllServicesForBooking/" + this.tab,
+        "GET"
+      ).then((res) => {
+        if (res) {
+          this.dataServices = res.data;
+          // console.log("LOVED", res.data);
+        }
+      });
+    },
+    getAllPackages() {
+      this.axiosCall("/services", "GET").then((res) => {
+        if (res) {
+          // console.log("Pakes", res.data);
+          this.dataPackages = res.data;
+        }
+      });
     },
     submitResult() {
       // console.log(this.input, this.input1, this.updateID);
@@ -364,6 +666,12 @@ export default {
       this.loadExistingFile(item.attachment);
       this.laboratoryDialog = true;
     },
+    availed(item) {
+      console.log(item);
+      this.selected = JSON.parse(item.service_list);
+      this.selectedPackage = JSON.parse(item.package_list);
+      this.laboratoryAvailedDialog = true;
+    },
     // view(item) {
     //   // console.log(item);
     //   this.action = "View";
@@ -374,11 +682,41 @@ export default {
     async loadExistingFile(attachment) {
       try {
         if (attachment) {
-          this.currentFileUrl =
+          this.getFileDownload(attachment);
+
+          const baseUrl =
             process.env.VUE_APP_SERVER +
             "/appointment/view/attachment/" +
             attachment;
+
+          const ext = attachment
+            .split(".")
+            .pop()
+            .toLowerCase();
+          const officeExt = ["xls", "xlsx", "doc", "docx", "ppt", "pptx"];
+          if (officeExt.includes(ext)) {
+            this.currentFileUrl =
+              "https://view.officeapps.live.com/op/embed.aspx?src=" +
+              encodeURIComponent(baseUrl);
+          } else {
+            this.currentFileUrl = baseUrl;
+          }
+
           this.currentFileName = attachment;
+          const isPdf = attachment.toLowerCase().endsWith(".pdf");
+          this.booleanPDF = isPdf ? 1 : 0;
+        }
+      } catch (err) {
+        console.error("Error fetching file:", err);
+      }
+    },
+    async getFileDownload(attachment) {
+      try {
+        if (attachment) {
+          this.currentFileUrlDownload =
+            process.env.VUE_APP_SERVER +
+            "/appointment/view/attachment/" +
+            attachment;
         }
       } catch (err) {
         console.error("Error fetching file:", err);
@@ -418,6 +756,12 @@ export default {
           res.data.filePath;
         this.currentFileName = res.data.originalName;
         this.selectedFile = null;
+        this.initialize();
+        this.laboratoryDialog = false;
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "success";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Submitted successfully!";
         this.closeD();
       } catch (err) {
         console.error("Upload failed:", err);
@@ -425,6 +769,12 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    changeTab(tab) {
+      this.activeTab = tab;
+      this.tab = tab.id;
+      this.getAllServices();
+      this.getAllPackages();
     },
   },
 };

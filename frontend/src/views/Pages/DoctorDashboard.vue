@@ -35,6 +35,7 @@
         :event-color="getEventColor"
         :type="type"
         color="primary"
+        @click:event="goToEvent"
       ></v-calendar>
     </v-sheet>
 
@@ -169,6 +170,16 @@ export default {
     },
     getEventColor(event) {
       return event.color || "primary";
+    },
+    goToEvent({ event }) {
+      console.log(event);
+      if (this.$route.path !== "/patient") {
+        this.$router.push("patient").catch((err) => {
+          if (err.name !== "NavigationDuplicated") {
+            console.error(err);
+          }
+        });
+      }
     },
     openDialog() {
       this.dialog = true;

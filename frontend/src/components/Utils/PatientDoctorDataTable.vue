@@ -34,7 +34,7 @@
     </v-row>
     <v-card class="ma-5 dt-container" elevation="0" outlined>
       <v-data-table
-        :headers="assignedModuleID == 3 ? headers : headers1"
+        :headers="assignedModuleID != 5 ? headers : headers1"
         :items="data"
         :items-per-page="10"
         :search="search"
@@ -43,11 +43,26 @@
         @pagination="pagination"
         hide-default-footer
       >
-        <template v-slot:[`item.fname`]="{ item }">
+        <template v-slot:[`item.name`]="{ item }">
           <p class="text-uppercase">
-            {{ item.fname }} {{ item.mname }} {{ item.lname }}
+            {{ item.name }}
           </p>
         </template>
+        <template v-slot:[`item.date`]="{ item }">
+          {{ formatDate(item.date) }} {{ item.time }}
+        </template>
+        <template v-slot:[`item.services`]="{ item }">
+          <v-chip v-for="element in filteredServices(item)" :key="element.id">
+            {{ element.description }}
+          </v-chip>
+        </template>
+
+        <template v-slot:[`item.packages`]="{ item }">
+          <v-chip v-for="element in filteredPackages(item)" :key="element.id">
+            {{ element.description }}
+          </v-chip>
+        </template>
+
         <template v-slot:[`item.status`]="{ item }">
           <v-chip
             :color="
@@ -89,19 +104,18 @@
           >
             <v-icon size="14">mdi-eye</v-icon>
           </v-btn> -->
-          <!-- 
-            <v-btn
-              class="ma-1 d-flex justify-center"
-              x-small
-              color="green"
-              outlined
-              @click="editMedicalInfo(item)"
-              block
-              v-if="userRoleID == 3"
-            >
-              <v-icon size="14" >mdi-note</v-icon>Medical
-              Information
-            </v-btn> -->
+
+          <!-- <v-btn
+            class="ma-1 d-flex justify-center"
+            x-small
+            color="green"
+            outlined
+            @click="editMedicalInfo(item)"
+            block
+            v-if="userRoleID == 3"
+          >
+            <v-icon size="14">mdi-note</v-icon>
+          </v-btn> -->
 
           <!-- <v-btn
             class="ma-1"
@@ -212,7 +226,15 @@
         <!-- Header -->
         <v-card-title class="d-flex align-center justify-space-between py-3">
           <span class="text-h6 font-weight-bold">Patient Options</span>
-          <v-btn icon variant="text" color="red" @click="dialog = false">
+          <v-btn
+            icon
+            variant="text"
+            color="red"
+            @click="
+              dialog = false;
+              initialize();
+            "
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -268,7 +290,11 @@
               </v-col>
 
               <!-- Examine -->
-              <v-col cols="12" sm="6" v-if="assignedModuleID == 2">
+              <v-col
+                cols="12"
+                sm="6"
+                v-if="assignedModuleID == 2 || assignedModuleID == 5"
+              >
                 <v-card
                   class="action-card text-center pa-4"
                   variant="outlined"
@@ -284,7 +310,7 @@
               </v-col>
 
               <!-- Appointment -->
-              <v-col cols="12" sm="6" v-if="assignedModuleID != 2">
+              <v-col cols="12" md="12" sm="12" v-if="assignedModuleID != 2">
                 <v-card
                   class="action-card text-center pa-4"
                   variant="outlined"
@@ -301,6 +327,192 @@
             </v-row>
           </v-container>
         </v-card-text>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="laboratoryDialog" max-width="800" persistent>
+      <v-card>
+        <v-card-title>Services</v-card-title>
+        <v-card-text>
+          <div>
+            <v-row>
+              <v-col cols="12" md="6" class="pa-0">
+                <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
+                  <v-tab
+                    v-for="tab in tabList"
+                    :key="tab.id"
+                    @click="changeTab(tab)"
+                    >{{ tab.name }}</v-tab
+                  >
+                </v-tabs>
+              </v-col>
+              <!--Laboratory Services Area-->
+              <v-col cols="12" v-if="tab == 1">
+                <v-row>
+                  <v-col
+                    cols="12"
+                    :md="item.data.length <= 0 ? 3 : 12"
+                    sm="12"
+                    v-for="item in dataServices"
+                    :key="item.id"
+                    class="my-1 mx-1"
+                    style="border: 1px solid black; border-radius: 10px;"
+                  >
+                    <div
+                      v-if="item.data.length <= 0"
+                      class="d-flex justify-center align-center"
+                    >
+                      <div>
+                        <v-checkbox
+                          v-model="selected"
+                          :disabled="action == 'Pay' ? true : false"
+                          :label="item.description"
+                          :value="item.id"
+                        ></v-checkbox>
+                      </div>
+                      <div class="mx-2">&#8369;{{ item.price }}</div>
+                    </div>
+                    <div v-if="item.data.length > 0" class="">
+                      <strong> {{ item.description }}</strong>
+                      <v-row>
+                        <v-col
+                          cols="3"
+                          v-for="items in item.data"
+                          :key="items.id"
+                        >
+                          <div class="d-flex justify-center align-center">
+                            <div>
+                              <v-checkbox
+                                v-model="selected"
+                                :label="items.description"
+                                :value="items.id"
+                                :disabled="action == 'Pay' ? true : false"
+                              ></v-checkbox>
+                            </div>
+                            <div class="mx-2">&#8369;{{ items.price }}</div>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <!-- :rules="[(v) => !!v || 'Service is required']" -->
+              <!--Imaging Services Area-->
+
+              <v-col cols="12" v-if="tab == 2">
+                <v-row>
+                  <v-col
+                    cols="12"
+                    :md="item.data.length <= 0 ? 3 : 12"
+                    sm="12"
+                    v-for="item in dataServices"
+                    :key="item.id"
+                    class="my-1 mx-1"
+                    style="border: 1px solid black; border-radius: 10px;"
+                  >
+                    <div
+                      v-if="item.data.length <= 0"
+                      class="d-flex justify-center align-center"
+                    >
+                      <div>
+                        <v-checkbox
+                          v-model="selected"
+                          :label="item.description"
+                          :value="item.id"
+                          :disabled="action == 'Pay' ? true : false"
+                        ></v-checkbox>
+                      </div>
+                      <div class="mx-2">&#8369;{{ item.price }}</div>
+                    </div>
+                    <div v-if="item.data.length > 0" class="">
+                      <strong>{{ item.description }}</strong>
+                      <v-row>
+                        <v-col
+                          cols="3"
+                          v-for="items in item.data"
+                          :key="items.id"
+                        >
+                          <div class="d-flex justify-center align-center">
+                            <div>
+                              <v-checkbox
+                                v-model="selected"
+                                :label="items.description"
+                                :value="items.id"
+                                :disabled="action == 'Pay' ? true : false"
+                              ></v-checkbox>
+                            </div>
+                            <div class="mx-2">&#8369;{{ items.price }}</div>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+
+              <!--Package Services Area-->
+
+              <v-col cols="12" v-if="tab == 3">
+                <v-row>
+                  <v-col
+                    cols="12"
+                    md="6"
+                    sm="12"
+                    v-for="item in dataPackages"
+                    :key="item.id"
+                    style="border: 1px solid black; border-radius: 10px;"
+                  >
+                    <div class="d-flex justify-center align-center">
+                      <div>
+                        <v-checkbox
+                          v-model="selectedPackage"
+                          :label="item.description"
+                          :value="item.id"
+                          :disabled="action == 'Pay' ? true : false"
+                        ></v-checkbox>
+                      </div>
+                      <div class="mx-2">&#8369;{{ item.price }}</div>
+                      <br />
+                    </div>
+                    <div class="mb-2">
+                      <strong style="font-size: 14px;">List of Service:</strong>
+                    </div>
+                    <v-row>
+                      <v-col
+                        cols="4"
+                        class="pa-2"
+                        v-for="items in JSON.parse(item.assign_mods)"
+                        :key="items.id"
+                      >
+                        <span style="font-size: 20px;">
+                          <strong>&#x2022;</strong></span
+                        >
+                        <v-chip
+                          small
+                          class="pa-2"
+                          color="blue"
+                          text-color="white"
+                        >
+                          {{ items.service_description }}
+                        </v-chip>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="resetForm()">Cancel</v-btn>
+          <v-btn v-if="action == 'Update'" text @click="updateLabRequest()">
+            Update
+          </v-btn>
+          <v-btn v-if="action == 'Add'" text @click="addLabRequest()">
+            Add
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -357,12 +569,12 @@ export default {
     medicalInfo: null,
     headers: [
       { text: "Name", value: "name" },
-      { text: "Identification No.", value: "patientID" },
-      { text: "Last Visit", value: "lastVisit" },
-      { text: "Status", value: "status" },
-      { text: "Next Visit", value: "nextVisit" },
-      { text: "Recent Topic", value: "recentTopic" },
-      { text: "Recent Doctor", value: "recentDoctor" },
+
+      { text: "Latest Laboratory Request", value: "services" },
+      { text: "Packages Availed", value: "packages" },
+      // { text: "Next Visit", value: "nextVisit" },
+      // { text: "Recent Topic", value: "recentTopic" },
+      // { text: "Recent Doctor", value: "recentDoctor" },
       {
         text: "Action",
         value: "actions",
@@ -374,8 +586,8 @@ export default {
 
     headers1: [
       { text: "Name", value: "name" },
-      // { text: "Identification No.", value: "patientID" },
-      // { text: "Last Visit", value: "lastVisit" },
+      { text: "Date", value: "date" },
+      { text: "Doctor Name", value: "doctor_name" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
@@ -430,24 +642,35 @@ export default {
 
   mounted() {
     this.eventHub.$on("closeAddPatient", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
+    this.eventHub.$on("closePrescrioptionDialog", () => {
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
+      this.initialize();
+    });
+
     this.eventHub.$on("closeViewMedicalInformationDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
     this.eventHub.$on("closePatientLaboratoryDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
     this.eventHub.$on("closepatientAppointmentDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
 
     this.eventHub.$on("closeExamineDataDialog", () => {
-      this.dialog = false;
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
   },
@@ -457,6 +680,7 @@ export default {
     this.eventHub.$off("closePatientLaboratoryDialog");
     this.eventHub.$off("closepatientAppointmentDialog");
     this.eventHub.$off("closeExamineDataDialog");
+    this.eventHub.$off("closePrescrioptionDialog");
   },
 
   watch: {
@@ -467,7 +691,39 @@ export default {
       deep: true,
     },
   },
+  computed: {
+    filteredServices() {
+      return (item) => {
+        if (!item?.availed_services) return [];
 
+        const seen = new Set();
+
+        return item.availed_services
+          .filter((s) => s.description) // remove null/empty
+          .filter((s) => {
+            if (seen.has(s.description)) return false; // skip duplicates
+            seen.add(s.description);
+            return true;
+          });
+      };
+    },
+
+    filteredPackages() {
+      return (item) => {
+        if (!item?.availed_packages) return [];
+
+        const seen = new Set();
+
+        return item.availed_packages
+          .filter((p) => p.description)
+          .filter((p) => {
+            if (seen.has(p.description)) return false;
+            seen.add(p.description);
+            return true;
+          });
+      };
+    },
+  },
   methods: {
     pagination(data) {
       this.paginationData = data;
@@ -527,6 +783,7 @@ export default {
       this.action = "View";
     },
     viewAll(item) {
+      localStorage.setItem("PatientData", JSON.stringify(item));
       this.patientItem = item;
       this.dialog = true;
     },
@@ -535,7 +792,6 @@ export default {
     },
 
     patientAppointment(item) {
-      // console.log(item);
       this.patientAppointement = item;
     },
     examinePatient(item) {

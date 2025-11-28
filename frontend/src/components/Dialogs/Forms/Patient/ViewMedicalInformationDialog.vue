@@ -306,7 +306,7 @@ export default {
       handler(data) {
         this.dialog = true;
         this.tab = 1;
-        console.log(data);
+        console.log("DataMed", data);
 
         this.personal_details = {
           f_name: data.f_name,

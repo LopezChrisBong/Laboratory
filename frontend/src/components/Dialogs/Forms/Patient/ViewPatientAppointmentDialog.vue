@@ -3,7 +3,7 @@
     <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span>Appointment</span>
+          <span>Appointment of {{ data && data.name }}</span>
           <v-spacer></v-spacer>
           <v-btn icon dark @click="closeD()">
             <v-icon>mdi-close</v-icon>
@@ -700,7 +700,7 @@ export default {
     saveAppointment() {
       let data = {
         patientID: this.data.id,
-        status: 0,
+        status: 1,
         date: this.form.date,
         time: this.form.time,
         clinic: this.clinicDecription.specialty
