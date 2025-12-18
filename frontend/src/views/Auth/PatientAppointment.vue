@@ -74,6 +74,7 @@
                       dense
                       required
                       type="date"
+                      :max="BdaymaxDate"
                       class="text-uppercase"
                       @input="calculateAge(form.b_date)"
                     />
@@ -112,6 +113,8 @@
                       maxlength="11"
                       @keypress="onlyDigits"
                       @input="cleanDigits"
+                      @change="getMobileNumber()"
+                      :error-messages="numberError"
                       :rules="[contactNoRule]"
                     ></v-text-field>
                   </v-col>
@@ -206,7 +209,7 @@
                       class="rounded-lg"
                       item-text="name"
                       item-value="code"
-                      label="*Baranggay"
+                      label="*Barangay"
                       color="#93CB5B"
                       :items="baranggayList"
                     >
@@ -237,7 +240,7 @@
                         <ul style="list-style-type: none; padding: 0">
                           <li
                             v-for="(item, index) in clinicList"
-                            :key="item.id || index"
+                            :key="item.id"
                             style="margin-bottom: 8px"
                             :class="{ selected: selectedIndex === index }"
                           >
@@ -454,7 +457,7 @@
                       changeTime();
                     "
                   >
-                    Return
+                    Back
                   </v-btn>
                   <v-btn
                     v-if="info == 3"
@@ -591,8 +594,11 @@ export default {
       info: 1,
       menu: false,
       confirmationDialog: false,
+      hasPendingAppointment: false,
       provinceList: [],
       city_muniList: [],
+      numberChecking: false,
+      numberError: "",
       form: {
         spouse: null,
         f_name: null,
@@ -639,13 +645,6 @@ export default {
         "04:00 PM",
       ],
       allTimes1: [
-        "12:00 AM",
-        "01:00 AM",
-        "02:00 AM",
-        "03:00 AM",
-        "04:00 AM",
-        "05:00 AM",
-        "06:00 AM",
         "07:00 AM",
         "08:00 AM",
         "09:00 AM",
@@ -659,10 +658,6 @@ export default {
         "05:00 PM",
         "06:00 PM",
         "07:00 PM",
-        "08:00 PM",
-        "09:00 PM",
-        "10:00 PM",
-        "11:00 PM",
       ],
       dataServices: [],
       bookings: [],
@@ -772,6 +767,9 @@ export default {
       today.setMonth(today.getMonth() + 1);
       return today.toISOString().substr(0, 10);
     },
+    BdaymaxDate() {
+      return new Date().toISOString().split("T")[0];
+    },
 
     totalPrice() {
       let data = this.selected
@@ -848,7 +846,9 @@ export default {
         purok &&
         address;
 
-      if (allFieldsFilled) {
+      const noPendingAppointment = !this.hasPendingAppointment;
+
+      if (allFieldsFilled && noPendingAppointment) {
         this.next();
       } else {
         this.alerts();
@@ -886,12 +886,47 @@ export default {
       this.form[field] = value.toUpperCase();
     },
     alerts() {
+      let message = "";
+
+      if (this.hasPendingAppointment) {
+        message = "This mobile number already has a pending appointment.";
+      } else if (
+        !this.form.contact_no ||
+        this.form.contact_no.length !== 11 ||
+        !/^0/.test(this.form.contact_no)
+      ) {
+        message =
+          "Please enter a valid 11-digit mobile number starting with 0.";
+      } else {
+        message = "Please fill out all required fields before booking!";
+      }
+
       this.fadeAwayMessage.show = true;
       this.fadeAwayMessage.type = "error";
-      this.fadeAwayMessage.header = "Please fill all field before booking!";
+      this.fadeAwayMessage.message = message;
+      this.fadeAwayMessage.header = "System Message";
+
       this.info = 1;
       this.confirmationDialog = false;
-      // alert("Please fill all field before booking!");
+    },
+    async getMobileNumber() {
+      this.numberChecking = true;
+      this.axiosCall(
+        "/appointment/checkMobileNumber/" + this.form.contact_no,
+        "GET"
+      ).then((res) => {
+        if (res) {
+          if (res.data.hasPending == true) {
+            this.numberError =
+              "This number has pending appointment, please select another number";
+            this.hasPendingAppointment = true;
+          } else {
+            this.numberError = "";
+            this.hasPendingAppointment = false;
+          }
+          this.numberChecking = false;
+        }
+      });
     },
     async fetchBookings(data) {
       try {
@@ -980,21 +1015,25 @@ export default {
       this.axiosCall("/doctor-specialization/getAllClinic", "GET").then(
         (res) => {
           if (res) {
-            let others = [
-              {
-                specialty: "Others",
-                description: "No specific Clinic to visit!",
-                doctors: [],
-              },
-            ];
-            this.clinicList = res.data;
-            Object.assign(this.clinicList, others);
-            // this.clinicList.reverse();
-            // // console.log("Clinic Data", this.clinicList);
+            const obj = res.data;
+            const list = Object.keys(obj).map((key) => ({
+              id: key,
+              ...obj[key],
+            }));
+
+            let others = {
+              id: 1000,
+              specialty: "Others",
+              description: "No specific Clinic to visit!",
+              doctors: [],
+            };
+
+            this.clinicList = [...list, others];
           }
         }
       );
     },
+
     getAllDoctorsSchedule() {
       let docList;
       if (
@@ -1103,6 +1142,26 @@ export default {
                   !this.clinicDecription.doctors
                     ? null
                     : this.doc_profile[0].doctorID,
+                data: JSON.stringify(
+                  Object.assign(
+                    data,
+                    { doctor: this.doc_profile },
+                    {
+                      date:
+                        this.clinicDecription.specialty == "Others" ||
+                        !this.clinicDecription.doctors
+                          ? this.form.date
+                          : this.doc_profile[0].oldDate,
+                    },
+                    {
+                      time:
+                        this.clinicDecription.specialty == "Others" ||
+                        !this.clinicDecription.doctors
+                          ? this.form.time
+                          : this.doctor_time,
+                    }
+                  )
+                ),
               };
 
               this.axiosCall(
@@ -1116,6 +1175,7 @@ export default {
                   this.fadeAwayMessage.header = "System Message";
                   this.fadeAwayMessage.message = "Succesfully saved!";
                   let notif_data = {
+                    appointmentID: res.data.saveID,
                     title: "Patient Appointment",
                     message: "View patient appointment!",
                     route:
@@ -1152,7 +1212,8 @@ export default {
                 } else if (res.data.status == 400) {
                   this.fadeAwayMessage.show = true;
                   this.fadeAwayMessage.type = "error";
-                  this.fadeAwayMessage.header = res.data.msg;
+                  this.fadeAwayMessage.header = "System Message";
+                  this.fadeAwayMessage.message = res.data.msg;
                 }
               });
             }
@@ -1182,6 +1243,26 @@ export default {
               !this.clinicDecription.doctors
                 ? null
                 : this.doc_profile[0].doctorID,
+            data: JSON.stringify(
+              Object.assign(
+                data,
+                { doctor: this.doc_profile },
+                {
+                  date:
+                    this.clinicDecription.specialty == "Others" ||
+                    !this.clinicDecription.doctors
+                      ? this.form.date
+                      : this.doc_profile[0].oldDate,
+                },
+                {
+                  time:
+                    this.clinicDecription.specialty == "Others" ||
+                    !this.clinicDecription.doctors
+                      ? this.form.time
+                      : this.doctor_time,
+                }
+              )
+            ),
           };
           this.axiosCall("/appointment/bookAppointment", "POST", data2).then(
             (res) => {
@@ -1191,6 +1272,7 @@ export default {
                 this.fadeAwayMessage.header = "System Message";
                 this.fadeAwayMessage.message = "Succesfully saved!";
                 let notif_data = {
+                  appointmentID: res.data.saveID,
                   title: "Patient Appointment",
                   message: "View patient appointment!",
                   route:
@@ -1226,7 +1308,8 @@ export default {
               } else if (res.data.status == 400) {
                 this.fadeAwayMessage.show = true;
                 this.fadeAwayMessage.type = "error";
-                this.fadeAwayMessage.header = res.data.msg;
+                this.fadeAwayMessage.header = "Successfully Saved!";
+                this.fadeAwayMessage.message = res.data.msg;
               }
             }
           );
@@ -1243,9 +1326,12 @@ export default {
 
       const currentDate = new Date();
       if (new Date(birthDate) > currentDate) {
-        this.birthDate = null;
+        this.form.b_date = null;
         this.form.age = null;
-        alert("Invalid Date of Birth");
+        this.fadeAwayMessage.show = true;
+        this.fadeAwayMessage.type = "error";
+        this.fadeAwayMessage.header = "System Message";
+        this.fadeAwayMessage.message = "Invalid Input. Check your date entry";
       }
 
       const diffTime = currentDate - new Date(birthDate);
@@ -1291,13 +1377,6 @@ export default {
       this.doc_profile = [];
       this.doctors_schedList = [];
       this.allTimes1 = [
-        "01:00 AM",
-        "02:00 AM",
-        "03:00 AM",
-        "04:00 AM",
-        "05:00 AM",
-        "06:00 AM",
-        "07:00 AM",
         "08:00 AM",
         "09:00 AM",
         "10:00 AM",
@@ -1309,12 +1388,6 @@ export default {
         "04:00 PM",
         "05:00 PM",
         "06:00 PM",
-        "07:00 PM",
-        "08:00 PM",
-        "09:00 PM",
-        "10:00 PM",
-        "11:00 PM",
-        "12:00 AM",
       ];
     },
     getRegion() {

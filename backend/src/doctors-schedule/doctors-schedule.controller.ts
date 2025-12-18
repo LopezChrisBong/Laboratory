@@ -12,6 +12,11 @@ export class DoctorsScheduleController {
     return this.doctorsScheduleService.create(createDoctorsScheduleDto);
   }
 
+    @Post('addMonthlySchedule')
+  addMonthlySchedule(@Body() createDoctorsScheduleDto: CreateDoctorsScheduleDto) {
+    return this.doctorsScheduleService.addMonthlySchedule(createDoctorsScheduleDto);
+  }
+
   @Get()
   findAll() {
     return this.doctorsScheduleService.findAll();
@@ -22,10 +27,11 @@ export class DoctorsScheduleController {
     return this.doctorsScheduleService.getMySchedule(+id);
   }
 
-      @Get('/getAllDoctorsSched/:data')
-  getAllDoctorsSched(@Param('data') data: string) {
+  @Get('/getAllDoctorsSched/:data')
+  getAllDoctorsSched(@Param('data') data: string): any {
     return this.doctorsScheduleService.getAllDoctorsSched(data);
   }
+
 
         @Get('/getAllDoctorsDashboard')
   getAllDoctorsDashboard() {

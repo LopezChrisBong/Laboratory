@@ -6,17 +6,17 @@
         color="black"
         @click.stop="drawer = !drawer"
       ></v-app-bar-nav-icon>
-      <v-toolbar-title style="margin:0 auto; width:250px">
+      <v-toolbar-title style="margin: 0 auto; width: 250px">
         <div class="d-flex justify-center align-center">
           <v-img
             v-if="$vuetify.breakpoint.smAndUp"
             src="../../assets/img/paragon logo website.png"
-            style="width: 2%;"
+            style="width: 2%"
           ></v-img>
 
           <div v-if="$vuetify.breakpoint.smAndUp" align="center">
-            <h1 style="color: black;">PARAGON</h1>
-            <p style="color: black; margin-top: -15px; font-size: 11px;">
+            <h1 style="color: black">PARAGON</h1>
+            <p style="color: black; margin-top: -15px; font-size: 11px">
               Diagnostics And Multi-Specialty Clinic
             </p>
           </div>
@@ -28,7 +28,12 @@
 
       <v-spacer></v-spacer>
 
-      <v-menu offset-y>
+      <v-menu
+        v-model="menu"
+        offset-y
+        transition="fade-transition"
+        :close-on-content-click="false"
+      >
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on">
             <v-badge
@@ -36,63 +41,140 @@
               :value="hasUnread"
               color="red"
               overlap
-              offset-x="50"
-              offset-y="25"
             >
-              <!-- <template #badge>
-                <span v-if="hasUnread" class="text-white text-caption">
-                  {{ unreadCount > 99 ? "99+" : unreadCount }}
-                </span>
-              </template> -->
-
-              <v-btn icon @click="menu = !menu">
-                <v-icon :color="hasUnread ? 'red' : 'black'">
-                  {{ hasUnread ? "mdi-bell-ring" : "mdi-bell-outline" }}
-                </v-icon>
-              </v-btn>
+              <v-icon :color="hasUnread ? 'red' : 'black'">
+                {{ hasUnread ? "mdi-bell-ring" : "mdi-bell-outline" }}
+              </v-icon>
             </v-badge>
           </v-btn>
         </template>
-        <v-card width="300">
-          <v-list v-if="notifications.legnth != []">
-            <v-list-item
-              v-for="(notif, index) in notifications"
-              :key="index"
-              @click="openNotification(notif)"
-            >
-              <v-list-item-content>
-                <v-list-item-title
-                  :style="{ color: notif.read ? 'inherit' : 'red' }"
-                >
-                  {{ notif.title }}
-                  <!-- {{ notif.read == true ? "(read)" : "(unread)" }} -->
-                  <v-icon size="large" color="teal-darken-2">{{
-                    notif.read == true ? "mdi-email-open" : "mdi-email"
-                  }}</v-icon>
-                </v-list-item-title>
-                <v-list-item-subtitle
-                  >{{ formatDate(notif.created_at) }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-          <v-list v-else>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-subtitle>
-                  No data found!
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
+
+        <v-card width="380" class="rounded-lg">
+          <!-- HEADER -->
+          <div class="d-flex justify-space-between align-center px-4 py-3">
+            <h3 class="text-h6 font-weight-bold m-0">Notifications</h3>
+            <v-btn text small color="primary" @click="markAllAsRead">
+              Mark all as read
+            </v-btn>
+          </div>
+
+          <!-- UNREAD / READ TABS -->
+          <v-tabs
+            v-model="tab"
+            background-color="transparent"
+            color="primary"
+            slider-color="primary"
+            grow
+            class="px-2"
+          >
+            <v-tab>Unread</v-tab>
+            <v-tab>Read</v-tab>
+          </v-tabs>
+
           <v-divider></v-divider>
+
+          <v-tabs-items v-model="tab">
+            <!-- UNREAD TAB -->
+            <v-tab-item>
+              <div style="max-height: 350px; overflow-y: auto">
+                <v-list two-line>
+                  <v-list-item
+                    v-for="(notif, i) in unreadNotifications"
+                    :key="'unread-' + i"
+                    class="py-3 blue lighten-5"
+                    @click="openNotification(notif)"
+                  >
+                    <!-- <v-list-item-avatar size="45">
+                      <img :src="notif.avatar" />
+                    </v-list-item-avatar> -->
+
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        <strong>{{ notif.name }}</strong
+                        ><br />
+                        <span class="grey--text"> {{ notif.message }}</span>
+                      </v-list-item-title>
+
+                      <v-list-item-subtitle>
+                        {{ formatDateTime(notif.created_at) }}
+                      </v-list-item-subtitle>
+                    </v-list-item-content>
+
+                    <!-- <v-list-item-action v-if="notif.type === 'request'">
+                      <div class="d-flex flex-column">
+                        <v-btn small color="primary" class="mb-1">Accept</v-btn>
+                        <v-btn small outlined>Deny</v-btn>
+                      </div>
+                    </v-list-item-action> -->
+                  </v-list-item>
+
+                  <v-list-item v-if="unreadNotifications.length === 0">
+                    <v-list-item-content class="text-center grey--text">
+                      No unread notifications.
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </div>
+            </v-tab-item>
+
+            <!-- READ TAB -->
+            <v-tab-item>
+              <div style="max-height: 350px; overflow-y: auto">
+                <v-list two-line>
+                  <v-list-item
+                    v-for="(notif, i) in readNotifications"
+                    :key="'read-' + i"
+                    class="py-3"
+                    @click="openNotification(notif)"
+                  >
+                    <!-- <v-list-item-avatar size="45">
+                      <img
+                        :src="
+                          notif.sex == 'Male'
+                            ? 'https://randomuser.me/api/portraits/men/2.jpg'
+                            : 'https://randomuser.me/api/portraits/women/3.jpg'
+                        "
+                      />
+                    </v-list-item-avatar> -->
+
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        <strong>{{ notif.name }}</strong
+                        ><br />
+                        <span class="grey--text"> {{ notif.message }}</span>
+                      </v-list-item-title>
+
+                      <v-list-item-subtitle>
+                        {{ formatDateTime(notif.created_at) }}
+                      </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-list-item v-if="readNotifications.length === 0">
+                    <v-list-item-content class="text-center grey--text">
+                      No read notifications.
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </div>
+            </v-tab-item>
+          </v-tabs-items>
+
+          <v-divider></v-divider>
+
           <v-card-actions>
-            <v-btn text color="primary" @click="showAllNotifDialog = true">
+            <v-btn
+              block
+              color="primary"
+              text
+              @click="showAllNotifDialog = true"
+            >
               View All Notifications
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-menu>
+
       <v-menu>
         <template v-slot:activator="{ on }">
           <v-chip v-on="on" color="#3386ff" class="rounded-lg d-flex py-2">
@@ -193,18 +275,18 @@
             <v-col
               cols="12"
               md="4"
-              style="justify-items: right; align-items: right: ;;"
+              style="justify-items: right; align-items: right"
             >
               <v-img
                 src="../../assets/img/paragon logo website.png"
-                style="width: 60%;  "
+                style="width: 60%"
               ></v-img>
             </v-col>
             <v-col
               cols="12"
               md="8"
               class="m-0"
-              style="justify-items: left; align-items: center;"
+              style="justify-items: left; align-items: center"
             >
               <div class="mt-2">
                 <h2>PARAGON</h2>
@@ -213,10 +295,10 @@
           </v-row>
         </div>
         <div v-if="$vuetify.breakpoint.smAndDown" class="d-flex align-center">
-          <div style="width: 30%;" class="ml-5">
+          <div style="width: 30%" class="ml-5">
             <v-img
               src="../../assets/img/paragon logo website.png"
-              style="width: 90%;  "
+              style="width: 90%"
             ></v-img>
           </div>
           <div>
@@ -224,17 +306,13 @@
           </div>
         </div>
 
-        <!-- List Items -->
         <div v-for="(link, i) in links" :key="i">
-          <!-- Section Titles -->
           <v-subheader
             v-if="link.section"
             class="text-uppercase font-weight-bold white--text text--disabled"
           >
             {{ link.section }}
           </v-subheader>
-
-          <!-- Single Item -->
           <v-list-item
             :to="'/' + userType + link.route"
             v-if="!link.subLink"
@@ -251,7 +329,6 @@
               <v-list-item-title>{{ link.title }}</v-list-item-title>
             </v-list-item-content>
 
-            <!-- Badge Count or Dot -->
             <v-list-item-action v-if="link.badge">
               <v-chip
                 v-if="link.badge !== true"
@@ -270,7 +347,6 @@
             </v-list-item-action>
           </v-list-item>
 
-          <!-- Grouped Items -->
           <v-list-group
             v-else
             color="#3a3b3a"
@@ -325,14 +401,12 @@
       </v-list>
     </v-navigation-drawer>
 
-    <!-- Main Content -->
     <v-main>
       <v-container fluid>
         <v-row>
-          <!-- Feed -->
           <v-col class="pa-3">
-            <div class=" fill-height pb-6" style="background-color:white; ">
-              <div class="d-flex justify-space-between py-4 px-4  ">
+            <div class="fill-height pb-6" style="background-color: white">
+              <div class="d-flex justify-space-between py-4 px-4">
                 <strong class="text-gray-100">{{ $route.meta.title }}</strong>
               </div>
               <router-view v-on:reloadProfile="loadImg" />
@@ -342,32 +416,78 @@
       </v-container>
     </v-main>
 
-    <v-dialog v-model="showAllNotifDialog" max-width="500">
-      <v-card>
-        <v-card-title class="headline">All Notifications</v-card-title>
+    <v-dialog
+      v-model="showAllNotifDialog"
+      max-width="520"
+      transition="dialog-bottom-transition"
+    >
+      <v-card class="rounded-lg">
+        <v-card-title class="py-4 d-flex align-center">
+          <v-icon color="primary" class="mr-2">mdi-bell</v-icon>
+          <span class="text-h6 font-weight-bold">All Notifications</span>
+          <v-spacer></v-spacer>
+
+          <v-btn icon @click="showAllNotifDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
         <v-divider></v-divider>
-        <v-card-text>
-          <v-list dense>
-            <v-list-item v-for="(notif, index) in notifications" :key="index">
-              <v-list-item-content>
-                <v-list-item-title
-                  >{{ notif.title }}
-                  <!-- {{
-                    notif.read == true ? "(read)" : "(unread)"
-                  }} -->
-                </v-list-item-title>
-                <v-list-item-subtitle
-                  >{{ formatDate(notif.created_at) }}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
+
+        <v-card-text class="py-0">
+          <div style="max-height: 420px; overflow-y: auto">
+            <v-list two-line>
+              <v-list-item
+                v-for="(notif, index) in notifications"
+                :key="index"
+                :class="notif.read ? 'grey lighten-5' : 'blue lighten-5'"
+                class="rounded-lg mb-2"
+              >
+                <v-list-item-avatar class="mr-3" size="40">
+                  <v-icon :color="notif.read ? 'grey' : 'primary'">
+                    {{ notif.read ? "mdi-email-open" : "mdi-email" }}
+                  </v-icon>
+                </v-list-item-avatar>
+
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-medium">
+                    {{ notif.title }}
+                  </v-list-item-title>
+
+                  <v-list-item-subtitle class="grey--text caption mt-1">
+                    {{ formatDateTime(notif.created_at) }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+
+                <v-list-item-action>
+                  <v-chip
+                    small
+                    :color="notif.read ? 'grey' : 'primary'"
+                    text-color="white"
+                    label
+                    @click="openNotification(notif)"
+                  >
+                    {{ notif.read ? "Read" : "New" }}
+                  </v-chip>
+                </v-list-item-action>
+              </v-list-item>
+
+              <div
+                v-if="notifications.length === 0"
+                class="text-center grey--text py-6"
+              >
+                No notifications found.
+              </div>
+            </v-list>
+          </div>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" text @click="showAllNotifDialog = false"
-            >Close</v-btn
-          >
+
+        <v-divider></v-divider>
+
+        <v-card-actions class="py-3">
+          <v-btn block color="primary" text @click="showAllNotifDialog = false">
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -398,6 +518,7 @@ export default {
       profImg: null,
       mobile: false,
       isActiveOIC: false,
+      tab: 0,
       userRoleList: [],
       links: [],
       userType: null,
@@ -407,8 +528,11 @@ export default {
       loading: false,
       options: [],
       schooYearList: [],
+      menu: false,
       notifications: [],
       sidebarOpen: true,
+      readList: [],
+      unreadList: [],
     };
   },
   computed: {
@@ -417,6 +541,12 @@ export default {
     },
     hasUnread() {
       return this.unreadCount > 0;
+    },
+    unreadNotifications() {
+      return this.notifications.filter((n) => !n.read);
+    },
+    readNotifications() {
+      return this.notifications.filter((n) => n.read);
     },
   },
 
@@ -437,6 +567,7 @@ export default {
         console.log(res);
         if (notif.route) {
           // this.$router.push(notif.route);
+          this.showAllNotifDialog = false;
           this.$router.push("/" + this.userType + notif.route);
         }
       });
@@ -474,6 +605,54 @@ export default {
       }
     },
 
+    // markAllAsRead() {
+    //   // Move all unread to read
+    //   let assignedModule = this.$store.state.user.user.assignedModuleID;
+    //   this.readList.unshift(
+    //     ...this.unreadList.map((n) => ({ ...n, read: true }))
+    //   );
+    //   this.unreadList = [];
+
+    //   // Update badge
+    //   this.unreadCount = 0;
+    //   this.hasUnread = false;
+
+    //   this.axiosCall("/notification/mark-all-read", "PATCH", {
+    //     read: true,
+    //   }).then((res) => {
+    //     console.log(res);
+    //     if (assignedModule == 3) {
+    //       this.$router.push("/appointment");
+    //     } else {
+    //       this.$router.push("/patient");
+    //     }
+    //   });
+    // },
+    markAllAsRead() {
+      if (!Array.isArray(this.readList)) this.readList = [];
+      if (!Array.isArray(this.unreadList)) this.unreadList = [];
+
+      // let assignedModule = this.$store.state.user.user.assignedModuleID;
+      let userID = this.$store.state.user.id;
+
+      this.axiosCall("/notification/mark-all-read/" + userID, "PATCH", {
+        read: true,
+      }).then((res) => {
+        console.log(res);
+
+        // this.menu = false;
+        this.unreadCount = 0;
+        this.unreadList = [];
+        this.hasUnread = false;
+        this.getAllNotifications();
+
+        // if (assignedModule == 3) {
+        //   this.$router.push("/" + this.userType + "/appointment");
+        // } else {
+        //   this.$router.push("/" + this.userType + "/patient");
+        // }
+      });
+    },
     openMobileNav() {
       this.drawer = true;
     },
@@ -579,7 +758,7 @@ export default {
     clearInterval(this.interval);
   },
 
-  created: function() {
+  created: function () {
     // this.getMyAssignedModules();
     let userType = this.$store.state.user.user.usertypeID;
 

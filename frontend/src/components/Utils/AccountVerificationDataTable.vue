@@ -3,9 +3,12 @@
     <v-row class="mx-2">
       <v-col cols="12" md="5" class="pa-0">
         <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
-          <v-tab v-for="tab in tabList" :key="tab.id" @click="changeTab(tab)">{{
-            tab.name
-          }}</v-tab>
+          <v-tab
+            v-for="tab in tabList"
+            :key="tab.id"
+            @change="changeTab(tab)"
+            >{{ tab.name }}</v-tab
+          >
         </v-tabs>
       </v-col>
       <v-spacer></v-spacer>

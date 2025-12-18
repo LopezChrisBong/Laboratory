@@ -14,7 +14,7 @@ export default {
   data: () => ({
     render: false,
   }),
-  created: function() {
+  created: function () {
     //VueX set this Vue Variable
     // this.$store.dispatch("setThisVue", this);
     // // console.log("is Expired: " + this.$store.getters.isExpired);
@@ -40,7 +40,11 @@ export default {
     } else {
       this.render = true;
       this.getUser();
+      // this.$router.push("/");
     }
+    setTimeout(() => {
+      localStorage.removeItem("Inventory");
+    }, 900000);
   },
   methods: {
     getUser() {

@@ -46,8 +46,8 @@ export class PdfGeneratorController {
     // // console.log(n)
   }
 
-   @Get('invoice/:id')
-  async invoice(@Res() res, @Param('id') id: string): Promise<void> {
+   @Get('invoice/:id/:name')
+  async invoice(@Res() res, @Param('id') id: string, @Param('name') name: string): Promise<void> {
     const buffer = await this.pdfGeneratorService.invoice(+id);
 
     res.set({
@@ -67,28 +67,109 @@ export class PdfGeneratorController {
   }
 
 
-     @Get('patientMedicalRecord/:id')
-  async patientMedicalRecord(@Res() res, @Param('id') id: string): Promise<void> {
-    const buffer = await this.pdfGeneratorService.patientMedicalRecord(+id);
+   @Get('patientMedicalRecord/:id')
+      async patientMedicalRecord(@Res() res, @Param('id') id: string): Promise<void> {
+        const buffer = await this.pdfGeneratorService.patientMedicalRecord(+id);
 
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename=example.pdf',
-      'Content-Length': buffer.length,
+        res.set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'inline; filename=example.pdf',
+          'Content-Length': buffer.length,
 
-      // prevent cache
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      Pragma: 'no-cache',
-      Expires: 0,
-    });
+          // prevent cache
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: 0,
+        });
 
-    res.end(buffer);
+        res.end(buffer);
 
-    // // console.log(n)
-  }
+        // // console.log(n)
+    }
+
+    @Get('patientNormalMedication/:id')
+        async patientNormalMedication(@Res() res, @Param('id') id: string): Promise<void> {
+        const buffer = await this.pdfGeneratorService.patientNormalMedication(+id);
+
+        res.set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'inline; filename=example.pdf',
+          'Content-Length': buffer.length,
+
+          // prevent cache
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: 0,
+        });
+
+        res.end(buffer);
+
+        // // console.log(n)
+    }
+
+    @Get('patientPregnantMedication/:id')
+        async patientPregnantMedication(@Res() res, @Param('id') id: string): Promise<void> {
+        const buffer = await this.pdfGeneratorService.patientPregnantMedication(+id);
+
+        res.set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'inline; filename=example.pdf',
+          'Content-Length': buffer.length,
+
+          // prevent cache
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: 0,
+        });
+
+        res.end(buffer);
+
+        // // console.log(n)
+    }
+
+    @Get('getInvoiceFiltered/:filter')
+        async getInvoiceFiltered(@Res() res, @Param('filter') filter: string): Promise<void> {
+        const buffer = await this.pdfGeneratorService.getInvoiceFiltered(filter,);
+
+        res.set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'inline; filename=example.pdf',
+          'Content-Length': buffer.length,
+
+          // prevent cache
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: 0,
+        });
+
+        res.end(buffer);
+
+        // // console.log(n)
+    }
+
+    @Get('medicalCertificate/:id')
+        async medicalCertificate(@Res() res, @Param('id') id: string): Promise<void> {
+        const buffer = await this.pdfGeneratorService.medicalCertificate(+id);
+
+        res.set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'inline; filename=example.pdf',
+          'Content-Length': buffer.length,
+
+          // prevent cache
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: 0,
+        });
+
+        res.end(buffer);
+
+        // // console.log(n)
+    }
 
 
 
+    
   @Get('getQRCode/:id')
   async getQRCode(@Res() res, @Param('id') id: string): Promise<void> {
     const buffer = await this.pdfGeneratorService.getQRCode(id);

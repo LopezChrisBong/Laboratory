@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { MedicalInfoService } from './medical-info.service';
 import { CreateMedicalInfoDto } from './dto/create-medical-info.dto';
 import { UpdateMedicalInfoDto } from './dto/update-medical-info.dto';
+import { CreateMedicalCertificateDto } from './dto/create-medical-certificate.dto';
 
 @Controller('medical-info')
 export class MedicalInfoController {
@@ -17,6 +18,11 @@ export class MedicalInfoController {
     return this.medicalInfoService.addMedicalInfo(createMedicalInfoDto);
   }
 
+      @Post('addMedicalCertificate')
+  addMedicalCertificate(@Body() createMedicalCertificateDto: CreateMedicalCertificateDto) {
+    return this.medicalInfoService.addMedicalCertificate(createMedicalCertificateDto);
+  }
+
   @Get()
   findAll() {
     return this.medicalInfoService.findAll();
@@ -25,6 +31,10 @@ export class MedicalInfoController {
   @Get('/patientMedicalInfo/:id')
   findOne(@Param('id') id: string) {
     return this.medicalInfoService.findOne(+id);
+  }
+    @Get('/patientMedicalCertificate/:id')
+  getAllMedicalRecords(@Param('id') id: string) {
+    return this.medicalInfoService.getAllMedicalRecords(+id);
   }
 
   @Patch(':id')

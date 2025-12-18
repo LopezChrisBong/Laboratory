@@ -19,4 +19,7 @@ export class CreateNotificationDto {
     @ApiProperty()
     assignedID: number;
 
+    @ApiProperty()
+    appointmentID: number;
+
 }

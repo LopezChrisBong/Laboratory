@@ -5,7 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Appointment, DoctorSpecialization, DoctorsSchedule, Patient, PatientDoctor, PatientMedtech, Service, ServiceAppointment, ServiceLabResult, ServicePackages, UserDetail, Users } from 'src/entities';
 import { DataSource, Repository } from 'typeorm';
 import { groupBy } from 'rxjs';
-
+interface GroupedSchedule {
+  date: string;
+  doctors: any[];
+}
 @Injectable()
 
 export class DoctorsScheduleService {
@@ -73,6 +76,88 @@ export class DoctorsScheduleService {
       }
     }
 
+ async addMonthlySchedule(createDoctorsScheduleDto: CreateDoctorsScheduleDto){
+  
+  const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+
+     const months = JSON.parse(createDoctorsScheduleDto.months);
+
+      const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      // const names = [ 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+      const result = [];
+
+      for (const monthStr of months) {
+        const [year, month] = monthStr.split('-').map(Number);
+        const date = new Date(year, month - 1, 1);
+
+        // while (date.getMonth() === month - 1) {
+        //   result.push(
+        //     `${date.getDate()}-${names[date.getDay()]}`
+        //   );
+        //   date.setDate(date.getDate() + 1);
+        // }
+          while (date.getMonth() === month - 1) {
+            const day = date.getDay();
+
+            //  Monday (1) to Friday (5) only
+            if (day >= 1 && day <= 5) {
+              result.push(
+                `${date.getDate()}-${names[day]}-${year}-${month}`
+              );
+            }
+
+            date.setDate(date.getDate() + 1);
+          }
+      
+      }
+           for (let i = 0; i < result.length; i++) {
+              let newData = result[i].split('-')
+              // let datas = {
+              //   dayNum:newData[0],
+              //   dayString:newData[1],
+              //   year:newData[2],
+              //   month:newData[3],
+              //   date:newData[2]+'-'+newData[3]+'-'+newData[0]
+              // }
+              const year = newData[2];
+              const month = String(newData[3]).padStart(2, '0');
+              const day = String(newData[0]).padStart(2, '0');
+
+              const date = `${year}-${month}-${day}`;
+
+            const data = queryRunner.manager.create(DoctorsSchedule, {
+            doctorID: createDoctorsScheduleDto.doctorID,
+            date:date,
+            day: newData[1],
+            timeFrom: createDoctorsScheduleDto.timeFrom,
+            timeTo:createDoctorsScheduleDto.timeTo
+            });
+            console.log(data)
+            await queryRunner.manager.save(data);
+            }
+     
+
+        await queryRunner.commitTransaction();
+        return {
+          msg: 'Saved successfully!',
+          status: HttpStatus.OK,
+        };
+      } catch (error) {
+        await queryRunner.rollbackTransaction();
+        return {
+          msg: 'Saving failed!' + error,
+          status: HttpStatus.BAD_REQUEST,
+        };
+      } finally {
+        await queryRunner.release();
+      }
+ }
+
   async getMySchedule(id: number) {
     const today = new Date();
     let data = await this.doctorsScheduleRepository
@@ -130,51 +215,63 @@ export class DoctorsScheduleService {
     
   // }
 
-  async getAllDoctorsSched(data: string) {
+    async getAllDoctorsSched(data: string) {
 
-    const today = new Date().toISOString().split('T')[0];
-    let doctorList = JSON.parse(data);
-    let allSchedules: any[] = [];
+      const today = new Date().toISOString().split('T')[0];
+        const doctorList = JSON.parse(data);
+        let allSchedules: any[] = [];
+        for (let i = 0; i < doctorList.length; i++) {
+          const id = doctorList[i].id;
 
-    for (let i = 0; i < doctorList.length; i++) {
-      let id = doctorList[i].id;
+          const schedules = await this.doctorsScheduleRepository
+            .createQueryBuilder('ds')
+            .select([
+              'ds.*',
+              "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname), concat(ud.fname, ' ', ud.lname)) as name",
+              'ud.profile_img as profile',
+              'JSON_ARRAY() as specialization'
+            ])
+            .leftJoin(UserDetail, 'ud', 'ud.id = :id', { id })
+            .leftJoin(Users, 'us', 'us.id = ud.userID')
+            .where('ds.doctorID = :id', { id })
+            .andWhere('ds.date >= :today', { today })
+            .andWhere('us.isAdminApproved = 1')
+            .andWhere('us.assignedModuleID = 5')
+            .orderBy('ds.date', 'ASC')
+            .getRawMany();
 
-      const schedules = await this.doctorsScheduleRepository
-        .createQueryBuilder('ds')
-        .select([
-          'ds.*',
-          "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname), concat(ud.fname, ' ', ud.lname)) as name",
-          'ud.profile_img as profile',
-        ])
-        .leftJoin(UserDetail, 'ud', 'ud.id = ' + id)
-        .leftJoin(Users, 'us', 'us.id = ud.userID')
-        .where('ds.doctorID = :id', { id })
-        .andWhere('ds.date >= :today', { today })
-        .andWhere('us.isAdminApproved = 1')
-        .andWhere('us.assignedModuleID = 5')
-        .orderBy('ds.date', 'ASC')
-        .getRawMany();
+          allSchedules.push(...schedules);
+        }
 
-      allSchedules.push(...schedules); 
+      const grouped = Object.values(
+        allSchedules.reduce((acc: any, item: any) => {
+          if (!acc[item.date]) {
+            acc[item.date] = {
+              date: item.date,
+              doctors: []
+            };
+          }
+          acc[item.date].doctors.push(item);
+          return acc;
+        }, {})
+      ) as GroupedSchedule[];
+
+      for (let i = 0; i < grouped.length; i++) {
+        for (let j = 0; j < grouped[i].doctors.length; j++) {
+          const doctorID = grouped[i].doctors[j].doctorID;
+
+          const newData = await this.doctorSpecializationRepository
+            .createQueryBuilder('ds')
+            .where('ds.doctorID = :doctorID', { doctorID })
+            .getMany();
+
+          grouped[i].doctors[j].specialization = newData;
+        }
     }
 
-    const grouped = Object.values(
-      allSchedules.reduce((acc: any, item: any) => {
-        if (!acc[item.date]) {
-          acc[item.date] = {
-            date: item.date,
-            doctors: []
-          };
-        }
-        acc[item.date].doctors.push(item);
-        return acc;
-      }, {})
-    );
+  return grouped;
+}
 
-    console.log('GROUPED:', grouped);
-
-    return grouped;
-  }
 
 
 async getAllDoctorsDashboard() {
@@ -261,7 +358,7 @@ console.log(result)
             timeTo:updateDoctorsScheduleDto.timeTo
             })
             return{
-              msg:'Updated successfully!', status:HttpStatus.CREATED
+              msg:'Updated successfully!', status:HttpStatus.OK
             }
           } catch (error) {
             return{

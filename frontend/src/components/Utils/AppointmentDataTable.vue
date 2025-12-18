@@ -3,7 +3,7 @@
     <v-row class="mx-2" align="center">
       <v-col cols="12" md="6" class="pa-0">
         <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
-          <v-tab v-for="tab in tabList" :key="tab.id" @click="changeTab(tab)"
+          <v-tab v-for="tab in tabList" :key="tab.id" @change="changeTab(tab)"
             >{{ tab.name }}
           </v-tab>
         </v-tabs>
@@ -122,11 +122,11 @@
             <v-col cols="12" v-show="info == 1">
               <v-row>
                 <v-col cols="12" md="5">
-                  <ul style="list-style-type: none; padding: 0;">
+                  <ul style="list-style-type: none; padding: 0">
                     <li
                       v-for="(item, index) in clinicList"
                       :key="item.id || index"
-                      style="margin-bottom: 8px;"
+                      style="margin-bottom: 8px"
                       :class="{ selected: selectedIndex === index }"
                     >
                       <v-btn
@@ -151,7 +151,7 @@
                       >
                       <div
                         class="d-flex justify-center align-center"
-                        style="text-align: justify;"
+                        style="text-align: justify"
                       >
                         <p>
                           {{ clinicDecription.description }}
@@ -182,7 +182,7 @@
               <v-row
                 v-if="
                   !clinicDecription.doctors ||
-                    clinicDecription.specialty == 'Others'
+                  clinicDecription.specialty == 'Others'
                 "
               >
                 <v-col cols="12" md="4" sm="12">
@@ -293,7 +293,7 @@
                         <div>
                           <!-- <p>image {{ item.profile }}</p> -->
                           <v-img
-                            style="width: 200px; height: 150px;"
+                            style="width: 200px; height: 150px"
                             :src="item.profile"
                           ></v-img>
                         </div>
@@ -371,7 +371,7 @@
           <h3 class="text-h6 font-weight-bold mb-2 text-red-darken-2">
             Delete Confirmation
           </h3>
-          <p class="text-body-2 mb-3" style="text-align: justify;">
+          <p class="text-body-2 mb-3" style="text-align: justify">
             Are you sure you want to <b>delete this information</b>?
             <br /><br />
             Please note that <b>this action cannot be undone.</b>
@@ -408,7 +408,7 @@
 
         <v-divider></v-divider>
 
-        <v-card-text class="pt-4 pb-6" style="font-size: 16px;">
+        <v-card-text class="pt-4 pb-6" style="font-size: 16px">
           <v-row>
             <v-col cols="12" class="text-center">
               <v-icon size="60" color="teal-darken-2" class="mb-3">
@@ -549,12 +549,6 @@ export default {
         "04:00 PM",
       ],
       allTimes1: [
-        "01:00 AM",
-        "02:00 AM",
-        "03:00 AM",
-        "04:00 AM",
-        "05:00 AM",
-        "06:00 AM",
         "07:00 AM",
         "08:00 AM",
         "09:00 AM",
@@ -568,11 +562,6 @@ export default {
         "05:00 PM",
         "06:00 PM",
         "07:00 PM",
-        "08:00 PM",
-        "09:00 PM",
-        "10:00 PM",
-        "11:00 PM",
-        "12:00 AM",
       ],
       updateID: null,
       search: "",

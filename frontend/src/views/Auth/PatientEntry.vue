@@ -6,14 +6,17 @@
           <v-card
             max-width="1000"
             class="rounded-card pa-4"
-            style=" border-left: #6ac5fe 1px solid; border-top: #6ac5fe 1px solid;"
+            style="
+              border-left: #6ac5fe 1px solid;
+              border-top: #6ac5fe 1px solid;
+            "
             align="start"
           >
             <v-card-title
               >{{ info == 1 ? "Patient Information" : "Book a Schedule" }}
 
               <v-spacer></v-spacer>
-              <span style="font-size: 12px; color: blue;">
+              <span style="font-size: 12px; color: blue">
                 (please type N/A if Not Applicable)</span
               >
             </v-card-title>

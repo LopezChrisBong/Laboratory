@@ -9,12 +9,12 @@
               <v-tab
                 v-for="tab in tabList"
                 :key="tab.id"
-                @click="changeTab(tab)"
+                @change="changeTab(tab)"
                 >{{ tab.name }}
               </v-tab>
             </v-tabs>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="6" class="d-flex justify-space-between">
             <v-text-field
               v-model="search"
               outlined
@@ -25,14 +25,34 @@
               class="rounded-lg"
               color="#239FAB"
               dense
-            ></v-text-field>
+            />
+
+            <v-select
+              v-model="dateFilter"
+              :items="['All', 'Weekly', 'Monthly', 'Yearly']"
+              label="Filter"
+              outlined
+              dense
+              hide-details
+              class="ml-2 rounded-lg"
+              style="max-width: 120px"
+            />
+
+            <v-btn
+              class="white--text ml-2 rounded-lg"
+              color="#2196F3"
+              @click="printInvoice()"
+            >
+              <v-icon>mdi-printer</v-icon>
+            </v-btn>
           </v-col>
+
           <v-col cols="12" md="12">
             <v-card class="pa-4 rounded-lg elevation-2">
               <!-- <h3 class="font-weight-medium mb-3">Pending Payment</h3> -->
               <v-data-table
                 :headers="tab == 1 ? patientHeaders : patientHeaders2"
-                :items="patients"
+                :items="filteredPatients"
                 :options.sync="options"
                 dense
                 :search="search"
@@ -186,6 +206,10 @@
                         item-text="description"
                         item-value="id"
                         label=""
+                        @change="
+                          amount_paid = 0;
+                          paymentMethod = 'Cash';
+                        "
                         color="#93CB5B"
                         :items="discountList"
                       >
@@ -245,6 +269,7 @@
                         :rules="[formRules.required]"
                         v-model="amount_paid"
                         single-line
+                        :readonly="paymentMethod != 'Cash'"
                         type="number"
                         color="#239FAB"
                         class="my-right-aligned-field"
@@ -299,6 +324,7 @@
                 @click="
                   paymentMethod = 'Gcash';
                   showPaymentMethodDialog = false;
+                  amount_paid = payPatient.total_amount - discountAmount;
                 "
                 class="img_size"
                 src="../../assets//img//gcash-logo.png"
@@ -310,6 +336,7 @@
                 @click="
                   paymentMethod = 'Maya';
                   showPaymentMethodDialog = false;
+                  amount_paid = payPatient.total_amount - discountAmount;
                 "
                 class="img_size"
                 src="../../assets//img/maya-icon.png"
@@ -321,6 +348,7 @@
                 @click="
                   paymentMethod = 'Cash';
                   showPaymentMethodDialog = false;
+                  amount_paid = 0;
                 "
                 class="img_size"
                 src="../../assets//img/cash-icon.png"
@@ -349,6 +377,7 @@ export default {
     return {
       paymentMethod: null,
       showPaymentMethodDialog: false,
+      dateFilter: "All",
       patientHeaders: [
         { text: "Name", value: "name", align: "start" },
         { text: "Service Availed", value: "service_availed", align: "center" },
@@ -360,7 +389,7 @@ export default {
       patientHeaders2: [
         { text: "Name", value: "name", align: "start" },
         { text: "Invoice #", value: "invoice_no", align: "center" },
-        { text: "Service Availed", value: "service_availed", align: "center" },
+        { text: "Service Availed", value: "service_availed", align: "start" },
         { text: "Total Amount", value: "total_amount", align: "center" },
         { text: "Date", value: "created_at", align: "center" },
         { text: "Action", value: "action", align: "end" },
@@ -421,6 +450,30 @@ export default {
 
     totalAmount() {
       return this.payPatient.total_amount - this.discountAmount;
+    },
+    filteredPatients() {
+      if (this.dateFilter === "All") return this.patients;
+
+      const now = new Date();
+
+      return this.patients.filter((patient) => {
+        const created = new Date(patient.created_at);
+
+        if (this.dateFilter === "Weekly") {
+          const weekAgo = new Date();
+          weekAgo.setDate(now.getDate() - 7);
+          return created >= weekAgo;
+        } else if (this.dateFilter === "Monthly") {
+          return (
+            created.getMonth() === now.getMonth() &&
+            created.getFullYear() === now.getFullYear()
+          );
+        } else if (this.dateFilter === "Yearly") {
+          return created.getFullYear() === now.getFullYear();
+        }
+
+        return true;
+      });
     },
   },
   mounted() {
@@ -512,9 +565,9 @@ export default {
                   ).then((res) => {
                     if (res.data.status == 200) {
                       let notif_data = {
-                        patientID: this.id,
+                        patientID: this.updateID,
                         title: "Patient Appointment",
-                        message: "You Have Appoitnment",
+                        message: "New patient has requested a laboratory test.",
                         route: "/patient",
                         assignedID: 12,
                       };
@@ -562,7 +615,19 @@ export default {
     print(item) {
       console.log(item);
       const url =
-        process.env.VUE_APP_SERVER + "/pdf-generator/invoice/" + item.id;
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/invoice/" +
+        item.id +
+        "/" +
+        item.name.replace(/ /g, "-");
+      window.open(url);
+    },
+    printInvoice() {
+      console.log(this.dateFilter, this.filteredPatients);
+      const url =
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/getInvoiceFiltered/" +
+        this.dateFilter;
       window.open(url);
     },
   },

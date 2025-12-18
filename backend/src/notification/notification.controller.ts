@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
-
+import { Notification } from 'src/entities';
+import { DataSource, Repository } from 'typeorm';
 @Controller('notification')
 export class NotificationController {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(private readonly notificationService: NotificationService,
+              private dataSource: DataSource,
+  ) {}
 
   @Post()
   create(@Body() createNotificationDto: CreateNotificationDto) {
@@ -37,6 +40,15 @@ export class NotificationController {
   update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
     return this.notificationService.update(+id, updateNotificationDto);
   }
+
+  @Patch('mark-all-read/:id')
+  markAllAsRead(@Param('id') id: string) {
+    // console.log(id)
+    return this.notificationService.markAllAsRead(+id);
+  }
+
+
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {

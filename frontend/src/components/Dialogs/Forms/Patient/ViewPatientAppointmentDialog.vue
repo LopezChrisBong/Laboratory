@@ -19,11 +19,7 @@
                 </div> -->
               </v-col>
               <v-spacer></v-spacer>
-              <v-col
-                cols="2"
-                class="d-flex justify-end mt-2 mr-2"
-                v-if="addAppointmentData"
-              >
+              <v-col cols="2" class="d-flex justify-end mt-2 mr-2">
                 <v-btn
                   @click="AddAppointment()"
                   class="white--text rounded-lg"
@@ -32,7 +28,7 @@
                   Add
                 </v-btn>
               </v-col>
-              <v-col cols="12" class=" pt-2 px-4">
+              <v-col cols="12" class="pt-2 px-4">
                 <v-data-table
                   :headers="headers"
                   :items="dataItem"
@@ -108,7 +104,11 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="addAppointmentDialog" max-width="1000px" persistent>
+    <v-dialog
+      v-model="addAppointmentDialog"
+      :max-width="info == 2 ? '600px' : '1000px'"
+      persistent
+    >
       <v-card>
         <v-card-title>
           <span class="headline">
@@ -120,11 +120,11 @@
             <v-col cols="12" v-show="info == 1">
               <v-row>
                 <v-col cols="12" md="5">
-                  <ul style="list-style-type: none; padding: 0;">
+                  <ul style="list-style-type: none; padding: 0">
                     <li
                       v-for="(item, index) in clinicList"
                       :key="item.id || index"
-                      style="margin-bottom: 8px;"
+                      style="margin-bottom: 8px"
                       :class="{ selected: selectedIndex === index }"
                     >
                       <v-btn
@@ -134,6 +134,7 @@
                           selectButton(index);
                           clinicData(item);
                         "
+                        block
                       >
                         {{ item.specialty }}
                       </v-btn>
@@ -148,7 +149,7 @@
                       >
                       <div
                         class="d-flex justify-center align-center"
-                        style="text-align: justify;"
+                        style="text-align: justify"
                       >
                         <p>
                           {{ clinicDecription.description }}
@@ -176,14 +177,152 @@
             </v-col>
 
             <v-col cols="12" v-show="info == 2">
-              <v-row
-                v-if="
-                  !clinicDecription.doctors ||
-                    clinicDecription.specialty == 'Others' ||
-                    assignModule == 5
-                "
-              >
-                <v-col cols="12" md="4" sm="12">
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-select
+                    outlined
+                    dense
+                    v-model="reportType"
+                    :items="['Single Date', 'Monthly', 'A Year']"
+                    label="Select Range of Date"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <v-row>
+                    <!-- SINGLE DATE -->
+                    <v-col cols="12" md="6" v-if="reportType === 'Single Date'">
+                      <v-menu
+                        v-model="menu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        :nudge-right="40"
+                        offset-y
+                        min-width="auto"
+                      >
+                        <template #activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="form.date"
+                            label="Pick a date"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                          />
+                        </template>
+                        <v-date-picker
+                          v-model="form.date"
+                          :min="tomorrow"
+                          @change="menu = false"
+                        />
+                      </v-menu>
+                    </v-col>
+
+                    <!-- MONTHLY -->
+                    <v-col
+                      cols="12"
+                      md="12"
+                      v-else-if="reportType === 'Monthly'"
+                    >
+                      <v-menu
+                        v-model="monthMenu"
+                        :close-on-content-click="false"
+                        offset-y
+                        min-width="300"
+                      >
+                        <!-- Input field -->
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            label="Select Month(s)"
+                            outlined
+                            dense
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                            :rules="[
+                              (v) =>
+                                form.months.length > 0 || 'Month is required',
+                            ]"
+                            :value="monthText"
+                            clearable
+                            @click:clear="clearMonths"
+                          />
+                        </template>
+
+                        <!-- Month picker -->
+                        <v-date-picker
+                          v-model="form.months"
+                          type="month"
+                          multiple
+                          :min="minMonth"
+                          @input="updateMonthText"
+                        />
+                      </v-menu>
+                      <v-row class="mt-2" dense>
+                        <v-chip
+                          v-for="(month, i) in form.months"
+                          :key="month"
+                          small
+                          close
+                          class="mr-1 mb-1"
+                          @click:close="removeMonth(i)"
+                        >
+                          {{ formatMonth(month) }}
+                        </v-chip>
+                      </v-row>
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="reportType === 'Monthly'">
+                      <v-select
+                        v-model="form.day"
+                        :items="days28"
+                        label="Select Day"
+                        :rules="[(v) => !!v || 'Day is required']"
+                    /></v-col>
+
+                    <!-- A Year -->
+                    <v-col
+                      cols="12"
+                      md="12"
+                      v-else-if="reportType === 'A Year'"
+                    >
+                      <v-autocomplete
+                        v-model="form.selectedMonths"
+                        :items="next12Months"
+                        class="mpa-2"
+                        label="Selected Month(s)"
+                        multiple
+                        small-chips
+                        outlined
+                        readonly-chips
+                        item-title="text"
+                        item-value="value"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="reportType === 'A Year'">
+                      <v-select
+                        v-model="form.day"
+                        :rules="[(v) => !!v || 'Day is required']"
+                        :items="days28"
+                        label="Select Day"
+                      />
+                    </v-col>
+
+                    <!-- TIME -->
+                    <v-col cols="12" md="6">
+                      <v-autocomplete
+                        v-model="form.time"
+                        small-chips
+                        deletable-chips
+                        :rules="[(v) => !!v || 'Time is required']"
+                        label="Select Time"
+                        :items="allTimes"
+                        class="rounded-lg"
+                        color="#6DB249"
+                      />
+                    </v-col>
+                  </v-row>
+                </v-col>
+
+                <!--  <v-col cols="12" md="6" sm="12">
                   <v-menu
                     ref="menu"
                     v-model="menu"
@@ -211,7 +350,7 @@
                     />
                   </v-menu>
                 </v-col>
-                <v-col cols="12" md="4" sm="12">
+                <v-col cols="12" md="6" sm="12">
                   <v-autocomplete
                     v-model="form.time"
                     small-chips
@@ -222,8 +361,8 @@
                     class="rounded-lg"
                     color="#6DB249"
                   ></v-autocomplete>
-                </v-col>
-                <v-col cols="12" md="4" v-if="action == 'Add'">
+                </v-col> -->
+                <!-- <v-col cols="12" md="4" v-if="action == 'Add'">
                   <v-autocomplete
                     v-model="patient"
                     small-chips
@@ -236,14 +375,14 @@
                     class="rounded-lg"
                     color="#6DB249"
                   ></v-autocomplete
-                ></v-col>
+                ></v-col> -->
               </v-row>
-              <v-row v-else>
+              <!-- <v-row v-else>
                 <v-col cols="12" md="12">
                   <div class="d-flex">
                     <v-autocomplete
                       v-model="doctors_date"
-                      style="width: 100px;"
+                      style="width: 100px"
                       small-chips
                       deletable-chips
                       :rules="[(v) => !!v || 'required']"
@@ -258,7 +397,7 @@
                     <v-autocomplete
                       v-model="doctor_time"
                       small-chips
-                      style="width: 100px;"
+                      style="width: 100px"
                       deletable-chips
                       :rules="[(v) => !!v || 'Time is required']"
                       label="Select Time"
@@ -271,7 +410,7 @@
                       v-if="action == 'Add'"
                       v-model="patient"
                       small-chips
-                      style="width: 100px;"
+                      style="width: 100px"
                       deletable-chips
                       :rules="[(v) => !!v || 'required']"
                       label="Select Patient"
@@ -283,41 +422,7 @@
                     ></v-autocomplete>
                   </div>
                 </v-col>
-                <!-- <v-col cols="12" md="6">
-                  <v-card class="pa-2">
-                    <v-row>
-                      <v-col
-                        cols="12"
-                        v-for="item in doc_profile"
-                        :key="item.id"
-                      >
-                        <div>
-                          <v-img
-                            style="width: 200px; height: 150px;"
-                            :src="item.profile"
-                          ></v-img>
-                        </div>
-                        <div>
-                          <p>
-                            Name:<b> Dr. {{ item.name }}</b>
-                          </p>
-                        </div>
-                        <div>
-                          <p>Field of experties:</p>
-                          <ul>
-                            <li
-                              v-for="items in item.specialization"
-                              :key="items.id"
-                            >
-                              {{ items.specialty }}
-                            </li>
-                          </ul>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </v-card>
-                </v-col> -->
-              </v-row>
+              </v-row> -->
             </v-col>
           </v-form>
         </v-card-text>
@@ -338,7 +443,7 @@
             class="mt-4"
             @click="info = 1"
           >
-            Return
+            Back
           </v-btn>
           <v-btn
             v-if="info == 2"
@@ -378,11 +483,40 @@ export default {
     data: null,
   },
   data() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
     return {
+      reportType: "Single Date",
+      menu: false,
+      form: {
+        date: null,
+        months: [],
+        day: null,
+        selectedMonths: [],
+        time: null,
+      },
+      tomorrow: tomorrow.toISOString().substr(0, 10),
+      months: [
+        { text: "January", value: 1 },
+        { text: "February", value: 2 },
+        { text: "March", value: 3 },
+        { text: "April", value: 4 },
+        { text: "May", value: 5 },
+        { text: "June", value: 6 },
+        { text: "July", value: 7 },
+        { text: "August", value: 8 },
+        { text: "September", value: 9 },
+        { text: "October", value: 10 },
+        { text: "November", value: 11 },
+        { text: "December", value: 12 },
+      ],
+      days28: Array.from({ length: 28 }, (_, i) => i + 1),
+
       options: {},
       updateID: null,
       action: null,
-      menu: false,
       labID: null,
       date: null,
       time: null,
@@ -443,6 +577,9 @@ export default {
         },
       ],
       doctorID: null,
+      monthMenu: false,
+      monthText: "",
+      minMonth: "",
       clinicList: [],
       doc_profile: [],
       doctors_schedList: [],
@@ -457,13 +594,6 @@ export default {
       appointments: [],
       doctors_date: null,
       doctor_time: null,
-      form: {
-        id: null,
-        doctorId: null,
-        patientName: "",
-        date: "",
-        time: "",
-      },
 
       patientList: [],
       clinicDecription: [],
@@ -498,14 +628,11 @@ export default {
         "02:00 PM",
         "03:00 PM",
         "04:00 PM",
+        "05:00 PM",
+        "06:00 PM",
+        "07:00 PM",
       ],
       allTimes1: [
-        "01:00 AM",
-        "02:00 AM",
-        "03:00 AM",
-        "04:00 AM",
-        "05:00 AM",
-        "06:00 AM",
         "07:00 AM",
         "08:00 AM",
         "09:00 AM",
@@ -519,11 +646,6 @@ export default {
         "05:00 PM",
         "06:00 PM",
         "07:00 PM",
-        "08:00 PM",
-        "09:00 PM",
-        "10:00 PM",
-        "11:00 PM",
-        "12:00 AM",
       ],
       assignModule: null,
       search: "",
@@ -543,15 +665,27 @@ export default {
   },
 
   computed: {
-    minDate() {
+    // minDate() {
+    //   const today = new Date();
+    //   today.setMonth(today.getMonth());
+    //   return today.toISOString().substr(0, 10);
+    // },
+    // maxDate() {
+    //   const today = new Date();
+    //   today.setMonth(today.getMonth() + 12);
+    //   return today.toISOString().substr(0, 10);
+    // },
+    next12Months() {
+      const result = [];
       const today = new Date();
-      today.setMonth(today.getMonth());
-      return today.toISOString().substr(0, 10);
-    },
-    maxDate() {
-      const today = new Date();
-      today.setMonth(today.getMonth() + 12);
-      return today.toISOString().substr(0, 10);
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+        result.push({
+          text: d.toLocaleString("default", { month: "long", year: "numeric" }),
+          value: d.getMonth() + 1, // store month number
+        });
+      }
+      return result;
     },
   },
 
@@ -589,6 +723,24 @@ export default {
   mounted() {
     this.assignModule = this.$store.state.user.user.assignedModuleID;
     this.doctorID = this.$store.state.user.id;
+    this.form.selectedMonths = this.next12Months.map((m) => m.value);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yyyy = tomorrow.getFullYear();
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const dd = String(tomorrow.getDate()).padStart(2, "0");
+    this.form.date = `${yyyy}-${mm}-${dd}`;
+
+    const nextMonthDate = new Date();
+    const nextMonth = new Date(
+      nextMonthDate.getFullYear(),
+      nextMonthDate.getMonth() + 1,
+      1
+    );
+    const nmY = nextMonth.getFullYear();
+    const nmM = String(nextMonth.getMonth() + 1).padStart(2, "0");
+    this.minMonth = `${nmY}-${nmM}`;
   },
 
   beforeDestroy() {},
@@ -698,20 +850,26 @@ export default {
       // console.log("Scdad", this.doc_profile);
     },
     saveAppointment() {
-      let data = {
-        patientID: this.data.id,
-        status: 1,
-        date: this.form.date,
-        time: this.form.time,
-        clinic: this.clinicDecription.specialty
-          ? this.clinicDecription.specialty
-          : "",
-        doctorID: this.doctorID,
-      };
-      console.log(data);
+      // console.log("Form", this.form);
+      if (this.reportType == "Single Date") {
+        console.log("Single Date", this.form);
+        let data = {
+          patientID: this.data.id,
+          status: 1,
+          date: this.form.date,
+          time: this.form.time,
+          clinic: this.clinicDecription.specialty
+            ? this.clinicDecription.specialty
+            : "",
+          doctorID: this.doctorID,
+        };
+        // console.log(data);
 
-      this.axiosCall("/appointment/bookAppointment", "POST", data).then(
-        (res) => {
+        this.axiosCall(
+          "/appointment/bookDoctorPatientAppointment",
+          "POST",
+          data
+        ).then((res) => {
           if (res.data.status == 200) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "success";
@@ -724,10 +882,79 @@ export default {
             this.fadeAwayMessage.type = "error";
             this.fadeAwayMessage.header = res.data.msg;
           }
-        }
-      );
-    },
+        });
+      } else {
+        const fullDatesMonth = this.buildDates();
+        const fullDatesYear = this.buildDatesFromSelectedMonths();
+        let newDatesData =
+          this.reportType == "Monthly" ? fullDatesMonth : fullDatesYear;
+        let data = {
+          patientID: this.data.id,
+          status: 1,
+          dates: newDatesData,
+          time: this.form.time,
+          clinic: this.clinicDecription.specialty
+            ? this.clinicDecription.specialty
+            : "",
+          doctorID: this.doctorID,
+        };
+        let newData = {
+          data: JSON.stringify(data),
+        };
+        // console.log(newData);
 
+        this.axiosCall("/appointment/bookWithRange", "POST", newData).then(
+          (res) => {
+            if (res.data.status == 200) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "success";
+              this.fadeAwayMessage.header = "Successfully Updated";
+              this.dialog = false;
+              this.addAppointmentDialog = false;
+              this.initialize();
+            } else if (res.data.status == 400) {
+              this.fadeAwayMessage.show = true;
+              this.fadeAwayMessage.type = "error";
+              this.fadeAwayMessage.header = res.data.msg;
+            }
+          }
+        );
+      }
+    },
+    buildDates() {
+      return this.form.months
+        .map((m) => {
+          const [y, mo] = m.split("-");
+          const d = String(this.form.day).padStart(2, "0");
+
+          // Get last day of month
+          const lastDay = new Date(y, mo, 0).getDate();
+
+          if (this.form.day > lastDay) return null;
+
+          return `${m}-${d}`;
+        })
+        .filter(Boolean);
+    },
+    buildDatesFromSelectedMonths() {
+      const today = new Date();
+      const yearNow = today.getFullYear();
+      const monthNow = today.getMonth() + 1;
+      const day = this.form.day;
+
+      return this.form.selectedMonths
+        .map((month) => {
+          const year = month >= monthNow ? yearNow : yearNow + 1;
+
+          const maxDay = new Date(year, month, 0).getDate();
+          if (day > maxDay) return null;
+
+          return `${year}-${String(month).padStart(2, "0")}-${String(
+            day
+          ).padStart(2, "0")}`;
+        })
+        .filter(Boolean);
+    },
     updateAppointment() {
       let data = {
         date:
@@ -848,6 +1075,11 @@ export default {
       this.doctors_schedList1 = [];
       this.selected = [];
       this.info = 1;
+      this.form.day = null;
+      this.form.selectedMonths = [];
+      this.form.months = [];
+      this.reportType = "Single Date";
+      this.form.date = null;
     },
     closeD() {
       this.eventHub.$emit("closepatientAppointmentDialog", false);
@@ -886,19 +1118,54 @@ export default {
         "GET"
       ).then((res) => {
         if (res) {
-          let others = [
-            {
-              specialty: "Others",
-              description: "No specific Clinic to visit!",
-              doctors: [],
-            },
-          ];
-          this.clinicList = res.data;
-          Object.assign(this.clinicList, others);
-          // this.clinicList.reverse();
-          // // console.log("Clinic Data", this.clinicList);
+          const clinicsArray = Object.values(res.data);
+          const others = {
+            id: 1000,
+            specialty: "Others",
+            description: "No specific Clinic to visit!",
+            doctors: [],
+          };
+
+          this.clinicList = [...clinicsArray, others];
         }
       });
+    },
+    allowedMonthDays(date) {
+      // Only allow dates in the selected month
+      if (!this.form.month) return true;
+      const month = this.form.month;
+      const d = new Date(date);
+      return d.getMonth() + 1 === month;
+    },
+    allowedYearDays(date) {
+      // Only allow dates in the selected year
+      if (!this.form.year) return true;
+      const year = this.form.year;
+      const d = new Date(date);
+      return d.getFullYear() === year;
+    },
+    updateMonthText() {
+      this.monthText = this.form.months
+        .map((m) => this.formatMonth(m))
+        .join(", ");
+    },
+
+    formatMonth(value) {
+      const [y, m] = value.split("-");
+      return new Date(y, m - 1).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
+    },
+
+    removeMonth(index) {
+      this.form.months.splice(index, 1);
+      this.updateMonthText();
+    },
+
+    clearMonths() {
+      this.form.months = [];
+      this.monthText = "";
     },
   },
 };

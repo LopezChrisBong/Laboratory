@@ -8,7 +8,7 @@
           align-tabs="left"
           v-if="assignedModuleID == 3"
         >
-          <v-tab v-for="tab in tabList" :key="tab.id" @click="changeTab(tab)"
+          <v-tab v-for="tab in tabList" :key="tab.id" @change="changeTab(tab)"
             >{{ tab.name }}
           </v-tab>
         </v-tabs>
@@ -40,11 +40,13 @@
     <v-card class="ma-5 dt-container" elevation="0" outlined>
       <v-data-table
         :headers="
-          assignedModuleID == 3 && tab != 2
-            ? headers
-            : assignedModuleID == 5
+          assignedModuleID == 5 && tab != 2
             ? headers2
-            : headers1
+            : assignedModuleID == 3 && tab == 2
+            ? headers1
+            : assignedModuleID == 2
+            ? headers1
+            : headers
         "
         :items="data"
         :items-per-page="10"
@@ -106,7 +108,10 @@
               v-if="userRoleID != 3 && tab != 3"
               @click="view(item)"
             >
-              <v-icon size="14" class="mr-1">mdi-pencil</v-icon>
+              <v-icon size="14" class="mr-1" v-if="assignedModuleID == 3"
+                >mdi-pencil</v-icon
+              >
+              <v-icon size="14" class="mr-1" v-else>mdi-eye</v-icon>
             </v-btn>
 
             <v-btn
@@ -138,8 +143,7 @@
               v-if="userRoleID == 3"
               @click="cancelPatient(item)"
             >
-              <v-icon size="14" class="mr-1">mdi-timer-cancel</v-icon
-              >Re-Schedule
+              <v-icon size="14" class="mr-1">mdi-timer-cancel</v-icon>Reschedule
             </v-btn>
 
             <!-- <v-btn
@@ -284,10 +288,9 @@
         <v-card-text>
           <v-container fluid>
             <v-row dense>
-              <!-- Information -->
               <v-col cols="12" sm="6">
                 <v-card
-                  class="action-card text-center pa-4"
+                  class="action-card fixed-card text-center pa-4"
                   variant="outlined"
                   @click="view(patientItem)"
                 >
@@ -300,10 +303,9 @@
                 </v-card>
               </v-col>
 
-              <!-- Medical Info -->
               <v-col cols="12" sm="6" v-if="userRoleID == 3">
                 <v-card
-                  class="action-card text-center pa-4"
+                  class="action-card fixed-card text-center pa-4"
                   variant="outlined"
                   @click="editMedicalInfo(patientItem)"
                 >
@@ -316,24 +318,22 @@
                 </v-card>
               </v-col>
 
-              <!-- Prescription -->
               <v-col cols="12" sm="6" v-if="assignedModuleID != 2">
                 <v-card
-                  class="action-card text-center pa-4"
+                  class="action-card fixed-card text-center pa-4"
                   variant="outlined"
                   @click="prescription(patientItem)"
                 >
-                  <v-icon size="60" color="deep-purple"> mdi-file-sign </v-icon>
+                  <v-icon size="60" color="deep-purple">mdi-file-sign</v-icon>
                   <div class="mt-2 text-subtitle-1 font-weight-medium">
                     Prescription
                   </div>
                 </v-card>
               </v-col>
 
-              <!-- Examine -->
               <v-col cols="12" sm="6" v-if="assignedModuleID != 2">
                 <v-card
-                  class="action-card text-center pa-4"
+                  class="action-card fixed-card text-center pa-4"
                   variant="outlined"
                   @click="examinePatient(patientItem)"
                 >
@@ -345,10 +345,10 @@
                   </div>
                 </v-card>
               </v-col>
-              <!-- Laboratory -->
-              <v-col cols="12" sm="12" v-if="assignedModuleID != 2">
+
+              <v-col cols="12" md="6" v-if="assignedModuleID != 2">
                 <v-card
-                  class="action-card text-center pa-4"
+                  class="action-card fixed-card text-center pa-4"
                   variant="outlined"
                   @click="laboratoryRequest(patientItem)"
                 >
@@ -357,6 +357,21 @@
                   >
                   <div class="mt-2 text-subtitle-1 font-weight-medium">
                     Laboratory/Ultrasound Request
+                  </div>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" md="6" v-if="assignedModuleID != 2">
+                <v-card
+                  class="action-card fixed-card text-center pa-4"
+                  variant="outlined"
+                  @click="patientAppointment(patientItem)"
+                >
+                  <v-icon size="60" color="green">
+                    mdi-file-chart-check-outline
+                  </v-icon>
+                  <div class="mt-2 text-subtitle-1 font-weight-medium">
+                    Appointment
                   </div>
                 </v-card>
               </v-col>
@@ -501,20 +516,20 @@
               ></v-autocomplete>
             </v-col>
             <v-col cols="12">
-              <v-text-field
+              <v-textarea
                 v-model="doctor_comment"
                 :rules="[formRules.required]"
                 dense
                 outlined
-                maxlength="54"
+                maxlength="200"
                 required
                 label="*Reason of re-scheduling"
                 class="rounded-lg"
                 color="blue"
-              ></v-text-field>
+              ></v-textarea>
             </v-col>
             <v-col cols="12">
-              <v-textarea
+              <!-- <v-textarea
                 v-model="newMessage"
                 :rules="[formRules.required]"
                 dense
@@ -527,6 +542,18 @@
                 color="blue"
                 counter="139"
                 maxlength="139"
+              ></v-textarea> -->
+              <v-textarea
+                v-model="newMessage"
+                :rules="[formRules.required]"
+                dense
+                outlined
+                required
+                readonly
+                type="text"
+                label="Message to Send"
+                class="rounded-lg"
+                color="blue"
               ></v-textarea>
             </v-col>
           </v-row>
@@ -630,12 +657,12 @@ export default {
     selectedPackage: [],
     headers: [
       { text: "Name", value: "name" },
-      { text: "Date", value: "date" },
-      { text: "Specialization", value: "clinic" },
+      { text: "Date", value: "date", align: "center" },
+      { text: "Specialization", value: "clinic", align: "center" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
-      { text: "Recent Doctor", value: "doctor_name" },
+      { text: "Recent Doctor", value: "doctor_name", align: "center" },
       {
         text: "Action",
         value: "actions",
@@ -647,8 +674,8 @@ export default {
 
     headers1: [
       { text: "Name", value: "name" },
-      // { text: "Identification No.", value: "patientID" },
-      // { text: "Last Visit", value: "lastVisit" },
+      { text: "Laboratory Request", value: "services", align: "center" },
+      { text: "Packages Availed", value: "packages", align: "center" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
@@ -664,7 +691,7 @@ export default {
     ],
     headers2: [
       { text: "Name", value: "name" },
-      // { text: "Laboratory Request", value: "services" },
+      { text: "Date", value: "date", align: "center" },
       // { text: "Packages Availed", value: "packages" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
@@ -715,13 +742,6 @@ export default {
     paginationData: {},
     dialogConfirmDone: false,
     allTimes: [
-      "12:00 AM",
-      "01:00 AM",
-      "02:00 AM",
-      "03:00 AM",
-      "04:00 AM",
-      "05:00 AM",
-      "06:00 AM",
       "07:00 AM",
       "08:00 AM",
       "09:00 AM",
@@ -735,10 +755,6 @@ export default {
       "05:00 PM",
       "06:00 PM",
       "07:00 PM",
-      "08:00 PM",
-      "09:00 PM",
-      "10:00 PM",
-      "11:00 PM",
     ],
 
     fadeAwayMessage: {
@@ -782,10 +798,25 @@ export default {
       };
     },
     newMessage() {
-      let message = "Your appointment has been reschedule to: \n";
-      message += "Date: " + this.formatDate(this.cancelDate) + "\n";
-      message += "Time: " + this.cancelTime + "\n";
-      message += "Reason: " + this.doctor_comment;
+      let message =
+        "Hi! This is from Paragon Diagnostics & Multi-Specialty Clinic.\n";
+      message +=
+        "\n We’d like to let you know that your appointment with " +
+        this.$store.state.user.fname +
+        " " +
+        this.$store.state.user.lname +
+        " has been rescheduled to " +
+        this.formatDate(this.cancelDate) +
+        " at " +
+        this.cancelTime +
+        ". We appreciate your understanding, and we want to ensure you receive the care you need.\n";
+      // message += "Date: " + this.formatDate(this.cancelDate) + "\n";
+      // message += "Time: " + this.cancelTime + "\n";
+      message += "\nReason: " + this.doctor_comment + ".\n";
+      message +=
+        "\nIf this new schedule doesn’t work for you, please feel free to contact us so we can assist with another convenient time.";
+      message +=
+        "\nWe look forward to seeing you and taking care of you soon! .";
       return message;
     },
     filteredTimes() {
@@ -1038,6 +1069,19 @@ export default {
             }
           );
         }
+      } else if (this.tab == 2) {
+        this.axiosCall(
+          "/appointment/getAllPatientByRole/" +
+            this.$store.state.user.id +
+            "?tab=" +
+            this.tab,
+          "GET"
+        ).then((res) => {
+          if (res) {
+            this.data = res.data;
+            this.loading = false;
+          }
+        });
       } else {
         this.axiosCall("/appointment/getAllPatient/" + this.tab, "GET").then(
           (res) => {
@@ -1137,5 +1181,13 @@ export default {
 .action-card:hover {
   background-color: #f5f5f5;
   transform: translateY(-3px);
+}
+.fixed-card {
+  width: 300px !important;
+  height: 180px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>

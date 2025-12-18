@@ -17,5 +17,8 @@ export class CreateDoctorsScheduleDto {
     @ApiProperty()
         timeTo: string;
 
+    @ApiProperty()
+        months: string;
+
 
 }

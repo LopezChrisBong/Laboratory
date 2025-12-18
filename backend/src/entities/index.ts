@@ -30,6 +30,7 @@ import { Supplier } from 'src/supplier/entities/supplier.entity';
 import { InventoryTransaction } from 'src/inventory-transaction/entities/inventory-transaction.entity';
 import { UserLogs } from 'src/auth/entities/user_logs.entity';
 import { Sms } from 'src/sms/entities/sms.entity';
+import { MedicalCertificate } from 'src/medical-info/entities/medical-record.entity';
 
 const entities = [
   Users,
@@ -64,6 +65,7 @@ const entities = [
   UserLogs,
   Sms,
   InventoryTransaction,
+  MedicalCertificate
 ];
 
 export {
@@ -99,6 +101,7 @@ export {
   UserLogs,
   Sms,
   InventoryTransaction,
+  MedicalCertificate
 };
 
 export default entities;

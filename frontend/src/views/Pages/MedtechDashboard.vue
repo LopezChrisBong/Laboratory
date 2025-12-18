@@ -71,6 +71,30 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Inventory Required -->
+    <v-dialog v-model="inventoryDialog" max-width="500px" persistent>
+      <v-card>
+        <v-card-title>
+          <span class="headline">Inventory Required!</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="form">
+            <v-row>
+              <v-col cols="12"
+                >Are you done inventory check-up? Click Yes if done, No if not
+                yet done!</v-col
+              >
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="success" @click="inventoryChecked">No</v-btn>
+          <v-spacer />
+          <v-btn color="primary" @click="inventoryCheckedYes">Yes</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -82,6 +106,7 @@ export default {
     dialog: false,
     currentMonth: new Date(),
     events: [],
+    inventoryDialog: true,
     newEvent: {
       name: "",
       start: "",
@@ -98,6 +123,9 @@ export default {
   }),
   mounted() {
     this.initialize();
+    if (localStorage.getItem("Inventory")) {
+      this.inventoryDialog = false;
+    }
   },
   computed: {
     currentTitle() {
@@ -179,6 +207,13 @@ export default {
         this.newEvent = { name: "", start: "", end: "", color: "blue" };
         this.dialog = false;
       }
+    },
+    inventoryChecked() {
+      this.$router.push("/employee/inventory");
+    },
+    inventoryCheckedYes() {
+      this.inventoryDialog = false;
+      localStorage.setItem("Inventory", 1);
     },
   },
 };

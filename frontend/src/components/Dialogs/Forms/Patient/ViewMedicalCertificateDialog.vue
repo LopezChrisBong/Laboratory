@@ -3,9 +3,7 @@
     <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span
-            >Patient Prescription Data Table of {{ data && data.name }}</span
-          >
+          <span>Medical Certificate of {{ data && data.name }}</span>
           <v-spacer></v-spacer>
           <v-btn icon dark @click="closeD()">
             <v-icon>mdi-close</v-icon>
@@ -88,7 +86,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!-- delete dialog -->
     <v-dialog v-model="confirmDialog" persistent max-width="390">
       <v-card color="white">
         <div class="pa-4 #3a3b3a--text">
@@ -120,7 +117,7 @@
     </v-dialog>
 
     <v-dialog
-      v-model="prescriptionDialog"
+      v-model="medicalCertificateDialog"
       eager
       scrollable
       max-width="600px"
@@ -128,13 +125,13 @@
     >
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-          <span>{{ action }} Prescription</span>
+          <span>{{ action }} Diagnosis and Recommendation</span>
           <v-spacer></v-spacer>
           <v-btn
             icon
             dark
             @click="
-              prescriptionDialog = false;
+              medicalCertificateDialog = false;
               resetForm();
             "
           >
@@ -143,48 +140,14 @@
         </v-card-title>
 
         <v-card-text style="max-height: 700px" class="my-4">
-          <!-- Header -->
-          <v-row class="align-center">
-            <v-col cols="12" class="text-center">
-              <h3 class="font-weight-bold mb-0">PARAGON</h3>
-              <h4 class="mb-0">MULTISPECIALTY CLINIC</h4>
-              <div class="text-caption">
-                1F Bluz Building 2, Tadeco Road, Brgy. San Francisco, Panabo
-                City <br />
-                📞 0946-100-3260 | Mon–Sat 8:00am–5:00pm
-              </div>
-              <v-divider class="my-3"></v-divider>
-            </v-col>
-          </v-row>
-
           <!-- Patient Info -->
-          <v-row>
+          <v-row class="mt-2">
             <v-col cols="8">
               <v-text-field
                 v-model="patient.name"
                 label="Name"
                 readonly
                 dense
-                hide-details
-                outlined
-              />
-            </v-col>
-            <v-col cols="4">
-              <v-text-field
-                v-model="patient.age"
-                label="Age/Status"
-                dense
-                readonly
-                hide-details
-                outlined
-              />
-            </v-col>
-            <v-col cols="8">
-              <v-text-field
-                v-model="patient.address"
-                label="Address"
-                dense
-                readonly
                 hide-details
                 outlined
               />
@@ -203,36 +166,25 @@
 
           <!-- RX Section -->
           <v-row>
-            <v-col cols="12" class="d-flex">
-              <div class="display-1 font-weight-bold mr-4">℞</div>
-
+            <v-col cols="12" class="">
+              <div style="">DIAGNOSIS:</div>
               <vue-editor
                 :disabled="action != 'Add'"
-                style="width: 100%"
-                v-model="prescription"
+                style="width: 100%; height: 100px"
+                v-model="diagnosis"
                 :editorToolbar="customToolbar"
                 class="mb-10"
               ></vue-editor>
             </v-col>
-          </v-row>
-
-          <!-- Footer -->
-          <v-row class="mt-6">
-            <v-col cols="8">
-              <!-- <v-text-field
-                  v-model="nextVisit"
-                  label="Your Next Visit is on:"
-                  dense
-                  hide-details
-                  outlined
-                /> -->
-              <div class="text-caption">
-                Your Next Visit is on:__________________
-              </div>
-            </v-col>
-            <v-col cols="4" class="text-right">
-              <div class="text-caption">License No: ______________</div>
-              <div class="text-caption">PTR No: _____________</div>
+            <v-col cols="12" class="">
+              <div style="">RECOMMENDATION:</div>
+              <vue-editor
+                :disabled="action != 'Add'"
+                style="width: 100%; height: 100px"
+                v-model="recommendation"
+                :editorToolbar="customToolbar"
+                class="mb-10"
+              ></vue-editor>
             </v-col>
           </v-row>
         </v-card-text>
@@ -244,7 +196,7 @@
             color="red"
             outlined
             @click="
-              prescriptionDialog = false;
+              medicalCertificateDialog = false;
               resetForm();
             "
           >
@@ -264,8 +216,6 @@
       </v-card>
     </v-dialog>
 
-    <MedicalInformation :data="medicalData" :action="action" />
-
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -281,7 +231,6 @@
 import { VueEditor } from "vue2-editor";
 export default {
   components: {
-    MedicalInformation: () => import("./MedicalInformation.vue"),
     VueEditor,
   },
   props: {
@@ -295,32 +244,18 @@ export default {
         address: "",
         date: new Date().toLocaleDateString(),
       },
-      nextVisit: "",
-      service_description: "Red Blood Cell",
-      input: [],
-      input1: [],
       updateID: null,
-      male_lower: 4.0,
-      male_upper: 5.9,
-      female_lower: 3.8,
-      female_upper: 6.0,
-      unit: "x 10⁶/L",
-      remarks: "",
       options: {},
-      strategicData: null,
       action: null,
-      prescription: null,
-      newPackageData: {},
-      service: [],
-      desc: null,
+      diagnosis: null,
+      recommendation: null,
       customToolbar: [
         ["bold", "italic", "underline"],
         [{ list: "ordered" }, { list: "bullet" }],
-        // [{ list: "bullet" }],
       ],
       itemToDelete: null,
       confirmDialog: false,
-      prescriptionDialog: false,
+      medicalCertificateDialog: false,
       fadeAwayMessage: {
         show: false,
         type: "success",
@@ -329,8 +264,6 @@ export default {
         top: 10,
       },
       dialog: false,
-
-      medicalData: null,
       id: null,
       loading: false,
       isButtonLoading: false,
@@ -393,13 +326,7 @@ export default {
     },
   },
   mounted() {
-    this.eventHub.$on("closeMedicalInformation", () => {
-      this.initialize();
-    });
-  },
-
-  beforeDestroy() {
-    this.eventHub.$off("closeMedicalInformation");
+    this.initialize();
   },
 
   methods: {
@@ -408,14 +335,13 @@ export default {
       let userID = this.$store.state.user.id;
       this.getAllPatientPrecription();
       console.log(userID);
-      // alert(this.assignedModuleID);
     },
 
     getAllPatientPrecription() {
       this.loading = true;
       if (this.data) {
         this.axiosCall(
-          "/patient/getAllPatientPrecription/" + this.data.patientID,
+          "/medical-info/patientMedicalCertificate/" + this.data.patientID,
           "GET"
         ).then((res) => {
           if (res) {
@@ -427,35 +353,43 @@ export default {
     },
 
     closeD() {
-      this.eventHub.$emit("closePrescrioptionDialog", false);
+      this.eventHub.$emit("closeMedCertificateDialog", false);
       this.dialog = false;
     },
 
     accept() {
-      if (this.prescription == null) {
+      if (
+        this.diagnosis == null ||
+        this.recommendation == null ||
+        this.diagnosis == "" ||
+        this.recommendation == ""
+      ) {
         this.fadeAwayMessage.show = true;
         this.fadeAwayMessage.type = "error";
-        this.fadeAwayMessage.header =
-          "Please add prescription before save, thank you.";
+        this.fadeAwayMessage.header = "System message!";
+        this.fadeAwayMessage.message =
+          "Please fill all required field before saving, thank you.";
       } else {
         let userID = this.$store.state.user.id;
         let data = {
           patientID: this.data.patientID,
           doctorID: Number(userID),
-          description: this.prescription,
-          age: this.patient.age,
           date: this.patient.date,
-          name: this.patient.name,
-          address: this.patient.address,
+          diagnosis: this.diagnosis,
+          recommendations: this.recommendation,
         };
-        console.log("love", data);
+        // console.log("love", data);
 
-        this.axiosCall("/patient/addPrescription", "POST", data).then((res) => {
+        this.axiosCall(
+          "/medical-info/addMedicalCertificate",
+          "POST",
+          data
+        ).then((res) => {
           if (res.data.status == 200) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "success";
             this.fadeAwayMessage.header = "Successfully Updated";
-            this.prescriptionDialog = false;
+            this.medicalCertificateDialog = false;
             this.initialize();
           } else {
             this.fadeAwayMessage.show = true;
@@ -465,55 +399,17 @@ export default {
         });
       }
     },
-    update() {
-      if (this.prescription == null) {
-        this.fadeAwayMessage.show = true;
-        this.fadeAwayMessage.type = "error";
-        this.fadeAwayMessage.header =
-          "Please add prescription before save, thank you.";
-      } else {
-        let userID = this.$store.state.user.id;
-        let data = {
-          patientID: this.data.id,
-          doctorID: Number(userID),
-          description: this.prescription,
-          age: this.patient.age,
-          date: this.patient.date,
-          name: this.patient.name,
-          address: this.patient.address,
-        };
-        console.log("love", data);
-        this.axiosCall("/patient/" + this.updateID, "PATCH", data).then(
-          (res) => {
-            if (res.data.status == 201) {
-              // alert("updated");
-              this.initialize();
-              this.updateID = null;
-              this.fadeAwayMessage.show = true;
-              this.fadeAwayMessage.type = "success";
-              this.fadeAwayMessage.header = "System Message";
-              this.fadeAwayMessage.message = res.data.msg;
 
-              this.prescriptionDialog = false;
-            } else {
-              this.fadeAwayMessage.show = true;
-              this.fadeAwayMessage.type = "error";
-              this.fadeAwayMessage.header = "System Message";
-              this.fadeAwayMessage.message = res.data.msg;
-            }
-          }
-        );
-      }
-    },
     resetForm() {
       this.patient.date = new Date().toLocaleDateString();
       this.patient.name = null;
-      this.prescription = null;
+      this.diagnosis = null;
+      this.recommendation = null;
     },
 
     addPrescription() {
       this.action = "Add";
-      this.prescriptionDialog = true;
+      this.medicalCertificateDialog = true;
     },
     view(item) {
       let userID = this.$store.state.user.id;
@@ -522,20 +418,19 @@ export default {
       } else {
         this.action = "View";
       }
-      // alert(this.action);
       this.updateID = item.id;
       this.patient.name = item.name;
-      this.patient.address = item.address;
+      this.diagnosis = item.diagnosis;
+      this.recommendation = item.recommendations;
       this.patient.date = item.date;
-      this.patient.age = item.age;
-      this.prescription = item.description;
-      this.prescriptionDialog = true;
+      this.medicalCertificateDialog = true;
     },
-
     print(item) {
       console.log(item);
       const url =
-        process.env.VUE_APP_SERVER + "/pdf-generator/prescription/" + item.id;
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/medicalCertificate/" +
+        item.id;
       window.open(url);
     },
   },

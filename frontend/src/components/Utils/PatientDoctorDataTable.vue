@@ -22,13 +22,13 @@
           dense
         ></v-text-field>
         <v-btn
-          v-if="assignedModuleID == 3"
           class="white--text ml-2 rounded-lg"
+          v-if="assignedModuleID == 2"
           color="#2196F3"
-          @click="add()"
+          @click="report()"
         >
-          <v-icon left> mdi-plus-box-outline </v-icon>
-          Add New
+          <v-icon left> mdi-eye </v-icon>
+          Report
         </v-btn>
       </v-col>
     </v-row>
@@ -51,6 +51,10 @@
         <template v-slot:[`item.date`]="{ item }">
           {{ formatDate(item.date) }} {{ item.time }}
         </template>
+        <template v-slot:[`item.created_at`]="{ item }">
+          {{ formatDateTime(item.updated_at) }}
+        </template>
+
         <template v-slot:[`item.services`]="{ item }">
           <v-chip v-for="element in filteredServices(item)" :key="element.id">
             {{ element.description }}
@@ -78,7 +82,7 @@
                   : item.status == 1
                   ? "On-Going"
                   : item.status == 2
-                  ? "Lab-Result Done"
+                  ? "Lab-request Done"
                   : "Done"
               }}
             </span>
@@ -96,13 +100,13 @@
             <v-icon size="14">mdi-eye</v-icon>
           </v-btn>
           <!-- <v-btn
-            class="ma-1 "
+            class="ma-1"
             x-small
             color="green"
             outlined
-            @click="view(item)"
+            @click="medicalCertificate(item)"
           >
-            <v-icon size="14">mdi-eye</v-icon>
+            <v-icon size="14">mdi-file-certificate</v-icon>
           </v-btn> -->
 
           <!-- <v-btn
@@ -258,6 +262,34 @@
                   </div>
                 </v-card>
               </v-col>
+              <!-- Appointment -->
+              <v-col cols="12" md="6" sm="12" v-if="assignedModuleID != 2">
+                <v-card
+                  class="action-card text-center pa-4"
+                  variant="outlined"
+                  @click="patientAppointment(patientItem)"
+                >
+                  <v-icon size="60" color="green">
+                    mdi-file-chart-check-outline
+                  </v-icon>
+                  <div class="mt-2 text-subtitle-1 font-weight-medium">
+                    Appointment
+                  </div>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12" md="6" sm="12" v-if="assignedModuleID != 2">
+                <v-card
+                  class="action-card text-center pa-4"
+                  variant="outlined"
+                  @click="medicalCertificate(patientItem)"
+                >
+                  <v-icon size="60">mdi-file-certificate</v-icon>
+                  <div class="mt-2 text-subtitle-1 font-weight-medium">
+                    Medical Certificate
+                  </div>
+                </v-card>
+              </v-col>
 
               <!-- Medical Info -->
               <v-col cols="12" sm="6" v-if="userRoleID == 3">
@@ -308,211 +340,128 @@
                   </div>
                 </v-card>
               </v-col>
-
-              <!-- Appointment -->
-              <v-col cols="12" md="12" sm="12" v-if="assignedModuleID != 2">
-                <v-card
-                  class="action-card text-center pa-4"
-                  variant="outlined"
-                  @click="patientAppointment(patientItem)"
-                >
-                  <v-icon size="60" color="green">
-                    mdi-file-chart-check-outline
-                  </v-icon>
-                  <div class="mt-2 text-subtitle-1 font-weight-medium">
-                    Appointment
-                  </div>
-                </v-card>
-              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="laboratoryDialog" max-width="800" persistent>
-      <v-card>
-        <v-card-title>Services</v-card-title>
+    <!-- Report Dialog -->
+    <v-dialog v-model="reportDialog" persistent scrollable max-width="1200">
+      <v-card style="max-height: 80vh; overflow-y: auto">
+        <v-toolbar flat color="primary" dark dense height="56">
+          <v-toolbar-title>Patient Reports</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="reportDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+
         <v-card-text>
-          <div>
-            <v-row>
-              <v-col cols="12" md="6" class="pa-0">
-                <v-tabs v-model="activeTab" color="#2196F3" align-tabs="left">
-                  <v-tab
-                    v-for="tab in tabList"
-                    :key="tab.id"
-                    @click="changeTab(tab)"
-                    >{{ tab.name }}</v-tab
-                  >
-                </v-tabs>
-              </v-col>
-              <!--Laboratory Services Area-->
-              <v-col cols="12" v-if="tab == 1">
+          <v-row>
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="reportType"
+                :items="['Weekly', 'Monthly', 'Yearly']"
+                label="Select Report Type"
+                @change="reportSelection()"
+              ></v-select>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <v-menu
+                v-model="menu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+              >
+                <template #activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="selectedDate"
+                    label="Select Date"
+                    readonly
+                    v-bind="attrs"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="selectedDate"
+                  @input="menu = false"
+                  @change="reportSelection()"
+                ></v-date-picker>
+              </v-menu>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <v-card class="pa-4">
+                <h3>{{ reportType }} Report for {{ formattedDate }}</h3>
+                <v-divider class="my-2"></v-divider>
+
                 <v-row>
-                  <v-col
-                    cols="12"
-                    :md="item.data.length <= 0 ? 3 : 12"
-                    sm="12"
-                    v-for="item in dataServices"
-                    :key="item.id"
-                    class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px"
-                  >
-                    <div
-                      v-if="item.data.length <= 0"
-                      class="d-flex justify-center align-center"
+                  <v-col cols="12" md="4">
+                    <v-card outlined class="pa-2">
+                      <div class="text-h6">Total Patients</div>
+                      <div class="text-h4">{{ filteredData.length }}</div>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="12" md="4">
+                    <v-card outlined class="pa-2">
+                      <div class="text-h6">Total Services</div>
+                      <div class="text-h4">{{ totalServices }}</div>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="12" md="4">
+                    <v-card outlined class="pa-2">
+                      <div class="text-h6">Total Packages</div>
+                      <div class="text-h4">{{ totalPackages }}</div>
+                    </v-card>
+                  </v-col>
+                </v-row>
+
+                <v-data-table
+                  :headers="headersReport"
+                  :items="filteredData"
+                  class="mt-4"
+                >
+                  <template #item.services="{ item }">
+                    <span v-if="item.availed_services">{{
+                      item.availed_services.length
+                    }}</span>
+                  </template>
+                  <template #item.packages="{ item }">
+                    <span v-if="item.availed_packages">{{
+                      item.availed_packages.length
+                    }}</span>
+                  </template>
+                  <template v-slot:[`item.services`]="{ item }">
+                    <v-chip
+                      v-for="element in filteredServices(item)"
+                      :key="element.id"
+                      small
                     >
-                      <div>
-                        <v-checkbox
-                          v-model="selected"
-                          :disabled="action == 'Pay' ? true : false"
-                          :label="item.description"
-                          :value="item.id"
-                        ></v-checkbox>
-                      </div>
-                      <div class="mx-2">&#8369;{{ item.price }}</div>
-                    </div>
-                    <div v-if="item.data.length > 0" class="">
-                      <strong> {{ item.description }}</strong>
-                      <v-row>
-                        <v-col
-                          cols="3"
-                          v-for="items in item.data"
-                          :key="items.id"
-                        >
-                          <div class="d-flex justify-center align-center">
-                            <div>
-                              <v-checkbox
-                                v-model="selected"
-                                :label="items.description"
-                                :value="items.id"
-                                :disabled="action == 'Pay' ? true : false"
-                              ></v-checkbox>
-                            </div>
-                            <div class="mx-2">&#8369;{{ items.price }}</div>
-                          </div>
-                        </v-col>
-                      </v-row>
-                    </div>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <!-- :rules="[(v) => !!v || 'Service is required']" -->
-              <!--Imaging Services Area-->
+                      {{ element.description }}
+                    </v-chip>
+                  </template>
 
-              <v-col cols="12" v-if="tab == 2">
-                <v-row>
-                  <v-col
-                    cols="12"
-                    :md="item.data.length <= 0 ? 3 : 12"
-                    sm="12"
-                    v-for="item in dataServices"
-                    :key="item.id"
-                    class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px"
-                  >
-                    <div
-                      v-if="item.data.length <= 0"
-                      class="d-flex justify-center align-center"
+                  <template v-slot:[`item.packages`]="{ item }">
+                    <v-chip
+                      small
+                      v-for="element in filteredPackages(item)"
+                      :key="element.id"
                     >
-                      <div>
-                        <v-checkbox
-                          v-model="selected"
-                          :label="item.description"
-                          :value="item.id"
-                          :disabled="action == 'Pay' ? true : false"
-                        ></v-checkbox>
-                      </div>
-                      <div class="mx-2">&#8369;{{ item.price }}</div>
-                    </div>
-                    <div v-if="item.data.length > 0" class="">
-                      <strong>{{ item.description }}</strong>
-                      <v-row>
-                        <v-col
-                          cols="3"
-                          v-for="items in item.data"
-                          :key="items.id"
-                        >
-                          <div class="d-flex justify-center align-center">
-                            <div>
-                              <v-checkbox
-                                v-model="selected"
-                                :label="items.description"
-                                :value="items.id"
-                                :disabled="action == 'Pay' ? true : false"
-                              ></v-checkbox>
-                            </div>
-                            <div class="mx-2">&#8369;{{ items.price }}</div>
-                          </div>
-                        </v-col>
-                      </v-row>
-                    </div>
-                  </v-col>
-                </v-row>
-              </v-col>
-
-              <!--Package Services Area-->
-
-              <v-col cols="12" v-if="tab == 3">
-                <v-row>
-                  <v-col
-                    cols="12"
-                    md="6"
-                    sm="12"
-                    v-for="item in dataPackages"
-                    :key="item.id"
-                    style="border: 1px solid black; border-radius: 10px"
-                  >
-                    <div class="d-flex justify-center align-center">
-                      <div>
-                        <v-checkbox
-                          v-model="selectedPackage"
-                          :label="item.description"
-                          :value="item.id"
-                          :disabled="action == 'Pay' ? true : false"
-                        ></v-checkbox>
-                      </div>
-                      <div class="mx-2">&#8369;{{ item.price }}</div>
-                      <br />
-                    </div>
-                    <div class="mb-2">
-                      <strong style="font-size: 14px">List of Service:</strong>
-                    </div>
-                    <v-row>
-                      <v-col
-                        cols="4"
-                        class="pa-2"
-                        v-for="items in JSON.parse(item.assign_mods)"
-                        :key="items.id"
-                      >
-                        <span style="font-size: 20px">
-                          <strong>&#x2022;</strong></span
-                        >
-                        <v-chip
-                          small
-                          class="pa-2"
-                          color="blue"
-                          text-color="white"
-                        >
-                          {{ items.service_description }}
-                        </v-chip>
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-          </div>
+                      {{ element.description }}
+                    </v-chip>
+                  </template>
+                  <template #item.created_at="{ item }">
+                    {{ formatDate(item.created_at) }}
+                  </template>
+                </v-data-table>
+              </v-card>
+            </v-col>
+          </v-row>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="resetForm()">Cancel</v-btn>
-          <v-btn v-if="action == 'Update'" text @click="updateLabRequest()">
-            Update
-          </v-btn>
-          <v-btn v-if="action == 'Add'" text @click="addLabRequest()">
-            Add
-          </v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -521,6 +470,8 @@
     <ViewPatientAppointmentDialog :data="patientAppointement" />
     <ExaminePatientDialog :data="patientExamine" />
     <PrescriptionDialog :data="prescriptionData" />
+    <ViewMedicalCertificateDialog :data="medicalCert" />
+
     <fade-away-message-component
       displayType="variation2"
       v-model="fadeAwayMessage.show"
@@ -532,6 +483,7 @@
   </div>
 </template>
 <script>
+import moment from "moment";
 export default {
   components: {
     AddPatientDialog: () =>
@@ -548,6 +500,10 @@ export default {
       import("../../components/Dialogs/Forms/Patient/ExaminePatientDialog.vue"),
     PrescriptionDialog: () =>
       import("../../components/Dialogs/Forms/Patient/PrescriptionDialog.vue"),
+    ViewMedicalCertificateDialog: () =>
+      import(
+        "../../components/Dialogs/Forms/Patient/ViewMedicalCertificateDialog.vue"
+      ),
   },
   filters: {
     highlight: function (value, query) {
@@ -567,14 +523,15 @@ export default {
     prescriptionData: null,
     patientExamine: null,
     medicalInfo: null,
+    medicalCert: null,
     headers: [
       { text: "Name", value: "name" },
 
-      { text: "Latest Laboratory Request", value: "services" },
-      { text: "Packages Availed", value: "packages" },
-      // { text: "Next Visit", value: "nextVisit" },
-      // { text: "Recent Topic", value: "recentTopic" },
-      // { text: "Recent Doctor", value: "recentDoctor" },
+      { text: "Latest Laboratory Request", value: "services", align: "center" },
+      { text: "Packages Availed", value: "packages", align: "center" },
+      { text: "Date/Time", value: "created_at", align: "center" },
+      { text: "Status", value: "status", align: "center" },
+
       {
         text: "Action",
         value: "actions",
@@ -586,8 +543,8 @@ export default {
 
     headers1: [
       { text: "Name", value: "name" },
-      { text: "Date", value: "date" },
-      { text: "Doctor Name", value: "doctor_name" },
+      { text: "Date", value: "date", align: "center" },
+      { text: "Doctor Name", value: "doctor_name", align: "center" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
       // { text: "Recent Topic", value: "recentTopic" },
@@ -602,6 +559,19 @@ export default {
     ],
 
     data: [],
+    reportDialog: false,
+    reportType: "Weekly",
+    selectedDate: moment().format("YYYY-MM-DD"),
+    menu: false,
+    patients: [], // your patient data
+    headersReport: [
+      { text: "Name", value: "name" },
+      { text: "Age", value: "age" },
+      { text: "Gender", value: "gender" },
+      { text: "Services", value: "services" },
+      { text: "Packages", value: "packages" },
+      { text: "Created At", value: "created_at" },
+    ],
     addPatient: null,
     perPageChoices: [
       { text: "5", value: 5 },
@@ -646,6 +616,12 @@ export default {
       this.patientItem = storedItem ? JSON.parse(storedItem) : null;
       this.initialize();
     });
+
+    this.eventHub.$on("closeMedCertificateDialog", () => {
+      const storedItem = localStorage.getItem("PatientData");
+      this.patientItem = storedItem ? JSON.parse(storedItem) : null;
+      this.initialize();
+    });
     this.eventHub.$on("closePrescrioptionDialog", () => {
       const storedItem = localStorage.getItem("PatientData");
       this.patientItem = storedItem ? JSON.parse(storedItem) : null;
@@ -681,6 +657,7 @@ export default {
     this.eventHub.$off("closepatientAppointmentDialog");
     this.eventHub.$off("closeExamineDataDialog");
     this.eventHub.$off("closePrescrioptionDialog");
+    this.eventHub.$off("closeMedCertificateDialog");
   },
 
   watch: {
@@ -723,8 +700,43 @@ export default {
           });
       };
     },
+    formattedDate() {
+      return moment(this.selectedDate).format("MMMM DD, YYYY");
+    },
+    filteredData() {
+      const start = moment(this.selectedDate);
+      let end;
+      if (this.reportType === "Weekly") {
+        start.startOf("week");
+        end = moment(start).endOf("week");
+      } else if (this.reportType === "Monthly") {
+        start.startOf("month");
+        end = moment(start).endOf("month");
+      } else if (this.reportType === "Yearly") {
+        start.startOf("year");
+        end = moment(start).endOf("year");
+      }
+
+      return this.data.filter((p) => {
+        const created = moment(p.created_at);
+        return created.isBetween(start, end, undefined, "[]");
+      });
+    },
+    totalServices() {
+      return this.filteredData.reduce((sum, p) => {
+        return sum + (p.availed_services ? p.availed_services.length : 0);
+      }, 0);
+    },
+    totalPackages() {
+      return this.filteredData.reduce((sum, p) => {
+        return sum + (p.availed_packages ? p.availed_packages.length : 0);
+      }, 0);
+    },
   },
   methods: {
+    formatDate(date) {
+      return moment(date).format("MMM DD, YYYY hh:mm A");
+    },
     pagination(data) {
       this.paginationData = data;
     },
@@ -797,14 +809,17 @@ export default {
     examinePatient(item) {
       this.patientExamine = item;
     },
-
-    printItem(item) {
-      const url =
-        process.env.VUE_APP_SERVER +
-        "/pdf-generator/printTravelOrder/" +
-        item.id;
-      window.open(url);
+    report() {
+      console.log("reprot");
+      this.reportDialog = true;
     },
+    // printItem(item) {
+    //   const url =
+    //     process.env.VUE_APP_SERVER +
+    //     "/pdf-generator/printTravelOrder/" +
+    //     item.id;
+    //   window.open(url);
+    // },
 
     // confirmDelete() {
     //   this.axiosCall("/request-type/" + this.deleteData.id, "DELETE").then(
@@ -815,6 +830,13 @@ export default {
     //     }
     //   );
     // },
+    reportSelection() {
+      console.log("filteredData", this.filteredData);
+    },
+    medicalCertificate(item) {
+      console.log(item);
+      this.medicalCert = item;
+    },
   },
 };
 </script>

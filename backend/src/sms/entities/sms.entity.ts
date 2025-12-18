@@ -5,7 +5,7 @@ export class Sms {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'text' })
   message: string;
 
   @Column({ type: 'varchar', length: 15 })
