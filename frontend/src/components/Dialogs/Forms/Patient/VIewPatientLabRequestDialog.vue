@@ -28,7 +28,7 @@
                   Add Request
                 </v-btn>
               </v-col>
-              <v-col cols="12" class=" pt-2 px-4">
+              <v-col cols="12" class="pt-2 px-4">
                 <v-data-table
                   :headers="headers"
                   :items="dataItem"
@@ -168,7 +168,7 @@
                   <v-tab
                     v-for="tab in tabList"
                     :key="tab.id"
-                    @click="changeTab(tab)"
+                    @change="changeTab(tab)"
                     >{{ tab.name }}</v-tab
                   >
                 </v-tabs>
@@ -183,7 +183,7 @@
                     v-for="item in dataServices"
                     :key="item.id"
                     class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div
                       v-if="item.data.length <= 0"
@@ -236,7 +236,7 @@
                     v-for="item in dataServices"
                     :key="item.id"
                     class="my-1 mx-1"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div
                       v-if="item.data.length <= 0"
@@ -288,7 +288,7 @@
                     sm="12"
                     v-for="item in dataPackages"
                     :key="item.id"
-                    style="border: 1px solid black; border-radius: 10px;"
+                    style="border: 1px solid black; border-radius: 10px"
                   >
                     <div class="d-flex justify-center align-center">
                       <div>
@@ -303,7 +303,7 @@
                       <br />
                     </div>
                     <div class="mb-2">
-                      <strong style="font-size: 14px;">List of Service:</strong>
+                      <strong style="font-size: 14px">List of Service:</strong>
                     </div>
                     <v-row>
                       <v-col
@@ -312,7 +312,7 @@
                         v-for="items in JSON.parse(item.assign_mods)"
                         :key="items.id"
                       >
-                        <span style="font-size: 20px;">
+                        <span style="font-size: 20px">
                           <strong>&#x2022;</strong></span
                         >
                         <v-chip
@@ -652,14 +652,15 @@ export default {
       this.getAllPackages();
       this.getAllDoctors();
       this.getAllMedtech();
-      this.axiosCall("/services/getAllLabRequest/List/" + this.id, "GET").then(
-        (res) => {
-          if (res) {
-            this.dataItem = res.data;
-            this.loading = false;
-          }
+      this.axiosCall(
+        "/services/getAllLabRequest/List/" + this.data.patientID,
+        "GET"
+      ).then((res) => {
+        if (res) {
+          this.dataItem = res.data;
+          this.loading = false;
         }
-      );
+      });
     },
     getAllDoctors() {
       this.axiosCall("/appointment/findAllDoctors", "GET").then((res) => {

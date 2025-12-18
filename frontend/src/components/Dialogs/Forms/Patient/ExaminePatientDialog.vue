@@ -1,6 +1,13 @@
 <template>
   <div>
-    <v-dialog v-model="dialog" eager persistent scrollable max-width="1000px">
+    <v-dialog
+      v-model="dialog"
+      eager
+      persistent
+      scrollable
+      max-width="1000px"
+      fullscreen
+    >
       <v-card>
         <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
           <span>Patient Examination Data Table of {{ data && data.name }}</span>
@@ -39,6 +46,25 @@
                   </template>
                   <template v-slot:[`item.lab_request`]="{ item }">
                     {{ item.lab_request == null ? "Doctor/Receptionist" : "" }}
+                  </template>
+                  <template v-slot:[`item.services`]="{ item }">
+                    <div>
+                      <v-chip
+                        v-for="element in item.services_availed"
+                        :key="element.id"
+                      >
+                        {{ element.service_description }}
+                      </v-chip>
+                    </div>
+                  </template>
+
+                  <template v-slot:[`item.packages`]="{ item }">
+                    <v-chip
+                      v-for="element in item.packages_availed"
+                      :key="element.id"
+                    >
+                      {{ element.description }}
+                    </v-chip>
                   </template>
                   <template v-slot:[`item.status`]="{ item }">
                     <v-chip
@@ -163,7 +189,7 @@
                   <v-tab
                     v-for="tab in tabList"
                     :key="tab.id"
-                    @click="changeTab(tab)"
+                    @change="changeTab(tab)"
                     >{{ tab.name }}</v-tab
                   >
                 </v-tabs>
@@ -498,17 +524,24 @@ export default {
           width: 50,
           sortable: false,
         },
+        // {
+        //   text: "Liscence No.",
+        //   value: "liscence_no",
+        //   align: "start",
+        //   valign: "start",
+        //   sortable: false,
+        // },
         {
-          text: "Liscence No.",
-          value: "liscence_no",
-          align: "start",
+          text: "Laboratory Request",
+          value: "services",
+          align: "center",
           valign: "start",
           sortable: false,
         },
         {
-          text: "Medtech",
-          value: "Med_name",
-          align: "start",
+          text: "Packages Availed",
+          value: "packages",
+          align: "center",
           valign: "start",
           sortable: false,
         },
@@ -559,6 +592,39 @@ export default {
     },
   },
   mounted() {},
+  computed: {
+    filteredServices() {
+      return (item) => {
+        if (!item?.services_availed) return [];
+
+        const seen = new Set();
+
+        return item.services_availed
+          .filter((s) => s.service_description)
+          .filter((s) => {
+            if (seen.has(s.service_description)) return false;
+            seen.add(s.service_description);
+            return true;
+          });
+      };
+    },
+
+    filteredPackages() {
+      return (item) => {
+        if (!item?.packages_availed) return [];
+
+        const seen = new Set();
+
+        return item.packages_availed
+          .filter((p) => p.description)
+          .filter((p) => {
+            if (seen.has(p.description)) return false;
+            seen.add(p.description);
+            return true;
+          });
+      };
+    },
+  },
 
   methods: {
     selectedFileChange(file) {
@@ -601,7 +667,7 @@ export default {
           "/appointment/getAssignedBookedAppointment/Doctor/" +
             userID +
             "/" +
-            this.data.id,
+            this.data.patientID,
           "GET"
         ).then((res) => {
           if (res) {
@@ -674,8 +740,8 @@ export default {
     },
     availed(item) {
       console.log(item);
-      this.selected = JSON.parse(item.service_list);
-      this.selectedPackage = JSON.parse(item.package_list);
+      this.selected = JSON.parse(item.sa_service_list);
+      this.selectedPackage = JSON.parse(item.sa_package_list);
       this.laboratoryAvailedDialog = true;
     },
     // view(item) {

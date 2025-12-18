@@ -23,6 +23,9 @@ export class Notification {
             
             @Column({ type: "int" })
             assignedID:number
+
+            @Column({ type: "int", nullable:true })
+            appointmentID:number
     
             @CreateDateColumn({
             nullable: false,

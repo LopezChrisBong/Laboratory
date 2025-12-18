@@ -264,7 +264,7 @@ export default {
       import("../../components/Dialogs/Forms/Patient/PrescriptionDialog.vue"),
   },
   filters: {
-    highlight: function(value, query) {
+    highlight: function (value, query) {
       return value.replace(
         new RegExp(query, ""),
         "<span class='blue'>" + query + "</span>"
@@ -286,7 +286,7 @@ export default {
     selectedPackage: [],
     headers: [
       { text: "Name", value: "name" },
-      { text: "Identification No.", value: "patientID" },
+      { text: "Identification No.", value: "patientID", align: "center" },
       // { text: "Last Visit", value: "lastVisit" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },
@@ -303,7 +303,7 @@ export default {
 
     headers1: [
       { text: "Name", value: "name" },
-      { text: "Identification No.", value: "patientID" },
+      { text: "Identification No.", value: "patientID", align: "center" },
       // { text: "Last Visit", value: "lastVisit" },
       // { text: "Status", value: "status" },
       // { text: "Next Visit", value: "nextVisit" },

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,Headers, UseInterceptors,Request, Res, UploadedFiles, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,Headers, UseInterceptors,Request, Res, UploadedFiles, StreamableFile,Query } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -13,6 +13,7 @@ import { diskStorage } from 'multer';
 import { Helper } from 'src/shared/helper';
 import { createReadStream } from 'fs';
 import { join } from 'path';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -187,6 +188,16 @@ getFile(
     return this.appointmentService.bookAppointment(createAppointmentDto);
   }
 
+    @Post('bookDoctorPatientAppointment')
+  bookDoctorPatientAppointment(@Body() createAppointmentDto: CreateAppointmentDto) {
+    return this.appointmentService.bookDoctorPatientAppointment(createAppointmentDto);
+  }
+
+  @Post('bookWithRange')
+  bookWithRange(@Body() createAppointmentDto: CreateAppointmentDto) {
+    return this.appointmentService.bookWithRange(createAppointmentDto);
+  }
+
   @Get()
   findAll() {
     return this.appointmentService.findAll();
@@ -219,11 +230,12 @@ getFile(
   }
 
 
-       @Get('getAllPatientByRole/:doctorID')
-  getAllPatientByRole(@Headers() headers,@Param('doctorID') doctorID: string) {
+      @Get('getAllPatientByRole/:doctorID')
+      @ApiQuery({ name: 'month', required: false, type: String })
+      getAllPatientByRole(@Headers() headers,@Param('doctorID') doctorID: string,@Query('tab') tab?: string,) {
        var head_str = headers.authorization;
-    const curr_user = currentUser(head_str);
-    return this.appointmentService.getAllPatientByRole(+doctorID,curr_user);
+        const curr_user = currentUser(head_str);
+      return this.appointmentService.getAllPatientByRole(+doctorID,curr_user,+tab);
   }
 
   @Get(':id')
@@ -270,6 +282,12 @@ getFile(
     @Get('getAssignedBookedAppointment/Doctor/:id/:patientID')
   getAssignedBookedAppointmentDoctor(@Param('id') id: string,@Param('patientID') patientID: string) {
     return this.appointmentService.getAssignedBookedAppointmentDoctor(+id,+patientID);
+  }
+
+  
+  @Get('checkMobileNumber/:mobile_no')
+  checkMobileNumber(@Param('mobile_no') mobile_no: string) {
+    return this.appointmentService.checkMobileNumber(mobile_no);
   }
 
       @Get('getAssignedBookedAppointment/Medtech/:id/:patientID')

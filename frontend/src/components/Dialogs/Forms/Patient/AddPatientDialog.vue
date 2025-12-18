@@ -26,6 +26,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     required
                     label="*First Name"
                     class="rounded-lg"
@@ -36,6 +37,7 @@
                   <v-text-field
                     v-model="mname"
                     dense
+                    :readonly="assignedModuleID != 3"
                     outlined
                     label="Middle Name"
                     class="rounded-lg"
@@ -48,6 +50,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     required
                     label="*Last Name"
                     class="rounded-lg"
@@ -59,6 +62,7 @@
                     v-model="suffix"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     required
                     label="Suffix"
                     class="rounded-lg"
@@ -109,6 +113,7 @@
                   <v-text-field
                     label="*Birth Date"
                     v-model="bdate"
+                    :readonly="assignedModuleID != 3"
                     :rules="[formRules.required]"
                     required
                     type="date"
@@ -127,6 +132,7 @@
                     outlined
                     required
                     label="*Age"
+                    :readonly="assignedModuleID != 3"
                     class="rounded-lg"
                     color="blue"
                   ></v-text-field> </v-col
@@ -136,6 +142,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     label="*Sex"
                     class="rounded-lg"
                     item-text="description"
@@ -152,6 +159,7 @@
                     label="*Contact No."
                     color="#6DB249"
                     type="text"
+                    :readonly="assignedModuleID != 3"
                     maxlength="11"
                     dense
                     outlined
@@ -177,6 +185,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     label="*Civil Status"
                     class="rounded-lg"
                     item-text="description"
@@ -196,6 +205,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     required
                     label="*Spouse"
                     class="rounded-lg"
@@ -208,6 +218,7 @@
                     :rules="[formRules.required]"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     required
                     label="*Occupation"
                     class="rounded-lg"
@@ -222,6 +233,7 @@
                     class="text-uppercase rounded-lg"
                     dense
                     outlined
+                    :readonly="assignedModuleID != 3"
                     required
                   />
                 </v-col>
@@ -241,6 +253,7 @@
                     dense
                     class="rounded-lg"
                     outlined
+                    :readonly="assignedModuleID != 3"
                     item-text="regionName"
                     item-value="code"
                     label="*Region"
@@ -259,6 +272,7 @@
                     item-text="name"
                     item-value="code"
                     label="*Province"
+                    :readonly="assignedModuleID != 3"
                     outlined
                     color="#93CB5B"
                     :items="provinceList"
@@ -276,6 +290,7 @@
                     outlined
                     item-value="code"
                     label="*City/Municipality"
+                    :readonly="assignedModuleID != 3"
                     color="#93CB5B"
                     :items="city_muniList"
                     @change="changeCityMuni()"
@@ -287,6 +302,7 @@
                     v-model="baranggay"
                     :rules="[formRules.required]"
                     dense
+                    :readonly="assignedModuleID != 3"
                     class="rounded-lg"
                     item-text="name"
                     item-value="code"
@@ -305,6 +321,7 @@
                     outlined
                     class="text-uppercase rounded-lg"
                     required
+                    :readonly="assignedModuleID != 3"
                     dense
                   />
                 </v-col>
@@ -597,7 +614,7 @@ export default {
       }
     },
     generateUUID() {
-      return "xxxx-4xxx-yxxx-xxxx".replace(/[xy]/g, function(c) {
+      return "xxxx-4xxx-yxxx-xxxx".replace(/[xy]/g, function (c) {
         const r = (Math.random() * 16) | 0;
         const v = c === "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);

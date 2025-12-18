@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medical Certificate (Paragon Multispecialty Clinic)</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background: #f2f2f2;
+      padding: 30px;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .paper {
+      width: 210mm;
+      min-height: auto; 
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 0 0.5cm rgba(0,0,0,0.15);
+      padding: 28px 28px 40px 28px;
+      box-sizing: border-box;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      border-bottom: 3px solid #222;
+      padding-bottom: 12px;
+    }
+
+    .logo {
+      width: 78px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo svg { width: 78px; height: 60px; }
+
+    .clinic-name {
+      flex: 1;
+      text-align: center;
+      font-size: 28px;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    .header-right {
+      width: 260px;
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .meta {
+      display:flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      align-items: center;
+    }
+
+    .meta .left { max-width: 60%; }
+
+    .title {
+      text-align: center;
+      font-size: 32px;
+      margin: 28px 0 18px 0;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .form {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .line {
+      border-bottom: 1px solid #000;
+      display: inline-block;
+      min-width: 300px;
+      height: 1.2em;
+      vertical-align: middle;
+    }
+
+    .row { margin: 10px 0; }
+
+    .label { width: 200px; display: inline-block; vertical-align: middle; }
+
+    .big-blank {
+      height: 90px;
+      border-bottom: 1px solid #000;
+      margin: 6px 0 18px 0;
+      padding-top: 8px;
+    }
+
+    .recommend {
+      margin-top: 6px;
+      min-height: 70px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 12px;
+    }
+
+    .signature-area {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 30px;
+    }
+
+    .sig-block {
+      width: 260px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .sig-line { border-top: 1px solid #000; margin-top: 28px; }
+
+    .date-inline { float: right; text-align: right; font-size: 13px; }
+
+    @media print {
+      body { background: #fff; }
+      .paper { box-shadow: none; margin: 0; }
+    }
+    .handwritten { font-family: "Segoe Script", "Bradley Hand", cursive; font-style: normal; font-size: 15px; }
+
+  </style>
+</head>
+<body>
+  {{#each this}}
+  <div class="paper">
+    <div class="header">
+      <div class="logo" aria-hidden>
+           <img
+            src='data:image/png;base64, {{headerImg}}'
+            width='110px'
+            height="110px"
+            alt=''
+          />
+      </div>
+
+      <div class="clinic-name">PARAGON<br><span style="letter-spacing:2px; font-size:22px">MULTISPECIALTY CLINIC</span></div>
+
+      <div class="header-right">
+        <div style="font-weight:600">1F Bluz Building 2, Tadeco Road,<br>Brgy. San Francisco, Panabo City</div>
+        <div style="margin-top:8px">☎ 0946-100-3260 &nbsp;&nbsp; | &nbsp;&nbsp; Mon to Sat 8:00am to 5:00pm</div>
+      </div>
+    </div>
+
+    <div class="title">MEDICAL CERTIFICATE <span class="date-inline">Date: <span class=""><u>{{formatted}}</u></span></span></div>
+
+    <div class="form">
+      <div class="row"><strong>To Whom It May Concern:</strong></div>
+
+      <div class="row"><span class="label">THIS IS TO CERTIFY THAT</span> <span class="line handwritten">&nbsp;&nbsp;&nbsp;&nbsp;{{medicalCert.name}}</span></div>
+
+      <div class="row"><span class="label">of</span> <span class="line handwritten" style="min-width:450px">&nbsp;{{medicalCert.address}}</span></div>
+
+      <div class="row">was examined and treated at my clinic on <span class="line handwritten" style="min-width:120px">&nbsp;{{ formatDate medicalCert.date}}</span> <span style="min-width:60px">&nbsp;</span> with the following diagnosis:</div>
+
+      <div class="big-blank handwritten" >&nbsp;<u> {{{medicalCert.diagnosis}}}</u>
+   
+      </div>
+
+      <div class="row"><strong>Recommendations:</strong></div>
+      <div class="recommend handwritten">
+        <div class="" style="min-width: 520px; height: 1.6em;"><u>{{{medicalCert.recommendations}}}</u></div>
+        {{!-- <div class="line" style="min-width: 520px; height: 1.6em; margin-top:8px"></div>
+        <div class="line" style="min-width: 520px; height: 1.6em; margin-top:8px"></div> --}}
+      </div>
+
+      <div class="footer-note">This certification is issued upon the request of the patient for whatever purpose it may serve except medicolegal purposes.</div>
+
+      <div class="signature-area">
+        <div class="sig-block">
+          <div class="sig-line"></div>
+          <div style="margin-top:6px; font-weight:600">Dr. <span style="text-transform: uppercase;">{{medicalCert.doctor_name}}</span>, M.D.</div>
+          <div style="font-size:12px">PRC No.: ________ &nbsp;&nbsp; PTR No.: ________</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  {{/each}}
+</body>
+</html>

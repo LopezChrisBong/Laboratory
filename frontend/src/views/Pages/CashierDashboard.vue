@@ -1,107 +1,390 @@
 <template>
   <v-container fluid class="pa-6 dashboard">
     <!--Invoice-->
-    <v-row>
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-text
-            class="d-flex flex-column align-center justify-center text-center"
-            ><div class="d-flex align-center justify-center">
-              <v-icon size="40">mdi-currency-php</v-icon>
-              <h1>{{ computeDaily }}</h1>
-            </div>
-            <div class="d-flex align-center">
-              <div>Total Income of the Day</div>
-              <div class="mt-2 mx-2">
-                <v-menu
-                  v-model="menuDate"
-                  :close-on-content-click="false"
-                  transition="scale-transition"
-                  offset-y
-                  max-width="290px"
-                  min-width="290px"
-                >
-                  <template #activator="{ on, attrs }">
-                    <v-text-field
-                      dense
+    <!-- <v-tabs v-model="activeTab" background-color="primary" dark>
+      <v-tab key="daily">Daily</v-tab>
+      <v-tab key="monthly">Monthly</v-tab>
+      <v-tab key="yearly">Yearly</v-tab>
+    </v-tabs>
+
+    <v-tabs-items v-model="activeTab" class="pa-6">
+      <v-tab-item key="daily">
+        <v-row justify="center">
+          <v-col cols="12" md="8">
+            <v-card class="rounded-xl elevation-2 pa-4">
+              <v-card-title class="justify-center text-h6 font-weight-bold">
+                Daily Income
+              </v-card-title>
+
+              <v-divider class="my-2"></v-divider>
+
+              <v-card-text class="text-center">
+                <div class="d-flex align-center justify-center mb-4">
+                  <v-icon size="50" color="green">mdi-currency-php</v-icon>
+                  <h1 class="ml-2 font-weight-bold">{{ computeDaily }}</h1>
+                </div>
+
+                <div class="d-flex justify-center align-center">
+                  <strong class="mr-2">Select Date:</strong>
+
+                  <v-menu
+                    v-model="menuDate"
+                    :close-on-content-click="false"
+                    offset-y
+                    max-width="290px"
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        dense
+                        outlined
+                        rounded
+                        v-model="selectedDate"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        prepend-inner-icon="mdi-calendar"
+                        style="max-width: 160px"
+                      />
+                    </template>
+
+                    <v-date-picker
                       v-model="selectedDate"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                    ></v-text-field>
-                  </template>
+                      @input="getDailyIncome"
+                      color="primary"
+                      @change="menuDate = false"
+                    />
+                  </v-menu>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+      <v-tab-item key="monthly">
+        <v-row justify="center">
+          <v-col cols="12" md="8">
+            <v-card class="rounded-xl elevation-2 pa-4">
+              <v-card-title class="justify-center text-h6 font-weight-bold">
+                Monthly Income
+              </v-card-title>
 
-                  <v-date-picker
+              <v-divider class="my-2"></v-divider>
+
+              <v-card-text class="text-center">
+                <div class="d-flex align-center justify-center mb-4">
+                  <v-icon size="50" color="blue darken-2"
+                    >mdi-currency-php</v-icon
+                  >
+                  <h1 class="ml-2 font-weight-bold">{{ computeMonthly }}</h1>
+                </div>
+
+                <div class="d-flex justify-center align-center flex-wrap">
+                  <strong class="mr-2">Select Month & Year:</strong>
+
+                  <v-autocomplete
+                    v-model="selectedMonth"
+                    @change="getMonthIncome"
+                    :items="monthArr"
+                    dense
+                    outlined
+                    rounded
+                    class="mx-2"
+                    style="max-width: 150px"
+                  />
+
+                  <v-autocomplete
+                    v-model="selectedYear"
+                    @change="getMonthIncome"
+                    :items="yrArr"
+                    dense
+                    outlined
+                    rounded
+                    class="mx-2"
+                    style="max-width: 150px"
+                  />
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+      <v-tab-item key="yearly">
+        <v-row justify="center">
+          <v-col cols="12" md="8">
+            <v-card class="rounded-xl elevation-2 pa-4">
+              <v-card-title class="justify-center text-h6 font-weight-bold">
+                Yearly Income
+              </v-card-title>
+
+              <v-divider class="my-2"></v-divider>
+
+              <v-card-text class="text-center">
+                <div class="d-flex align-center justify-center mb-4">
+                  <v-icon size="50" color="deep-purple"
+                    >mdi-currency-php</v-icon
+                  >
+                  <h1 class="ml-2 font-weight-bold">{{ computeYearly }}</h1>
+                </div>
+
+                <div class="d-flex justify-center align-center">
+                  <strong class="mr-2">Select Year:</strong>
+
+                  <v-autocomplete
+                    v-model="selectedYear1"
+                    @change="getYearlyIncome"
+                    :items="yrArr"
+                    dense
+                    outlined
+                    rounded
+                    style="max-width: 160px"
+                  />
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items> -->
+
+    <!-- <v-row justify="center">
+      <v-col cols="12" md="8">
+        <v-card class="rounded-xl elevation-2 pa-4">
+          <v-card-title class="justify-center">
+            <v-select
+              v-model="incomeMode"
+              :items="['Daily', 'Monthly', 'Yearly']"
+              outlined
+              dense
+              rounded
+              style="max-width: 180px"
+            />
+          </v-card-title>
+
+          <v-divider class="my-2" />
+
+          <v-card-text class="text-center">
+            <div class="d-flex align-center justify-center mb-4">
+              <v-icon size="50" :color="iconColor"> mdi-currency-php </v-icon>
+
+              <h1 class="ml-2 font-weight-bold">
+                {{ displayedIncome }}
+              </h1>
+            </div>
+
+            <div
+              v-if="incomeMode === 'Daily'"
+              class="d-flex justify-center align-center"
+            >
+              <strong class="mr-2">Select Date:</strong>
+
+              <v-menu
+                v-model="menuDate"
+                :close-on-content-click="false"
+                offset-y
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    dense
+                    outlined
+                    rounded
+                    v-bind="attrs"
+                    v-on="on"
+                    readonly
                     v-model="selectedDate"
-                    @input="getDailyIncome()"
-                    color="primary"
-                  ></v-date-picker>
-                </v-menu>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-text class="d-flex flex-column align-center justify-center">
-            <div class="d-flex align-center justify-center">
-              <v-icon size="40">mdi-currency-php</v-icon>
-              <h1>{{ computeMonthly }}</h1>
-            </div>
-            <div class="d-flex align-center">
-              <div class="d-flex justify-start">
-                Total Income of this Month:
-              </div>
-              <div class="d-flex">
-                <v-autocomplete
-                  v-model="selectedMonth"
-                  dense
-                  @change="getMonthIncome()"
-                  class="rounded-lg"
-                  color="#93CB5B"
-                  :items="monthArr"
-                >
-                </v-autocomplete>
-                <v-autocomplete
-                  v-model="selectedYear"
-                  @change="getMonthIncome()"
-                  dense
-                  class="rounded-lg"
-                  color="#93CB5B"
-                  :items="yrArr"
-                >
-                </v-autocomplete>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-text class="d-flex flex-column align-center justify-center">
-            <div class="d-flex align-center justify-center">
-              <v-icon size="40">mdi-currency-php</v-icon>
-              <h1>{{ computeYearly }}</h1>
+                    prepend-inner-icon="mdi-calendar"
+                    style="max-width: 160px"
+                  />
+                </template>
+
+                <v-date-picker
+                  v-model="selectedDate"
+                  @input="getDailyIncome"
+                  color="primary"
+                  @change="menuDate = false"
+                />
+              </v-menu>
             </div>
 
-            <div class="d-flex align-center">
-              <div class="d-flex justify-start">Total Income of Year:</div>
-              <div class="d-flex mt-2 mx-2">
-                <v-autocomplete
-                  v-model="selectedYear1"
-                  @change="getYearlyIncome()"
-                  dense
-                  class="rounded-lg"
-                  color="#93CB5B"
-                  :items="yrArr"
-                >
-                </v-autocomplete>
-              </div>
+            <div
+              v-if="incomeMode === 'Monthly'"
+              class="d-flex justify-center align-center flex-wrap"
+            >
+              <strong class="mr-2">Select Month & Year:</strong>
+
+              <v-autocomplete
+                v-model="selectedMonth"
+                @change="getMonthIncome"
+                :items="monthArr"
+                dense
+                outlined
+                rounded
+                class="mx-2"
+                style="max-width: 150px"
+              />
+
+              <v-autocomplete
+                v-model="selectedYear"
+                @change="getMonthIncome"
+                :items="yrArr"
+                dense
+                outlined
+                rounded
+                class="mx-2"
+                style="max-width: 120px"
+              />
+            </div>
+
+            <div
+              v-if="incomeMode === 'Yearly'"
+              class="d-flex justify-center align-center"
+            >
+              <strong class="mr-2">Select Year:</strong>
+
+              <v-autocomplete
+                v-model="selectedYear1"
+                @change="getYearlyIncome"
+                :items="yrArr"
+                dense
+                outlined
+                rounded
+                style="max-width: 160px"
+              />
             </div>
           </v-card-text>
         </v-card>
       </v-col>
+    </v-row> -->
+
+    <v-card class="pa-6 rounded-xl" color="#165fab" dark>
+      <!-- TOTAL AMOUNT -->
+      <div class="text-center mb-4">
+        <h1 class="display-1 font-weight-bold">
+          ₱{{
+            activeTab === "daily"
+              ? computeDaily
+              : activeTab === "monthly"
+              ? computeMonthly
+              : computeYearly
+          }}
+        </h1>
+      </div>
+
+      <!-- FILTER BUTTONS -->
+      <div class="d-flex justify-center mb-4">
+        <v-btn
+          depressed
+          class="mx-2"
+          :class="activeTab === 'monthly' ? 'blue-grey lighten-3' : ''"
+          @click="activeTab = 'monthly'"
+        >
+          Month ▾
+        </v-btn>
+
+        <v-btn
+          depressed
+          class="mx-2"
+          :class="activeTab === 'daily' ? 'blue-grey lighten-3' : ''"
+          @click="activeTab = 'daily'"
+        >
+          Date ▾
+        </v-btn>
+
+        <v-btn
+          depressed
+          class="mx-2"
+          :class="activeTab === 'yearly' ? 'blue-grey lighten-3' : ''"
+          @click="activeTab = 'yearly'"
+        >
+          Year ▾
+        </v-btn>
+      </div>
+
+      <!-- DYNAMIC CONTENT BASED ON ACTIVE TAB -->
+      <div class="text-center">
+        <!-- DAILY -->
+        <div v-if="activeTab === 'daily'">
+          <strong>Select Date:</strong>
+          <div class="d-flex justify-center mt-2 flex-wrap">
+            <v-menu
+              v-model="menuDate"
+              :close-on-content-click="false"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  dense
+                  outlined
+                  rounded
+                  readonly
+                  v-model="selectedDate"
+                  v-bind="attrs"
+                  v-on="on"
+                  prepend-inner-icon="mdi-calendar"
+                  style="max-width: 200px"
+                />
+              </template>
+
+              <v-date-picker
+                v-model="selectedDate"
+                color="primary"
+                @input="getDailyIncome"
+                @change="menuDate = false"
+              />
+            </v-menu>
+          </div>
+        </div>
+
+        <!-- MONTHLY -->
+        <div v-if="activeTab === 'monthly'">
+          <strong>Select Month & Year:</strong>
+
+          <div class="d-flex justify-center mt-2 flex-wrap">
+            <v-autocomplete
+              v-model="selectedMonth"
+              :items="monthArr"
+              @change="getMonthIncome"
+              dense
+              outlined
+              rounded
+              style="max-width: 150px"
+              class="mx-2"
+            />
+
+            <v-autocomplete
+              v-model="selectedYear"
+              :items="yrArr"
+              @change="getMonthIncome"
+              dense
+              outlined
+              rounded
+              style="max-width: 150px"
+              class="mx-2"
+            />
+          </div>
+        </div>
+
+        <!-- YEARLY -->
+        <div v-if="activeTab === 'yearly'">
+          <strong>Select Year:</strong>
+
+          <v-autocomplete
+            v-model="selectedYear1"
+            :items="yrArr"
+            @change="getYearlyIncome"
+            dense
+            outlined
+            rounded
+            style="max-width: 200px"
+            class="mx-auto mt-2"
+          />
+        </div>
+      </div>
+    </v-card>
+
+    <v-row>
       <v-col cols="6">
         <canvas id="monthlyChart"></canvas>
       </v-col>
@@ -134,6 +417,7 @@ export default {
       yearlyData: [],
       dailyChart: null,
       monthlyChart: null,
+      incomeMode: "Daily",
       menuDate: false,
       selectedDate: new Date().toISOString().substr(0, 10),
       dailyTotal: 0,
@@ -168,6 +452,7 @@ export default {
         message: "",
         top: 10,
       },
+      activeTab: "daily",
       currentMonthIndex: null,
       currentYear: null,
 
@@ -177,12 +462,12 @@ export default {
         { id: 2, description: "PWD", percentage: 20 },
         { id: 3, description: "Employee", percentage: 50 },
       ],
-      activeTab: { id: 1, name: "Pending" },
-      tab: 1,
-      tabList: [
-        { id: 1, name: "Pending" },
-        { id: 2, name: "Fully Paid" },
-      ],
+      // activeTab: { id: 1, name: "Pending" },
+      // tab: 1,
+      // tabList: [
+      //   { id: 1, name: "Pending" },
+      //   { id: 2, name: "Fully Paid" },
+      // ],
       monthArr: [
         "January",
         "February",
@@ -262,6 +547,19 @@ export default {
       }
 
       return this.formatNumberValue(amount, 2);
+    },
+    displayedIncome() {
+      if (this.incomeMode === "Daily") return this.computeDaily;
+      if (this.incomeMode === "Monthly") return this.computeMonthly;
+      if (this.incomeMode === "Yearly") return this.computeYearly;
+      return 0;
+    },
+
+    iconColor() {
+      if (this.incomeMode === "Daily") return "green";
+      if (this.incomeMode === "Monthly") return "blue darken-2";
+      if (this.incomeMode === "Yearly") return "deep-purple";
+      return "grey";
     },
   },
   methods: {
@@ -592,7 +890,11 @@ export default {
     print(item) {
       console.log(item);
       const url =
-        process.env.VUE_APP_SERVER + "/pdf-generator/invoice/" + item.id;
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/invoice/" +
+        item.id +
+        "/" +
+        item.name.replace(/ /g, "-");
       window.open(url);
     },
   },

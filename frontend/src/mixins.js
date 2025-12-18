@@ -445,7 +445,7 @@ export default {
         return moment(date).format(format);
       }
     },
-    formatDateTime(date, format = "MMM. DD, YYYY HH:mm") {
+    formatDateTime(date, format = "MMM. DD, YYYY -  hh:mm A") {
       if (date) {
         return moment(date).format(format);
       }

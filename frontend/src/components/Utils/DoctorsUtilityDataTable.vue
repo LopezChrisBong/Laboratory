@@ -67,12 +67,15 @@
             </v-btn>
           </div>
 
-          <div v-if="dataSchedule.length === 0" class="text-center text-grey">
+          <div
+            v-if="dataSchedule.length === 0"
+            class="text-center text-grey mb-3"
+          >
             <v-icon size="40" class="mb-2">mdi-calendar-blank</v-icon>
             <div>No schedule added</div>
           </div>
 
-          <v-row>
+          <!-- <v-row>
             <v-col
               v-for="item in dataSchedule"
               :key="item.id"
@@ -104,123 +107,38 @@
                 </div>
               </v-card>
             </v-col>
+          </v-row> -->
+          <v-row justify="center">
+            <v-col cols="12">
+              <v-card>
+                <v-card-title>
+                  {{ monthName }}
+                  <v-spacer />
+                  <v-btn icon @click="$refs.calendar.prev()">
+                    <v-icon>mdi-chevron-left</v-icon>
+                  </v-btn>
+                  <v-btn icon @click="$refs.calendar.next()">
+                    <v-icon>mdi-chevron-right</v-icon>
+                  </v-btn>
+                </v-card-title>
+
+                <v-card-text>
+                  <v-calendar
+                    ref="calendar"
+                    v-model="focus"
+                    type="month"
+                    :events="calendarEvents"
+                    :event-color="getEventColor"
+                    @click:event="eventClick"
+                    style="height: 600px"
+                  />
+                </v-card-text>
+              </v-card>
+            </v-col>
           </v-row>
         </v-card>
       </v-col>
     </v-row>
-    <v-dialog v-model="scheduleDialog" max-width="800" persistent>
-      <v-card>
-        <v-card-title>{{ action }} Schedule</v-card-title>
-        <v-card-text>
-          <div>
-            <v-form ref="addSchedule">
-              <v-row>
-                <v-col cols="12" v-if="action == 'Add'">
-                  <v-menu
-                    ref="menu"
-                    v-model="menu"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    :nudge-right="40"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        label="Pick dates"
-                        prepend-icon="mdi-calendar"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                        :value="
-                          dates.length
-                            ? dates.length + ' dates selected'
-                            : 'Select dates'
-                        "
-                        :rules="[
-                          (v) => (dates && dates.length > 0) || 'required',
-                        ]"
-                      />
-                    </template>
-
-                    <v-date-picker
-                      v-model="dates"
-                      :min="minDate"
-                      :max="maxDate"
-                      multiple
-                      :allowed-dates="allowedDates"
-                      @input="onDatePicked"
-                    />
-                  </v-menu>
-
-                  <!-- Show chips outside the text field -->
-                  <v-chip-group v-if="dates.length" multiple class="mt-2">
-                    <v-chip
-                      v-for="(d, index) in dates"
-                      :key="index"
-                      close
-                      @click:close="removeDate(index)"
-                    >
-                      {{ new Date(d).toLocaleDateString() }}
-                    </v-chip>
-                  </v-chip-group>
-                </v-col>
-
-                <!-- <v-col cols="12">
-                  <v-text-field
-                    v-model="day"
-                    required
-                    readonly
-                    label="Day"
-                    class="rounded-lg"
-                    color="#6DB249"
-                  ></v-text-field>
-                </v-col> -->
-                <v-col cols="12">
-                  <v-autocomplete
-                    v-model="timeFrom"
-                    small-chips
-                    deletable-chips
-                    :rules="[(v) => !!v || 'time from is required']"
-                    label="from:"
-                    :items="allTimes"
-                    :readonly="action == 'View'"
-                    class="rounded-lg"
-                    color="#6DB249"
-                  ></v-autocomplete>
-                </v-col>
-                <v-col cols="12">
-                  <v-autocomplete
-                    v-model="timeTo"
-                    small-chips
-                    deletable-chips
-                    :rules="[(v) => !!v || 'time to is required']"
-                    label="to:"
-                    :items="allTimes"
-                    :readonly="action == 'View'"
-                    class="rounded-lg"
-                    color="#6DB249"
-                  ></v-autocomplete>
-                </v-col>
-              </v-row>
-            </v-form>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="resetForm()" color="red" outlined class="">
-            Cancel</v-btn
-          >
-          <v-btn
-            v-if="action != 'View'"
-            class="white--text ml-2 rounded-lg d-flex justify-center"
-            color="blue darken-1"
-            @click="action == 'Add' ? submitSchedule() : updateSchedule()"
-            >{{ action == "Add" ? "Submit" : "Update" }}</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 
     <v-dialog v-model="scheduleDialog" max-width="600" persistent>
       <v-card class="rounded-xl">
@@ -230,7 +148,31 @@
 
         <v-card-text>
           <v-form ref="addSchedule">
-            <v-row>
+            <v-row v-if="action == 'Add'">
+              <v-col>
+                <v-tabs
+                  grow
+                  v-model="activeTab"
+                  color="#2196F3"
+                  align-tabs="left"
+                  class="pa-2"
+                  style="
+                    border: 1px solid #2196f3;
+                    border-radius: 20px 20px 10px 10px;
+                    background-color: #1565c0;
+                  "
+                >
+                  <v-tab
+                    style="border: 1px solid #2196f3"
+                    v-for="tab in tabList"
+                    :key="tab.id"
+                    @change="changeTab(tab)"
+                    >{{ tab.name }}
+                  </v-tab>
+                </v-tabs>
+              </v-col>
+            </v-row>
+            <v-row v-if="tab == 1">
               <v-col cols="12" v-if="action === 'Add'">
                 <v-menu
                   v-model="menu"
@@ -269,14 +211,17 @@
                     v-for="(d, i) in dates"
                     :key="i"
                     closable
+                    small
+                    close
                     @click:close="removeDate(i)"
                   >
-                    {{ new Date(d).toLocaleDateString() }}
+                    <!-- {{ new Date(d).toLocaleDateString() }} -->
+                    {{ formatDate(d) }}
                   </v-chip>
                 </v-chip-group>
               </v-col>
 
-              <v-col cols="12">
+              <v-col cols="12" md="6">
                 <v-autocomplete
                   v-model="timeFrom"
                   label="From"
@@ -285,7 +230,105 @@
                 />
               </v-col>
 
+              <v-col cols="12" md="6">
+                <v-autocomplete
+                  v-model="timeTo"
+                  label="To"
+                  :items="allTimes"
+                  :rules="[(v) => !!v || 'Required']"
+                />
+              </v-col>
+            </v-row>
+            <v-row v-if="tab == 2">
               <v-col cols="12">
+                <v-menu
+                  v-model="monthMenu"
+                  :close-on-content-click="false"
+                  offset-y
+                  min-width="300"
+                >
+                  <!-- Input field -->
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      label="Select Month(s)"
+                      outlined
+                      dense
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                      :rules="[(v) => months.length > 0 || 'Month is required']"
+                      :value="monthText"
+                      clearable
+                      @click:clear="clearMonths"
+                    />
+                  </template>
+
+                  <!-- Month picker -->
+                  <v-date-picker
+                    v-model="months"
+                    type="month"
+                    :allowed-dates="allowedMonths"
+                    multiple
+                    :min="minMonth"
+                    @input="updateMonthText"
+                  />
+                </v-menu>
+                <v-row class="mt-2" dense>
+                  <v-chip
+                    v-for="(month, i) in months"
+                    :key="month"
+                    small
+                    close
+                    class="mr-1 mb-1"
+                    @click:close="removeMonth(i)"
+                  >
+                    {{ formatMonth(month) }}
+                  </v-chip>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-autocomplete
+                  v-model="timeFrom"
+                  label="From"
+                  :items="allTimes"
+                  :rules="[(v) => !!v || 'Required']"
+                />
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-autocomplete
+                  v-model="timeTo"
+                  label="To"
+                  :items="allTimes"
+                  :rules="[(v) => !!v || 'Required']"
+                />
+              </v-col>
+            </v-row>
+            <v-row v-if="tab == 3">
+              <v-col cols="12">
+                <v-autocomplete
+                  v-model="selectedMonths"
+                  :items="next12Months"
+                  class="mpa-2"
+                  label="Selected Month(s)"
+                  multiple
+                  small-chips
+                  outlined
+                  readonly-chips
+                  item-title="text"
+                  item-value="value"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-autocomplete
+                  v-model="timeFrom"
+                  label="From"
+                  :items="allTimes"
+                  :rules="[(v) => !!v || 'Required']"
+                />
+              </v-col>
+
+              <v-col cols="12" md="6">
                 <v-autocomplete
                   v-model="timeTo"
                   label="To"
@@ -300,7 +343,11 @@
         <v-card-actions>
           <v-spacer />
 
-          <v-btn variant="outlined" color="red" @click="resetForm()"
+          <v-btn
+            variant="outlined"
+            class="white--text"
+            color="red"
+            @click="resetForm()"
             >Cancel</v-btn
           >
 
@@ -315,6 +362,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
     <v-dialog v-model="specialtyDialog" max-width="600" persistent>
       <v-card class="rounded-xl">
         <v-card-title class="text-h6 font-weight-bold">
@@ -347,7 +395,11 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="outlined" color="red" @click="resetForm()"
+          <v-btn
+            variant="outlined"
+            class="white--text"
+            color="red"
+            @click="resetForm()"
             >Cancel</v-btn
           >
 
@@ -369,6 +421,8 @@
 export default {
   data: () => ({
     data: null,
+    focus: new Date().toISOString().substr(0, 10),
+    calendarEvents: [],
     daysList: [
       "Sunday",
       "Monday",
@@ -384,10 +438,14 @@ export default {
     timeTo: null,
     dates: [],
     disabledDates: [],
+    months: [],
     menu: false,
     scheduleDialog: false,
     specialtyDialog: false,
     experty: null,
+    monthMenu: false,
+    monthText: "",
+    minMonth: "",
     specialtyList: [
       { name: "Cardiology", description: "Heart and blood vessels" },
       { name: "Dermatology", description: "Skin, hair, and nails" },
@@ -467,12 +525,6 @@ export default {
       },
     ],
     allTimes: [
-      "01:00 AM",
-      "02:00 AM",
-      "03:00 AM",
-      "04:00 AM",
-      "05:00 AM",
-      "06:00 AM",
       "07:00 AM",
       "08:00 AM",
       "09:00 AM",
@@ -486,17 +538,21 @@ export default {
       "05:00 PM",
       "06:00 PM",
       "07:00 PM",
-      "08:00 PM",
-      "09:00 PM",
-      "10:00 PM",
-      "11:00 PM",
-      "12:00 AM",
     ],
     dataSchedule: [],
+    disabledMonths: [],
     dataSpecialty: [],
     updateID: null,
     dataExperties: [],
+    selectedMonths: [],
     action: null,
+    activeTab: { id: 1, name: "Daily Select" },
+    tab: 1,
+    tabList: [
+      { id: 1, name: "Daily" },
+      { id: 2, name: "Monthly" },
+      { id: 3, name: "Whole Year" },
+    ],
     fadeAwayMessage: {
       show: false,
       type: "success",
@@ -513,11 +569,75 @@ export default {
       },
       deep: true,
     },
+    disabledMonths: {
+      handler() {
+        this.selectedMonths = this.selectedMonths.filter(
+          (m) => !this.disabledMonths.includes(m)
+        );
+      },
+      immediate: true,
+    },
   },
   mounted() {
     this.initialize();
+    this.selectedMonths = this.next12Months.map((m) => m.value);
+    const nextMonthDate = new Date();
+    const nextMonth = new Date(
+      nextMonthDate.getFullYear(),
+      nextMonthDate.getMonth() + 1,
+      1
+    );
+    const nmY = nextMonth.getFullYear();
+    const nmM = String(nextMonth.getMonth() + 1).padStart(2, "0");
+    this.minMonth = `${nmY}-${nmM}`;
   },
   computed: {
+    // next12Months() {
+    //   const result = [];
+    //   const today = new Date();
+    //   for (let i = 1; i < 13; i++) {
+    //     const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    //     result.push({
+    //       text: d.toLocaleString("default", { month: "long", year: "numeric" }),
+    //       value: d.getFullYear() + "-" + (d.getMonth() + 1), // store month number
+    //       // value: d.getMonth() + 1, // store month number
+    //       // value: d.toLocaleString("default", {
+    //       //   month: "long",
+    //       //   year: "numeric",
+    //       // }),
+    //     });
+    //   }
+    //   return result;
+    // },
+    next12Months() {
+      const result = [];
+      const today = new Date();
+
+      for (let i = 1; i <= 12; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+
+        const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}`;
+
+        if (this.disabledMonths.includes(value)) continue;
+
+        result.push({
+          text: d.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          }),
+          value,
+        });
+      }
+
+      return result;
+    },
+    monthName() {
+      const date = new Date(this.focus);
+      return date.toLocaleString("default", { month: "long", year: "numeric" });
+    },
     formattedDates() {
       if (!this.dates || this.dates.length === 0) return "";
       return this.dates
@@ -542,19 +662,19 @@ export default {
       this.getAllSchedule();
       this.getAllSpecialty();
     },
+
     getAllSchedule() {
       let userRoleID = this.$store.state.user.id;
-
       this.axiosCall(
         "/doctors-schedule/getMySchedule/" + userRoleID,
         "GET"
       ).then((res) => {
         if (res) {
           this.dataSchedule = res.data;
-
           this.disabledDates = res.data.map((item) => item.date);
-
-          console.log("Disabled dates:", this.disabledDates);
+          console.log("dataSchedule dates:", this.dataSchedule);
+          this.disabledMonths = this.computeDisabledMonths();
+          this.mapScheduleToEvents();
         }
       });
     },
@@ -601,6 +721,7 @@ export default {
     },
     editSchedule(item) {
       this.action = "Update";
+      // console.log("Update", item);
       this.dates = item.date;
       this.day = item.day;
       this.timeFrom = item.timeFrom;
@@ -637,22 +758,65 @@ export default {
       }
       return;
     },
+    // allowedDates(date) {
+    //   return !this.disabledDates.includes(date);
+    // },
     allowedDates(date) {
-      return !this.disabledDates.includes(date);
+      const day = new Date(date).getDay();
+      const isWeekday = day !== 0 && day !== 6;
+      const notDisabled = !this.disabledDates.includes(date);
+
+      return isWeekday && notDisabled;
+    },
+    allowedMonths(date) {
+      return !this.disabledMonths.includes(date);
     },
     submitSchedule() {
-      if (this.$refs.addSchedule.validate()) {
-        let userRoleID = this.$store.state.user.id;
-        for (let i = 0; i < this.dates.length; i++) {
+      let userRoleID = this.$store.state.user.id;
+      if (this.tab == 1) {
+        if (this.$refs.addSchedule.validate()) {
+          for (let i = 0; i < this.dates.length; i++) {
+            let data = {
+              doctorID: userRoleID,
+              date: this.dates[i],
+              day: this.checkDay(this.dates[i]),
+              timeFrom: this.timeFrom,
+              timeTo: this.timeTo,
+            };
+            console.log(data);
+            this.axiosCall("/doctors-schedule", "POST", data).then((res) => {
+              if (res.data.status == 200) {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "success";
+                this.fadeAwayMessage.header = "Successfully Saved";
+                this.scheduleDialog = false;
+                this.resetForm();
+                this.initialize();
+              } else if (res.data.status == 400) {
+                this.fadeAwayMessage.show = true;
+                this.fadeAwayMessage.type = "error";
+                this.fadeAwayMessage.header = res.data.msg;
+              }
+            });
+          }
+        }
+      } else {
+        if (this.$refs.addSchedule.validate()) {
           let data = {
             doctorID: userRoleID,
-            date: this.dates[i],
-            day: this.checkDay(this.dates[i]),
+            months:
+              this.tab == 2
+                ? JSON.stringify(this.months)
+                : JSON.stringify(this.selectedMonths),
             timeFrom: this.timeFrom,
             timeTo: this.timeTo,
           };
           console.log(data);
-          this.axiosCall("/doctors-schedule", "POST", data).then((res) => {
+          this.axiosCall(
+            "/doctors-schedule/addMonthlySchedule",
+            "POST",
+            data
+          ).then((res) => {
             if (res.data.status == 200) {
               this.fadeAwayMessage.show = true;
               this.fadeAwayMessage.type = "success";
@@ -694,31 +858,29 @@ export default {
       }
     },
     updateSchedule() {
-      if (this.$refs.addSchedule.validate()) {
-        let data = {
-          timeFrom: this.timeFrom,
-          timeTo: this.timeTo,
-        };
+      // if (this.$refs.addSchedule.validate()) {
+      let data = {
+        timeFrom: this.timeFrom,
+        timeTo: this.timeTo,
+      };
 
-        this.axiosCall(
-          "/doctors-schedule/" + this.updateID,
-          "PATCH",
-          data
-        ).then((res) => {
-          if (res.data.status == 201) {
-            this.initialize();
+      this.axiosCall("/doctors-schedule/" + this.updateID, "PATCH", data).then(
+        (res) => {
+          if (res.data.status == 200) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "success";
-            this.fadeAwayMessage.header = "Successfully Updated";
-            this.scheduleDialog = false;
+            this.fadeAwayMessage.header = "System Message!";
+            this.fadeAwayMessage.message = "Schedule successfuly Updated";
             this.resetForm();
+            this.initialize();
           } else if (res.data.status == 400) {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "error";
             this.fadeAwayMessage.header = res.data.msg;
           }
-        });
-      }
+        }
+      );
+      // }
     },
     updateSpecialty() {
       if (this.$refs.addSpecialty.validate()) {
@@ -738,7 +900,6 @@ export default {
             this.fadeAwayMessage.show = true;
             this.fadeAwayMessage.type = "success";
             this.fadeAwayMessage.header = "Successfully Updated";
-            this.scheduleDialog = false;
             this.initialize();
             this.resetForm();
           } else if (res.data.status == 400) {
@@ -804,7 +965,130 @@ export default {
       this.updateID = null;
       this.specialtyDescription = null;
       this.experty = null;
+      this.tab = 1;
+      this.activeTab = { id: 1, name: "Daily Select" };
+
       this.getAllSchedule();
+    },
+    changeTab(tab) {
+      this.activeTab = tab;
+      this.tab = tab.id;
+      this.menu = false;
+      this.monthMenu = false;
+      // this.initialize();
+    },
+    allowedMonthDays(date) {
+      // Only allow dates in the selected month
+      if (!this.form.month) return true;
+      const month = this.form.month;
+      const d = new Date(date);
+      return d.getMonth() + 1 === month;
+    },
+    allowedYearDays(date) {
+      // Only allow dates in the selected year
+      if (!this.form.year) return true;
+      const year = this.form.year;
+      const d = new Date(date);
+      return d.getFullYear() === year;
+    },
+    updateMonthText() {
+      this.monthText = this.months.map((m) => this.formatMonth(m)).join(", ");
+    },
+
+    formatMonth(value) {
+      const [y, m] = value.split("-");
+      return new Date(y, m - 1).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
+    },
+
+    removeMonth(index) {
+      this.months.splice(index, 1);
+      this.updateMonthText();
+    },
+
+    clearMonths() {
+      this.months = [];
+      this.monthText = "";
+    },
+    getWeekdaysInMonth(year, month) {
+      const dates = [];
+      const date = new Date(year, month - 1, 1);
+
+      while (date.getMonth() === month - 1) {
+        const day = date.getDay();
+
+        if (day >= 1 && day <= 5) {
+          const y = date.getFullYear();
+          const m = String(date.getMonth() + 1).padStart(2, "0");
+          const d = String(date.getDate()).padStart(2, "0");
+
+          dates.push(`${y}-${m}-${d}`);
+        }
+
+        date.setDate(date.getDate() + 1);
+      }
+      return dates;
+    },
+    computeDisabledMonths() {
+      const disabledSet = new Set(this.disabledDates);
+      const months = new Set(this.disabledDates.map((d) => d.slice(0, 7)));
+
+      const disabledMonths = [];
+
+      months.forEach((monthStr) => {
+        const [year, month] = monthStr.split("-").map(Number);
+
+        const weekdays = this.getWeekdaysInMonth(year, month);
+
+        const allDisabled = weekdays.every((d) => disabledSet.has(d));
+
+        if (allDisabled) {
+          disabledMonths.push(monthStr);
+        }
+      });
+      console.log("disabledMonths", disabledMonths);
+      return disabledMonths;
+    },
+
+    mapScheduleToEvents() {
+      this.calendarEvents = this.dataSchedule.map((item) => {
+        const startTime = this.convertTo24Hour(item.timeFrom);
+        const endTime = this.convertTo24Hour(item.timeTo);
+
+        return {
+          // name: `Available (${item.timeFrom} - ${item.timeTo})`,
+          name: `(${item.timeFrom} - ${item.timeTo})`,
+          start: `${item.date} ${startTime}`,
+          end: `${item.date} ${endTime}`,
+          timed: true,
+          color: "green",
+          data: item,
+        };
+      });
+    },
+
+    getEventColor(event) {
+      return event.color || "primary";
+    },
+
+    convertTo24Hour(time) {
+      const [hourMin, modifier] = time.split(" ");
+      let [hours, minutes] = hourMin.split(":");
+
+      if (modifier === "PM" && hours !== "12") {
+        hours = String(parseInt(hours, 10) + 12);
+      }
+      if (modifier === "AM" && hours === "12") {
+        hours = "00";
+      }
+      return `${hours.padStart(2, "0")}:${minutes}`;
+    },
+    eventClick({ event, nativeEvent }) {
+      this.type = "week";
+      this.editSchedule(event.data);
+      nativeEvent.stopPropagation();
     },
   },
 };

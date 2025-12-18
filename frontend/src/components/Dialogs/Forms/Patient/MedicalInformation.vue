@@ -568,6 +568,7 @@
                   <v-autocomplete
                     dense
                     outlined
+                    :readonly="action == 'Add' ? false : true"
                     v-model="referred_by"
                     class="rounded-lg"
                     item-text="name"
@@ -588,8 +589,16 @@
                       row
                       :rules="[formRules.required]"
                     >
-                      <v-radio label="Normal" value="Normal"></v-radio>
-                      <v-radio label="CS" value="CS"></v-radio>
+                      <v-radio
+                        label="Normal"
+                        value="Normal"
+                        :disabled="action == 'Add' ? false : true"
+                      ></v-radio>
+                      <v-radio
+                        label="CS"
+                        value="CS"
+                        :disabled="action == 'Add' ? false : true"
+                      ></v-radio>
                     </v-radio-group>
                   </div>
                 </v-col>
@@ -640,7 +649,7 @@
                   >
                   <vue-editor
                     v-model="complain"
-                    :readonly="action == 'View'"
+                    :disabled="action == 'View' ? true : false"
                     :editorToolbar="customToolbar"
                   ></vue-editor>
                 </v-col>
@@ -651,7 +660,7 @@
                   >
                   <vue-editor
                     v-model="finding"
-                    :readonly="action == 'View'"
+                    :disabled="action == 'View' ? true : false"
                     :editorToolbar="customToolbar"
                   ></vue-editor>
                 </v-col>
@@ -662,7 +671,7 @@
 
                   <vue-editor
                     v-model="treatment"
-                    :readonly="action == 'View'"
+                    :disabled="action == 'View' ? true : false"
                     :editorToolbar="customToolbar"
                   ></vue-editor>
                 </v-col>
@@ -673,7 +682,7 @@
                   >
                   <vue-editor
                     v-model="remarks"
-                    :readonly="action == 'View'"
+                    :disabled="action == 'View' ? true : false"
                     :editorToolbar="customToolbar"
                   ></vue-editor>
                 </v-col>

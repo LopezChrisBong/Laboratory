@@ -148,7 +148,7 @@ export class DoctorSpecializationService {
                   name: item.name,
                 });
               }
-          // // console.log('Sample Clinic Data:',grouped)
+          console.log('Sample Clinic Data:',grouped)
           return grouped
   }
    async getAllDoctorClinic(id:number){

@@ -54,10 +54,52 @@
               </v-card>
             </v-col> -->
             <v-col cols="12" class="d-flex justify-end mt-2 mr-2">
+              <v-menu
+                offset-y
+                left
+                transition="scale-transition"
+                v-model="menu"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    color="blue"
+                    class="rounded-lg mx-2"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    print
+                  </v-btn>
+                </template>
+
+                <v-card class="pa-3" max-width="450" persistent>
+                  <v-card-title class="text-h6">Print Medication</v-card-title>
+                  <v-card-text>
+                    <v-card
+                      class="pa-2 my-2 medic"
+                      style="text-align: center"
+                      @click="printMeds(1)"
+                      >NORMAL/USUAL MEDICATION</v-card
+                    >
+                    <v-card
+                      v-if="buttonAlert == true"
+                      class="pa-2 medic"
+                      style="text-align: center"
+                      @click="printMeds(2)"
+                      >PREGNANCY MEDICATION</v-card
+                    >
+                  </v-card-text>
+                  <!-- <v-card-actions>
+                    <v-btn text color="primary" @click="menu = false"
+                      >Close</v-btn
+                    >
+                  </v-card-actions> -->
+                </v-card>
+              </v-menu>
               <v-btn
                 @click="AddFunction()"
                 class="white--text rounded-lg"
-                color="blue"
+                color="green"
                 v-if="userRoleID == 3"
               >
                 Add
@@ -72,10 +114,13 @@
                 <template v-slot:[`item.index`]="{ index }">
                   {{ index + 1 }}.
                 </template>
+                <template v-slot:[`item.created_at`]="{ item }">
+                  {{ formatDate(item.created_at) }}
+                </template>
                 <template v-slot:[`item.pregnant`]="{ item }">
                   {{
                     item.pregnant != "0"
-                      ? " PREGNANCY MEDICATION"
+                      ? "PREGNANCY MEDICATION"
                       : "NORMAL/USUAL MEDICATION"
                   }}.
                 </template>
@@ -187,6 +232,7 @@ export default {
       options: {},
       strategicData: null,
       action: null,
+      buttonAlert: false,
       desc: null,
       itemToDelete: null,
       confirmDialog: false,
@@ -246,7 +292,14 @@ export default {
           valign: "center",
           sortable: false,
         },
-
+        {
+          text: "Date",
+          value: "created_at",
+          align: "center",
+          valign: "center",
+          sortable: false,
+          width: 200,
+        },
         {
           text: "Action",
           value: "action",
@@ -354,12 +407,15 @@ export default {
     getAllPatientMedicalInfo() {
       this.loading = true;
       this.axiosCall(
-        "/medical-info/patientMedicalInfo/" + this.data.id,
+        "/medical-info/patientMedicalInfo/" + this.data.patientID,
         "GET"
       ).then((res) => {
         if (res) {
-          console.log("Get Data", res.data);
+          // console.log("Get Data", res.data);
           this.dataItem = res.data;
+          this.buttonAlert = this.dataItem.some(
+            (item) => String(item.pregnant) === "1"
+          );
         } else {
           this.dataItem = null;
         }
@@ -418,7 +474,27 @@ export default {
         item.id;
       window.open(url);
     },
+    printMeds(num) {
+      if (num == 1) {
+        const url =
+          process.env.VUE_APP_SERVER +
+          "/pdf-generator/patientNormalMedication/" +
+          this.data.patientID;
+        window.open(url);
+      } else {
+        const url =
+          process.env.VUE_APP_SERVER +
+          "/pdf-generator/patientPregnantMedication/" +
+          this.data.patientID;
+        window.open(url);
+      }
+    },
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+:hover.medic {
+  background-color: blue;
+  color: white;
+}
+</style>
