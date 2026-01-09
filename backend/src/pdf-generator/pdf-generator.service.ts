@@ -8,6 +8,8 @@ import { DataSource } from 'typeorm';
 
 import { SendNewEmailDto } from './dto/send-new-email.dto';
 import {
+  Inventory,
+  InventoryTransaction,
   Invoice,
   MedicalCertificate,
   MedicalInfo,
@@ -407,7 +409,7 @@ export class PdfGeneratorService {
     return moment(value).format('MMM DD,YYYY');
   }
 
-  async prescription(id: number) {
+  async prescription(id: number, name:string) {
     let prescription = await this.dataSource.manager
       .createQueryBuilder(Prescription, 'p')
       .select(['p.*',
@@ -607,7 +609,7 @@ export class PdfGeneratorService {
     return result[0];
   }
 
-  async patientMedicalRecord(id: number) {
+  async patientMedicalRecord(id: number, name) {
     console.log(id);
     const patientData = await this.dataSource.manager
       .createQueryBuilder(MedicalInfo, 'mid')
@@ -685,7 +687,7 @@ export class PdfGeneratorService {
     }
   }
 
-  async patientNormalMedication(id: number) {
+  async patientNormalMedication(id: number, name:string) {
       const patientData = await this.dataSource.manager
       .createQueryBuilder(Patient, 'p')
       .select(['p.*',
@@ -778,7 +780,7 @@ export class PdfGeneratorService {
     }
   }
 
-  async patientPregnantMedication(id: number) {
+  async patientPregnantMedication(id: number, name:string) {
       const patientData = await this.dataSource.manager
       .createQueryBuilder(Patient, 'p')
       .select(['p.*',
@@ -858,6 +860,133 @@ export class PdfGeneratorService {
       const page = await browser.newPage();
 
       const content = await this.compile('pregnant-patient-medication', data);
+      await page.setContent(content);
+
+      const buffer = await page.pdf({
+        format: 'letter',
+        margin: {
+          top: '0.20in',
+          left: '0.50in',
+          bottom: '0.20in',
+          right: '0.50in',
+        },
+        landscape: false,
+        printBackground: true,
+      });
+
+      await browser.close();
+      return buffer;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async patientAllMedication(id: number, name:string) {
+      const patientData = await this.dataSource.manager
+      .createQueryBuilder(Patient, 'p')
+      .select(['p.*',
+              `IF (
+                    !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
+                    CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
+                    CONCAT(p.f_name, ' ', p.l_name)
+                ) AS name`,
+          ])
+      .leftJoin(MedicalInfo, 'mid', 'mid.patientId = p.id')
+      .where('p.id = :id', { id })
+      .getRawOne()
+      console.log(patientData)
+
+    
+    const medicalDataNormal = await this.dataSource.manager
+      .createQueryBuilder(MedicalInfo, 'mid')
+      .select([
+        `IF (
+          !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
+          CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
+          CONCAT(p.f_name, ' ', p.l_name)
+      ) AS name`,
+             `IF (
+          !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
+          CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
+          CONCAT(ud.fname, ' ', ud.lname)
+      ) AS doctor_name`,
+        'mid.*',
+        'p.b_date as b_date',
+        'p.gender as sex',
+        'p.address as address',
+        'p.civil_status as civil_status',
+        'p.contact_no as contact_no',
+        'p.occupation as occupation',
+      ])
+      .leftJoin(Patient, 'p', 'mid.patientId = p.id')
+      .leftJoin(UserDetail, 'ud', 'mid.doctorID = ud.id')
+      .where('mid.patientID = :id', { id })
+      .andWhere('mid.pregnant = 0')
+      .orderBy('mid.created_at', 'DESC')
+      .getRawMany();
+      // console.log(medicalDataNormal)
+
+      const medicalDataPregnant = await this.dataSource.manager
+      .createQueryBuilder(MedicalInfo, 'mid')
+      .select([
+        `IF (
+          !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
+          CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
+          CONCAT(p.f_name, ' ', p.l_name)
+      ) AS name`,
+             `IF (
+          !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
+          CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
+          CONCAT(ud.fname, ' ', ud.lname)
+      ) AS doctor_name`,
+        'mid.*',
+        'p.b_date as b_date',
+        'p.gender as sex',
+        'p.address as address',
+        'p.civil_status as civil_status',
+        'p.contact_no as contact_no',
+        'p.occupation as occupation',
+      ])
+      .leftJoin(Patient, 'p', 'mid.patientId = p.id')
+      .leftJoin(UserDetail, 'ud', 'mid.doctorID = ud.id')
+      .where('mid.patientID = :id', { id })
+      .andWhere('mid.pregnant = 1')
+      .orderBy('mid.created_at', 'DESC')
+      .getRawMany();
+   
+
+    const now = new Date();
+    const formatted = new Intl.DateTimeFormat('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(now);
+
+    const headerImgPath = join(
+      process.cwd(),
+      '/../static/img/Paragon Logo.png',
+    );
+    // const headerImgPath = join(process.cwd(), '/static/img/paragon logo website.png');
+    const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
+    // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
+
+    const data = [{
+      patientData: patientData,
+      headerImg: headerImg,
+      medicalDataNormal:medicalDataNormal,
+      medicalDataPregnant:medicalDataPregnant,
+      pregnantInfo:medicalDataPregnant[0],
+      formatted
+    }];
+
+    try {
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox'],
+      });
+
+      const page = await browser.newPage();
+
+      const content = await this.compile('all-patient-medication', data);
       await page.setContent(content);
 
       const buffer = await page.pdf({
@@ -1038,7 +1167,7 @@ export class PdfGeneratorService {
     }
   }
 
-  async medicalCertificate(id: number) {
+  async medicalCertificate(id: number, name:string) {
     let medicalCert = await this.dataSource.manager
       .createQueryBuilder(MedicalCertificate, 'mc')
       .select(['mc.*',
@@ -1106,6 +1235,64 @@ export class PdfGeneratorService {
     }
   }
 
+  async inventoryTransactionPerItem(id: number) {
+    let itemTransaction = await this.dataSource.manager
+      .createQueryBuilder(InventoryTransaction, 'it')
+      .select(['it.*'])
+      .where('it.inventoryItemId = :id', { id })
+      .orderBy('it.transaction_date', 'DESC')
+      .getRawMany();
+      console.log(itemTransaction)
+
+    const now = new Date();
+    const formatted = new Intl.DateTimeFormat('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(now);
+
+
+    const headerImgPath = join(
+      process.cwd(),
+      '/../static/img/Paragon Logo.png',
+    );
+    // const headerImgPath = join(process.cwd(), '/static/img/paragon logo website.png');
+    const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
+    // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
+
+    const data = [{
+        itemTransaction: itemTransaction,
+        itemTransactionName: itemTransaction[0].itemName,
+        headerImg,
+        formatted
+      }];
+    try {
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox'],
+      });
+      const page = await browser.newPage();
+      // compile(template_name, data)
+      const content = await this.compile('items-transaction', data);
+      await page.setContent(content);
+
+      const buffer = await page.pdf({
+        format: 'A4',
+        margin: {
+          top: '0.20in',
+          left: '0.50in',
+          bottom: '0.20in',
+          right: '0.50in',
+        },
+        landscape: false,
+        printBackground: true,
+      });
+      await browser.close();
+      return buffer;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async getQRCode(id: string) {
     let d = await QRCode.toDataURL(id)
       .then((url) => {
@@ -1142,6 +1329,113 @@ export class PdfGeneratorService {
       return buffer;
     } catch (e) {
       // console.log(e);
+    }
+  }
+
+  async printAllItemReport( type:number, dates:string) {
+    console.log(type,dates)
+    let reportData
+     let datesData = type == 1 ? dates : JSON.parse(dates)
+    if(type == 1){
+      const inputDate = new Date(datesData);
+
+      // clone date
+      const d = new Date(inputDate);
+
+      // get Monday
+      const day = d.getDay(); // 0 = Sunday
+      const diffToMonday = day === 0 ? -6 : 1 - day;
+      const startOfWeek = new Date(d.setDate(d.getDate() + diffToMonday));
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      // get Sunday
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+
+      reportData = await this.dataSource.manager
+      .createQueryBuilder(InventoryTransaction, 'it')
+      .select([
+        'it.*',
+        'inv.itemName as itemName',
+      ])
+      .leftJoin(Inventory, 'inv', 'inv.id = it.inventoryItemId')
+      .where('it.transaction_date BETWEEN :start AND :end', {
+        start: startOfWeek,
+        end: endOfWeek,
+        })
+      .orderBy('it.transaction_date', 'DESC')
+      .getRawMany();
+      console.log(reportData)
+    }
+    else if(type == 2){
+   
+       reportData = await this.dataSource.manager
+      .createQueryBuilder(InventoryTransaction, 'it')
+      .select([
+        'it.*',
+        'inv.itemName as itemName',
+      ])
+      .leftJoin(Inventory, 'inv', 'inv.id = it.inventoryItemId')
+      .where("DATE_FORMAT(it.transaction_date, '%Y-%m') IN (:...datesData)", {
+        datesData,
+      })
+      .orderBy('it.transaction_date', 'DESC')
+      .getRawMany();
+      console.log(reportData)
+    }
+
+   
+
+    const now = new Date();
+    const formatted = new Intl.DateTimeFormat('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(now);
+
+    const headerImgPath = join(
+      process.cwd(),
+      '/../static/img/Paragon Logo.png',
+    );
+    // const headerImgPath = join(process.cwd(), '/static/img/paragon logo website.png');
+    const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
+    // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
+
+    const data = [{
+      reportData:reportData,
+      headerImg: headerImg,
+      type: type,
+      formatted
+    }];
+
+    try {
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox'],
+      });
+
+      const page = await browser.newPage();
+
+      const content = await this.compile('all-items-transaction', data);
+      await page.setContent(content);
+
+      const buffer = await page.pdf({
+        format: 'letter',
+        margin: {
+          top: '0.20in',
+          left: '0.50in',
+          bottom: '0.20in',
+          right: '0.50in',
+        },
+        landscape: false,
+        printBackground: true,
+      });
+
+      await browser.close();
+      return buffer;
+    } catch (e) {
+      console.log(e);
     }
   }
 }

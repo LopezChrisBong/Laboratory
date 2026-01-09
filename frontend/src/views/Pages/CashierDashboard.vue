@@ -291,6 +291,7 @@
         </v-btn>
 
         <v-btn
+          v-if="assignModule == 1"
           depressed
           class="mx-2"
           :class="activeTab === 'yearly' ? 'blue-grey lighten-3' : ''"
@@ -385,10 +386,10 @@
     </v-card>
 
     <v-row>
-      <v-col cols="6">
+      <v-col :cols="assignModule == 1 ? '6' : '12'">
         <canvas id="monthlyChart"></canvas>
       </v-col>
-      <v-col cols="6">
+      <v-col v-if="assignModule == 1" :cols="assignModule == 1 ? '6' : '12'">
         <canvas id="yearlyChart"></canvas>
       </v-col>
     </v-row>
@@ -442,6 +443,7 @@ export default {
       dialogConfirmDone: false,
       loading: true,
       invoice_income: [],
+      assignModule: null,
       search: "",
       date: null,
       payPatient: [],
@@ -491,6 +493,7 @@ export default {
     };
   },
   mounted() {
+    this.assignModule = this.$store.state.user.user.assignedModuleID;
     let d = new Date();
     for (let i = d.getFullYear(); i >= 2024; i--) {
       this.yrArr.push(i);

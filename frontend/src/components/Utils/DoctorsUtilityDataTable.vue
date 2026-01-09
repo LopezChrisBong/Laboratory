@@ -609,6 +609,7 @@ export default {
     //   }
     //   return result;
     // },
+
     next12Months() {
       const result = [];
       const today = new Date();
@@ -763,7 +764,8 @@ export default {
     // },
     allowedDates(date) {
       const day = new Date(date).getDay();
-      const isWeekday = day !== 0 && day !== 6;
+      // const isWeekday = day !== 0 && day !== 6;
+      const isWeekday = day !== 0;
       const notDisabled = !this.disabledDates.includes(date);
 
       return isWeekday && notDisabled;

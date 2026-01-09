@@ -11,7 +11,7 @@
 
       <v-card-text style="max-height: 600px" class="pa-4">
         <v-row class="mb-3">
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="5">
             <v-text-field
               v-model="search"
               outlined
@@ -22,7 +22,7 @@
               hide-details
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="5">
             <v-select
               v-model="filterType"
               :items="transactionTypes"
@@ -34,6 +34,16 @@
               @change="filterTransactions"
             ></v-select>
           </v-col>
+          <v-col cols="12" md="2">
+            <v-btn
+              class="white--text ml-2 rounded-lg"
+              color="#2196F3"
+              @click="report()"
+            >
+              <v-icon left> mdi-printer </v-icon>
+              Report
+            </v-btn></v-col
+          >
         </v-row>
 
         <v-data-table
@@ -59,15 +69,20 @@
           </template>
 
           <template v-slot:[`item.quantity`]="{ item }">
-            <span :class="item.transactionType === 'Resupply' ? 'green--text' : 'orange--text'">
-              {{ item.transactionType === 'Resupply' ? '+' : '-' }}{{ item.quantity }}
+            <span
+              :class="
+                item.transactionType === 'Resupply'
+                  ? 'green--text'
+                  : 'orange--text'
+              "
+            >
+              {{ item.transactionType === "Resupply" ? "+" : "-"
+              }}{{ item.quantity }}
             </span>
           </template>
 
           <template v-slot:[`item.stockChange`]="{ item }">
-            <span>
-              {{ item.previousStock }} → {{ item.newStock }}
-            </span>
+            <span> {{ item.previousStock }} → {{ item.newStock }} </span>
           </template>
         </v-data-table>
       </v-card-text>
@@ -76,9 +91,7 @@
 
       <v-card-actions class="pa-4">
         <v-spacer></v-spacer>
-        <v-btn color="primary" @click="closeDialog()">
-          Close
-        </v-btn>
+        <v-btn color="primary" @click="closeDialog()"> Close </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -170,6 +183,14 @@ export default {
       this.transactions = [];
       this.filteredTransactions = [];
     },
+    report() {
+      console.log(this.inventoryItemId);
+      const url =
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/inventoryTransactionPerItem/" +
+        this.inventoryItemId;
+      window.open(url);
+    },
   },
 };
 </script>
@@ -180,4 +201,3 @@ export default {
   color: white;
 }
 </style>
-

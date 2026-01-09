@@ -30,7 +30,8 @@ export class ServiceAppointment {
      @Column({ type: "longtext", nullable:true})
     attachment: string
 
-    
+    @Column({ type: 'varchar', nullable:true })
+    created_by: string;
 
     @CreateDateColumn({
         type: 'datetime',

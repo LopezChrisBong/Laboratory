@@ -525,6 +525,7 @@ export default {
     medicalInfo: null,
     medicalCert: null,
     headers: [
+      { text: "Patient ID", value: "pID" },
       { text: "Name", value: "name" },
 
       { text: "Latest Laboratory Request", value: "services", align: "center" },
@@ -542,6 +543,7 @@ export default {
     ],
 
     headers1: [
+      { text: "Patient ID", value: "pID" },
       { text: "Name", value: "name" },
       { text: "Date", value: "date", align: "center" },
       { text: "Doctor Name", value: "doctor_name", align: "center" },

@@ -15,8 +15,11 @@
         <div v-if="$vuetify.breakpoint.smAndDown">PARAGON</div>
 
         <div v-if="$vuetify.breakpoint.smAndUp">
-          <h2 class="mb-0" style="color:black; font-size:20px;">PARAGON</h2>
-          <p class="ma-0" style="color:black; margin-top:-5px; font-size:12px;">
+          <h2 class="mb-0" style="color: black; font-size: 20px">PARAGON</h2>
+          <p
+            class="ma-0"
+            style="color: black; margin-top: -5px; font-size: 12px"
+          >
             Diagnostics And Multi-Specialty Clinic
           </p>
         </div>
@@ -25,13 +28,13 @@
       <v-spacer></v-spacer>
       <div v-if="$vuetify.breakpoint.smAndUp">
         <v-btn text @click="mainData = 1">
-          <RouterLink to="/landing-page" style="text-decoration:none;">
-            <b style="color:black;">Home</b>
+          <RouterLink to="/landing-page" style="text-decoration: none">
+            <b style="color: black">Home</b>
           </RouterLink>
         </v-btn>
 
         <v-btn text @click="mainData = 2">
-          <b style="color:black;">Appointment</b>
+          <b style="color: black">Appointment</b>
         </v-btn>
       </div>
     </v-app-bar>
@@ -39,7 +42,7 @@
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list>
         <v-list-item @click="mainData = 1">
-          <RouterLink to="/landing-page" style="text-decoration:none;">
+          <RouterLink to="/landing-page" style="text-decoration: none">
             <v-list-item-title>Home</v-list-item-title>
           </RouterLink>
         </v-list-item>
@@ -58,7 +61,7 @@
           hide-delimiter-background
           show-arrows-on-hover
           :show-arrows="false"
-          style="margin-top: -60px;"
+          style="margin-top: -60px"
         >
           <v-carousel-item
             v-for="(item, i) in slides"
@@ -69,12 +72,12 @@
           >
             <v-row class="fill-height" align="center" justify="center">
               <v-col class="text-center white--text" cols="12">
-                <h1 class="display-2 font-weight-bold" style="color: black;">
+                <h1 class="display-2 font-weight-bold" style="color: black">
                   {{ item.title }}
                 </h1>
-                <p class="headline" style="color: blue;">{{ item.subtitle }}</p>
+                <p class="headline" style="color: blue">{{ item.subtitle }}</p>
               </v-col>
-              <v-col cols="12" class="d-flex  justify-center item-center">
+              <v-col cols="12" class="d-flex justify-center item-center">
               </v-col>
             </v-row>
           </v-carousel-item>
@@ -156,7 +159,7 @@
           </v-row>
         </v-container>
       </div>
-      <PatientAppointment v-else style="margin-top: -30px;" />
+      <PatientAppointment v-else style="margin-top: -30px" />
     </v-main>
 
     <v-footer app padless>

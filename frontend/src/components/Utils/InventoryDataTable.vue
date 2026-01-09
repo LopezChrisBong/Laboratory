@@ -39,7 +39,7 @@
               outlined
               hide-details
               class="shrink mr-2"
-              style="max-width: 200px;"
+              style="max-width: 200px"
             ></v-select>
             <v-autocomplete
               v-model="selectedSupplier"
@@ -52,12 +52,16 @@
               hide-details
               clearable
               class="shrink mr-2"
-              style="max-width: 200px;"
+              style="max-width: 200px"
               :loading="loadingSuppliers"
               @change="filterBySupplier"
             ></v-autocomplete>
             <v-btn color="primary" dark class="mb-2" @click="addNewItem">
               New Item
+            </v-btn>
+            <v-btn color="primary" dark class="mb-2 mx-2" @click="printReprot">
+              <v-icon size="large">mdi-printer</v-icon>
+              Report
             </v-btn>
           </v-toolbar>
         </template>
@@ -92,22 +96,29 @@
               >
                 <div>{{ item.brand }}</div>
                 <template v-slot:input>
-                  <v-select
+                  <!-- <v-select
                     v-model="item.brand"
                     :items="brands"
                     label="Edit Brand"
                     single-line
                     :rules="[formRules.required]"
-                  ></v-select>
+                  ></v-select> -->
+                  <v-text-field
+                    v-model="item.brand"
+                    label="Edit Brand"
+                    single-line
+                    counter
+                    :rules="[formRules.required]"
+                  ></v-text-field>
                 </template>
               </v-edit-dialog>
             </td>
             <td>
               <v-edit-dialog
-                  :return-value.sync="item.unit"
-                  @save="saveInlineItem(item)"
-                  large
-                  persistent
+                :return-value.sync="item.unit"
+                @save="saveInlineItem(item)"
+                large
+                persistent
               >
                 <div>{{ item.unit }}</div>
                 <template v-slot:input>
@@ -198,7 +209,7 @@
                     counter
                     :rules="[
                       formRules.number,
-                      v => v >= 0 || 'Cannot be negative'
+                      (v) => v >= 0 || 'Cannot be negative',
                     ]"
                   ></v-text-field>
                 </template>
@@ -224,8 +235,12 @@
                     counter
                     :rules="[
                       formRules.number,
-                      v => v >= 0 || 'Cannot be negative',
-                      v => v <= (item.totalend_quantity || 0) || 'Cannot exceed available stock (' + (item.totalend_quantity || 0) + ')'
+                      (v) => v >= 0 || 'Cannot be negative',
+                      (v) =>
+                        v <= (item.totalend_quantity || 0) ||
+                        'Cannot exceed available stock (' +
+                          (item.totalend_quantity || 0) +
+                          ')',
                     ]"
                   ></v-text-field>
                 </template>
@@ -252,7 +267,7 @@
                     counter
                     :rules="[
                       formRules.number,
-                      v => v >= 0 || 'Cannot be negative'
+                      (v) => v >= 0 || 'Cannot be negative',
                     ]"
                   ></v-text-field>
                 </template>
@@ -304,9 +319,9 @@
               </v-chip>
             </td>
             <td>
-              <v-icon 
-                small 
-                class="mr-2" 
+              <v-icon
+                small
+                class="mr-2"
                 @click="viewTransactionHistory(item)"
                 color="blue"
                 title="View Transaction History"
@@ -356,7 +371,7 @@
                   color="blue"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12">
+              <!-- <v-col cols="12">
                 <v-autocomplete
                   v-model="editedItem.brand"
                   :rules="[formRules.required]"
@@ -368,6 +383,19 @@
                   :items="brands"
                 >
                 </v-autocomplete>
+              </v-col> -->
+              <v-col cols="12">
+                <v-text-field
+                  v-model="editedItem.brand"
+                  :rules="[formRules.required]"
+                  dense
+                  outlined
+                  type="text"
+                  label="Edit Brand"
+                  required
+                  class="rounded-lg"
+                  color="blue"
+                ></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-autocomplete
@@ -436,7 +464,7 @@
                   v-model.number="editedItem.starting_quantity"
                   :rules="[
                     formRules.required,
-                    v => v >= 0 || 'Cannot be negative'
+                    (v) => v >= 0 || 'Cannot be negative',
                   ]"
                   dense
                   outlined
@@ -497,6 +525,54 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="reportDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Report on:</v-card-title>
+        <v-card-text>
+          <div class="d-flex justify-center">
+            <v-row>
+              <v-col cols="12" md="6" v-if="reportType == null">
+                <v-btn block class="reportHov" @click="reportType = 1"
+                  >WEEK</v-btn
+                ></v-col
+              >
+              <v-col cols="12" md="6" v-if="reportType == null">
+                <v-btn block class="reportHov" @click="reportType = 2"
+                  >MONTH</v-btn
+                >
+              </v-col>
+              <v-col cols="12" v-if="reportType == 2">
+                <div class="d-flex justify-center">
+                  <v-date-picker
+                    v-model="monthReport"
+                    type="month"
+                    :allowed-dates="allowedDates"
+                    multiple
+                  ></v-date-picker>
+                </div>
+              </v-col>
+              <v-col cols="12" v-if="reportType == 1">
+                <div class="d-flex justify-center">
+                  <v-date-picker v-model="weekReport"></v-date-picker>
+                </div>
+              </v-col>
+              <!-- <v-col cols="12" md="4"> <v-btn block>YEAR</v-btn></v-col> -->
+            </v-row>
+          </div>
+        </v-card-text>
+        <v-card-actions
+          ><v-btn color="red darken-1" @click="cacelReport()">Cancel</v-btn>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            :disabled="monthReport == null && weekReport == null"
+            color="blue darken-1"
+            @click="reportInventory"
+            >print</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <TransactionHistoryDialog
       v-model="showTransactionHistory"
@@ -520,6 +596,7 @@ export default {
     return {
       search: "",
       dialog: false,
+      reportDialog: false,
       selectedSection: "Hematology",
       selectedTransactionType: "Resupply", // Default to Resupply
       selectedSupplier: null, // Filter by supplier
@@ -547,6 +624,9 @@ export default {
         { text: "Actions", value: "actions", sortable: false },
       ],
       items: [],
+      reportType: null,
+      weekReport: null,
+      monthReport: null,
       editedItem: {
         itemName: "",
         brand: "",
@@ -593,6 +673,7 @@ export default {
         "Rapiquick",
         "Advan",
         "Fine Care",
+        "Others",
       ],
       options: {},
       loading: false,
@@ -642,7 +723,7 @@ export default {
     closeD() {
       this.dialog = false;
     },
-    searchInventory: debounce(async function(event) {
+    searchInventory: debounce(async function (event) {
       const name = event.target.value;
       if (name) {
         try {
@@ -735,11 +816,15 @@ export default {
         };
         console.log(dataToSend);
         const token = localStorage.getItem("token");
-        await axios.post(process.env.VUE_APP_SERVER + "/inventory", dataToSend, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        await axios.post(
+          process.env.VUE_APP_SERVER + "/inventory",
+          dataToSend,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         this.fadeAwayMessage.show = true;
         this.fadeAwayMessage.type = "success";
         this.fadeAwayMessage.header = "System Message";
@@ -781,7 +866,7 @@ export default {
             section: item.section,
             transactionType: this.selectedTransactionType || null,
           };
-          
+
           await axios.patch(
             process.env.VUE_APP_SERVER + `/inventory/${item.id}`,
             dataToSend,
@@ -811,7 +896,7 @@ export default {
           this.fadeAwayMessage.type = "success";
           this.fadeAwayMessage.header = "System Message";
           this.fadeAwayMessage.message = "Successfully Updated";
-          
+
           // Refresh the entire table to ensure all values are in sync
           await this.getData();
         } catch (error) {
@@ -973,10 +1058,43 @@ export default {
           return "blue";
       }
     },
+    allowedDates(date) {
+      const selected = new Date(date + "-01");
+      const now = new Date();
+      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1 + 1);
+
+      return selected <= currentMonth;
+    },
+    printReprot() {
+      this.reportDialog = true;
+    },
+    reportInventory() {
+      console.log(this.monthReport, this.weekReport);
+      let data =
+        this.weekReport != null
+          ? JSON.stringify(this.weekReport)
+          : JSON.stringify(this.monthReport);
+      let type = this.weekReport != null ? 1 : 2;
+      const url =
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/printAllItemReport/" +
+        type +
+        "/" +
+        data +
+        "/inventoryReport";
+      window.open(url);
+    },
+    cacelReport() {
+      this.reportDialog = false;
+      this.reportType = null;
+      this.monthReport = null;
+      this.weekReport = null;
+    },
   },
   mounted() {
     this.getData();
     this.getSuppliers();
+    // this.monthReport = new Date().toISOString().slice(0, 7);
   },
 };
 </script>
@@ -984,5 +1102,9 @@ export default {
 <style scoped>
 .v-data-table {
   font-size: 14px;
+}
+.reportHov:hover {
+  background-color: rgb(47, 106, 233);
+  color: white;
 }
 </style>

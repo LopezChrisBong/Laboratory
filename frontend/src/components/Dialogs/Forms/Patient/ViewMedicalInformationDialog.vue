@@ -88,6 +88,12 @@
                       @click="printMeds(2)"
                       >PREGNANCY MEDICATION</v-card
                     >
+                    <v-card
+                      class="pa-2 my-2 medic"
+                      style="text-align: center"
+                      @click="printMeds(3)"
+                      >ALL MEDICATION</v-card
+                    >
                   </v-card-text>
                   <!-- <v-card-actions>
                     <v-btn text color="primary" @click="menu = false"
@@ -468,10 +474,13 @@ export default {
 
     print(item) {
       console.log(item);
+      console.log(this.data.name);
       const url =
         process.env.VUE_APP_SERVER +
         "/pdf-generator/patientMedicalRecord/" +
-        item.id;
+        item.id +
+        "/" +
+        this.data.name.replace(/\s+/g, ",");
       window.open(url);
     },
     printMeds(num) {
@@ -479,13 +488,26 @@ export default {
         const url =
           process.env.VUE_APP_SERVER +
           "/pdf-generator/patientNormalMedication/" +
-          this.data.patientID;
+          this.data.patientID +
+          "/" +
+          this.data.name.replace(/\s+/g, ",");
         window.open(url);
-      } else {
+      } else if (num == 2) {
         const url =
           process.env.VUE_APP_SERVER +
           "/pdf-generator/patientPregnantMedication/" +
-          this.data.patientID;
+          this.data.patientID +
+          "/" +
+          this.data.name.replace(/\s+/g, ",");
+        window.open(url);
+      } else if (num == 3) {
+        console.log(num);
+        const url =
+          process.env.VUE_APP_SERVER +
+          "/pdf-generator/patientAllMedication/" +
+          this.data.patientID +
+          "/" +
+          this.data.name.replace(/\s+/g, ",");
         window.open(url);
       }
     },

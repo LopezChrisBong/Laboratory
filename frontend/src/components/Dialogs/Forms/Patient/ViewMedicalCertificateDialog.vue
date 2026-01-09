@@ -430,7 +430,9 @@ export default {
       const url =
         process.env.VUE_APP_SERVER +
         "/pdf-generator/medicalCertificate/" +
-        item.id;
+        item.id +
+        "/" +
+        item.name.replace(/\s+/g, ",");
       window.open(url);
     },
   },
