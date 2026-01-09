@@ -177,11 +177,92 @@
                   </div>
                   </td>
                 </tr>
+                 {{#if medicalDataPregnant.length}} 
+                <tr>
+                <td colspan="4">
+                    <div>Last Menstrual Period</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{formatDate pregnantInfo.menstrual}}
+                    </div> 
+                  </div>
+                  </td>
+                  <td colspan="4">
+                    <div>Expected Delivery Date</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{formatDate pregnantInfo.deliveryDate}}
+                    </div> 
+                  </div>
+                  </td>
+                   <td colspan="4">
+                    <div>No. of Previous Pregnancies</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{pregnantInfo.prevPreg}}
+                    </div> 
+                  </div>
+                  </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                    <div>No. of Live Births</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{pregnantInfo.liveBirths}}
+                    </div> 
+                  </div>
+                  </td>
+                    <td colspan="4">
+                    <div>Date of last Delivery</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{formatDate pregnantInfo.deliveryDate}}
+                    </div> 
+                  </div>
+                  </td>
+                   <td colspan="4">
+                    <div>Method of Previous Deliveries</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{pregnantInfo.deliveryMethod}}
+                    </div> 
+                  </div>
+                  </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                    <div>Name of Spouse</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{pregnantInfo.spouse}}
+                    </div> 
+                  </div>
+                  </td>
+                    <td colspan="6">
+                    <div>Referred by</div>
+                    <div style="text-align:left; border:1px solid black; padding:5px;" class="strong">
+                    <div>
+                      {{pregnantInfo.doctor_name}}
+                    </div> 
+                  </div>
+                  </td>
+                </tr>
+                {{/if}}
+                  <tr>
+                    <td colspan="12" class="font-14"> 
+                    <div style="text-align:left; border:1px solid black; padding:10px;background-color:#0c87c7; color:white;margin-top:20px; margin-bottom:-20px" class="strong">
+                    <div style=" margin-left:10px; ">
+                      Normal Medical Record
+                    </div> 
+                  </div>
+                  </td>
+                </tr>
                 <tr>
                     <td colspan="12" >
                       <div width="100%">
                     
-                        <table id="userBackground" style="width: 100%; margin-top:20px" class="font-12">
+                    <table id="userBackground" style="width: 100%; margin-top:20px" class="font-12">
                             <tbody>
                           
                             <tr style="background-color:#0c87c7; color:white;">
@@ -189,21 +270,64 @@
                               <td align="center" width="40%"><strong>Findings</strong></td>
                               <td align="center" width="40%"><strong>Treatment</strong></td>
                             </tr>
-                               {{#medicalData}}
+                               {{#medicalDataNormal}}
                             <tr>
                               <td align="center">{{formatDate date}}</td>
                               <td>{{{finding}}}</td>
                               <td>{{{treatment}}}</td>
                             </tr> 
-                              {{/medicalData}}
+                              {{/medicalDataNormal}}
                             
                             </tbody>
-                      </table>
+                    </table>
+
+                     
                        
                       </div>
                      
                     </td>
-                </tr>  
+                   
+                </tr> 
+                {{#if medicalDataPregnant.length}} 
+                <tr>
+                    <td colspan="12" class="font-14"> 
+                        <hr>
+                    <div style="text-align:left; border:1px solid black; padding:10px;background-color:#e6a58f; color:white;margin-top:20px; margin-bottom:-20px" class="strong">
+                    <div style=" margin-left:10px; ">
+                      Pregnant Medical Record
+                    </div> 
+                  </div>
+                  </td>
+                </tr>
+                <tr>
+                     <td colspan="12">
+                        <div width="100%">
+                            <table id="userBackground" style="width: 100%; margin-top:20px" class="font-12">
+                            <tbody>
+                          
+                            <tr style="background-color:#e6a58f; color:white;">
+                              <td width="10%"><strong>Date</strong></td>
+                              <td width="10%"><strong>Weight</strong></td>
+                              <td width="10%"><strong>Blood Pressure</strong></td>
+                              <td width="10%"><strong>ABD. Measure</strong></td>
+                              <td align="center" width="40%"><strong>Remarks</strong></td>
+                            </tr>
+                               {{#medicalDataPregnant}}
+                            <tr>
+                              <td align="center">{{formatDate date}}</td>
+                              <td>{{weight}}</td>
+                              <td>{{bp}}</td>
+                              <td>{{am}}</td>
+                              <td>{{{remarks}}}</td>
+                            </tr> 
+                              {{/medicalDataPregnant}}
+                            
+                            </tbody>
+                        </table>
+                        </div>
+                    </td>
+                </tr>
+                {{/if}}
               </tbody>
             </table>
           </div>

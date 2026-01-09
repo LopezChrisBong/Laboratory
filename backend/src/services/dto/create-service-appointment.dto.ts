@@ -28,4 +28,7 @@ export class CreateServiceAppointmentDto {
   @ApiProperty()
   attachment:string;
 
+  @ApiProperty()
+  created_by:string;
+
 }

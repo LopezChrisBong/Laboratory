@@ -57,7 +57,7 @@ export class ServicesController {
     return this.servicesService.getAllLabRequest(+patientID);
   }
 
-        @Get('getCategoryServiceType/:id')
+  @Get('getCategoryServiceType/:id')
   getCategoryServiceType(@Param('id') id: string) {
     return this.servicesService.getCategoryServiceType(+id);
   }

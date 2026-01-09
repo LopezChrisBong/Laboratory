@@ -80,7 +80,7 @@
                     >
                       <span>{{
                         item.status == 0
-                          ? "Pending"
+                          ? "For Payment"
                           : item.status == 1
                           ? "Paid"
                           : "Done Examination"
@@ -106,7 +106,7 @@
                           : "View Lab Result"
                       }}</v-btn
                     >
-                    <v-btn
+                    <!-- <v-btn
                       v-if="assignedModuleID == 2"
                       x-small
                       class="mt-1"
@@ -115,7 +115,7 @@
                       color="green"
                       block
                       ><v-icon small> mdi-eye</v-icon>Availed Laboratory</v-btn
-                    >
+                    > -->
                     <v-btn
                       v-if="assignedModuleID == 5 && item.attachment"
                       x-small

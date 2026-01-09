@@ -4,7 +4,7 @@
       <v-form ref="UserVerifyFormref" @submit.prevent>
         <v-card>
           <v-card-title dark class="dialog-header pt-5 pb-5 pl-6">
-            <span>{{ action }} User</span>
+            <span>{{ action }} User {{ data.user_email }}</span>
             <v-spacer></v-spacer>
             <v-btn icon dark @click="closeD()">
               <v-icon>mdi-close</v-icon>

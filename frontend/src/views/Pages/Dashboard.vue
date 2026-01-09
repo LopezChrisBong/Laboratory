@@ -1,12 +1,12 @@
 <template>
   <v-container fluid>
     <v-row>
-      <!-- LEFT PANEL: Booking Appointment -->
+      <v-col cols="12" v-if="assignModule == 1">
+        <CashierDashboard />
+      </v-col>
       <v-col cols="12" md="6" v-if="assignModule == 1">
         <v-card outlined>
-          <v-card-title>
-            Users Logs
-          </v-card-title>
+          <v-card-title> Users Logs </v-card-title>
 
           <v-row>
             <v-col>
@@ -26,9 +26,7 @@
       </v-col>
       <v-col cols="12" md="6" v-if="assignModule == 1">
         <v-card outlined>
-          <v-card-title>
-            Entry Logs
-          </v-card-title>
+          <v-card-title> Entry Logs </v-card-title>
 
           <v-row>
             <v-col>
@@ -49,6 +47,7 @@
       <v-col cols="12">
         <ReceptionistDashboard />
       </v-col>
+
       <!-- MIDDLE PANEL: Doctor List -->
       <v-col cols="12" md="12">
         <v-card outlined>
@@ -231,6 +230,7 @@
 export default {
   components: {
     ReceptionistDashboard: () => import("../Pages/ReceptionistDashboard.vue"),
+    CashierDashboard: () => import("../Pages/CashierDashboard.vue"),
   },
   data() {
     return {
@@ -281,6 +281,7 @@ export default {
   },
   mounted() {
     this.assignModule = this.$store.state.user.user.assignedModuleID;
+
     this.initialize();
   },
   computed: {

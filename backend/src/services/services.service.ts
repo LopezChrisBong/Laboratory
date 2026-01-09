@@ -72,6 +72,7 @@ export class ServicesService {
               medtechID:services.medtechID,
               service_list:services.service_list,
               package_list:services.package_list,
+              created_by:services.created_by
             });
            let saveService = await queryRunner.manager.save(data);
 
@@ -698,6 +699,7 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
     medtechID: number;
     status:number
     attachment:string
+    created_by:string
     } = {
     patientID: dto.patientID,
     appointmentID: dto.appointmentID,
@@ -707,7 +709,8 @@ async updateServiceAppointment(id: number, dto: UpdateServiceAppointmentDto) {
     doctorID: dto.doctorID,
     medtechID: dto.medtechID,
     status:dto.status,
-    attachment:dto.attachment
+    attachment:dto.attachment,
+    created_by:dto.created_by
     };
 
      const existing = await this.servicesAppointmentRepository.findOneBy({ appointmentID:dto.appointmentID });

@@ -48,10 +48,8 @@
             @click="editItem(item)"
             class="mx-2"
           >
-            <v-icon size="14">{{
-              tab == 1 ? "mdi-pencil-outline" : "mdi-eye"
-            }}</v-icon>
-            {{ tab == 1 ? "Verify" : "View" }}
+            <v-icon size="14">mdi-pencil-outline</v-icon>
+            {{ tab == 1 ? "Verify" : "Update" }}
           </v-btn>
 
           <v-btn

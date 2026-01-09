@@ -535,7 +535,11 @@ export default {
     print(item) {
       console.log(item);
       const url =
-        process.env.VUE_APP_SERVER + "/pdf-generator/prescription/" + item.id;
+        process.env.VUE_APP_SERVER +
+        "/pdf-generator/prescription/" +
+        item.id +
+        "/" +
+        item.name.replace(/\s+/g, ",");
       window.open(url);
     },
   },

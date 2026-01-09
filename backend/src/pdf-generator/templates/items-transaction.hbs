@@ -13,6 +13,11 @@
       -webkit-print-color-adjust: exact;
     }
 
+     #userBackground tr td, #userBackground
+      tr th{ padding: 5px; } #userBackground{ page-break-after: always; }#userBackground th,#userBackground td{ border: 1px solid black; }
+      #userBackground{ border-collapse: collapse; } 
+      #userBackground{ border: 1px solid black; }
+
     .paper {
       width: 210mm;
       min-height: auto; 
@@ -66,10 +71,11 @@
 
     .title {
       text-align: center;
-      font-size: 32px;
-      margin: 28px 0 18px 0;
+      font-size: 18px;
+      {{!-- margin: 28px 0 18px 0; --}}
       letter-spacing: 1px;
       font-weight: 600;
+      margin-top:20px
     }
 
     .form {
@@ -103,7 +109,7 @@
 
     .footer-note {
       margin-top: 18px;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .signature-area {
@@ -150,42 +156,43 @@
         <div style="margin-top:8px">☎ 0946-100-3260 &nbsp;&nbsp; | &nbsp;&nbsp; Mon to Sat 8:00am to 5:00pm</div>
       </div>
     </div>
-     <div class="title">
-        <span class="date-inline">Date: <span class=""><u>{{formatted}}</u></span></span>
-    </div>
-    <br>
-    <div class="title">MEDICAL CERTIFICATE </div>
+   
+    <div class="title">TRANSACTION REPORT OF <span style="text-transform: uppercase;">{{itemTransactionName}}</span></div>
    
 
-    <div class="form" style="margin-bottom:20px">
-      <div class="row"><strong>To Whom It May Concern:</strong></div>
-
-      <div class="row"><span class="label">THIS IS TO CERTIFY THAT</span> <span class="line handwritten">&nbsp;&nbsp;&nbsp;&nbsp;{{medicalCert.name}}</span></div>
-
-      <div class="row"><span class="label">of</span> <span class="line handwritten" style="min-width:450px">&nbsp;{{medicalCert.address}}</span></div>
-
-      <div class="row">was examined and treated at my clinic on <span class="line handwritten" style="min-width:120px">&nbsp;{{ formatDate medicalCert.date}}</span> <span style="min-width:60px">&nbsp;</span> with the following diagnosis:</div>
-
-      <div class="big-blank handwritten" >&nbsp;<u> {{{medicalCert.diagnosis}}}</u>
-   
-      </div>
-
-      <div class="row"><strong>Recommendations:</strong></div>
-      <div class="recommend handwritten">
-        <div class="" style="min-width: 520px; height: 1.6em;"><u>{{{medicalCert.recommendations}}}</u></div>
-        {{!-- <div class="line" style="min-width: 520px; height: 1.6em; margin-top:8px"></div>
-        <div class="line" style="min-width: 520px; height: 1.6em; margin-top:8px"></div> --}}
-      </div>
-
-      <div class="footer-note">This certification is issued upon the request of the patient for whatever purpose it may serve except medicolegal purposes.</div>
-
-      <div class="signature-area">
-        <div class="sig-block">
-          <div class="sig-line"></div>
-          <div style="margin-top:6px; font-weight:600">Dr. <span style="text-transform: uppercase;">{{medicalCert.doctor_name}}</span>, M.D.</div>
-          <div style="font-size:12px">PRC No.: ________ &nbsp;&nbsp; PTR No.: ________</div>
-        </div>
-      </div>
+    <div class="form" style="margin-bottom:20px" width="100%">
+    <table id="userBackground"
+              style='margin:0 auto; width: 100%; page-break-inside:auto; table-layout:fixed;font-family: Arial'
+            >
+            <thead>
+                <tr style="font-weight: 600; background-color:#0f79b1; color:white">
+                    <td align="center" width="15%">Date</td>
+                    <td align="center">Type</td>
+                    <td align="center">Quantity</td>
+                    <td align="center">Stock Change</td>
+                    <td align="center">Supplier</td>
+                    <td align="center">Lot Number</td>
+                    <td align="center">Brand</td>
+                    <td align="center">Performed By</td>
+                    <td align="center">Notes</td>
+                </tr>
+            </thead>
+            <tbody>
+                {{#itemTransaction}}
+                <tr>
+                    <td align="center">{{ formatDate transaction_date}}</td>
+                    <td align="center">{{transactionType}}</td>
+                    <td align="center">{{quantity}}</td>
+                    <td align="center">{{previousStock}} - {{newStock}} </td>
+                    <td align="center">{{supplier}} </td>
+                    <td align="center">{{lotNumber}} </td>
+                    <td align="center">{{brand}} </td>
+                    <td align="center">{{performedBy}}</td>
+                    <td align="center">{{notes}}</td>
+                </tr>
+                {{/itemTransaction}}
+            </tbody>
+    </table>
     </div>
 
   </div>

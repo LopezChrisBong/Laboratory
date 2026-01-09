@@ -105,7 +105,7 @@ export class DoctorsScheduleService {
             const day = date.getDay();
 
             //  Monday (1) to Friday (5) only
-            if (day >= 1 && day <= 5) {
+            if (day >= 1 && day <= 6) {
               result.push(
                 `${date.getDate()}-${names[day]}-${year}-${month}`
               );

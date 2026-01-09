@@ -51,7 +51,7 @@
                     >
                       <span>{{
                         item.status == 0
-                          ? "Pending"
+                          ? "For Payment"
                           : item.status == 1
                           ? "Paid"
                           : "Done"
@@ -64,6 +64,9 @@
                       Liscence No.
                       <u>{{ item.liscence_no }}</u></span
                     >
+                  </template>
+                  <template v-slot:[`item.updated_at`]="{ item }">
+                    <span> {{ formatDateTime(item.updated_at) }}</span> <br />
                   </template>
                   <template v-slot:[`item.action`]="{ item }">
                     <v-btn
@@ -580,8 +583,15 @@ export default {
         },
 
         {
-          text: "Med-Tech",
+          text: "LabTest Request",
           value: "medtech_name",
+          align: "center",
+          valign: "center",
+          sortable: false,
+        },
+        {
+          text: "Date",
+          value: "updated_at",
           align: "center",
           valign: "center",
           sortable: false,
@@ -856,6 +866,7 @@ export default {
         patientID: this.id,
         service_list: JSON.stringify(this.selected),
         package_list: JSON.stringify(this.selectedPackage),
+        created_by: this.$store.state.user.id,
       };
       console.log(data);
       this.axiosCall("/services/createServiceAppointment/", "POST", data).then(

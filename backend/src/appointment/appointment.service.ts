@@ -588,11 +588,10 @@ export class AppointmentService {
   }
 
   async getAllPatient(tabID:number, user:any){
-    //  console.log('Love',user.userdetail.user.assignedModuleID)
-    let data
+      let data
     if(tabID == 1){
 
-      if(user.userdetail.user.assignedModuleID == 3){
+      // if(user.userdetail.user.assignedModuleID == 3){
        data = await this.patientRepository
       .createQueryBuilder('pt')
       .select([
@@ -610,17 +609,18 @@ export class AppointmentService {
       .orderBy('ap.date', "DESC")
       .groupBy('pt.patientID')
       .getRawMany()
-      }
-      else{
-      data = await this.patientRepository
-      .createQueryBuilder('pt')
-      .select([
-        "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
-        " pt.*",
-      ])
-      .groupBy('pt.patientID')
-      .getRawMany()
-      }
+      // }
+      // else{
+      // data = await this.patientRepository
+      // .createQueryBuilder('pt')
+      // .select([
+      //   "IF (!ISNULL(pt.m_name), concat(pt.f_name, ' ',SUBSTRING(pt.m_name, 1, 1) ,'. ',pt.l_name) ,concat(pt.f_name, ' ', pt.l_name)) as name",
+      //   " pt.*",
+      // ])
+      // .groupBy('pt.patientID')
+      // .getRawMany()
+      // console.log(data)
+      // }
     }else if(tabID == 2){
           const users = await this.serviceAppointmentRepository
             .createQueryBuilder('pt')
@@ -647,7 +647,6 @@ export class AppointmentService {
       
 
     }else if(tabID == 3){
-
         const users = await this.appointmentRepository
           .createQueryBuilder('pt')
           .where('pt.status = 1')  
@@ -757,10 +756,12 @@ export class AppointmentService {
       "ap.*",
       "ap.id as appointmentID",
       "ap.date as date",
-      "ap.time as time"
+      "ap.time as time",
+      "pt.patientID as pID"
+      
     ])
-    .orderBy("ap.date", "ASC")
-    .addOrderBy("ap.time", "ASC")
+    .orderBy("ap.created_at", "ASC")
+    // .addOrderBy("ap.time", "DESC")
     .getRawMany();
 
   return data;
@@ -792,6 +793,7 @@ async getAllPatientForMedtech(medtechID: number) {
     "pt.id AS patientID",
     "sa.service_list",
     "sa.package_list",
+    "pt.patientID AS pID",
     "sa.status",
     `(
       SELECT JSON_ARRAYAGG(

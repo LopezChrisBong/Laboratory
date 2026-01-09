@@ -13,6 +13,30 @@
       -webkit-print-color-adjust: exact;
     }
 
+    #userBackground th,
+    #userBackground td {
+        border: 1px solid #333;
+        padding: 6px 8px;
+        word-wrap: break-word;
+    }
+
+    #userBackground th {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    #userBackground td {
+        text-align: left;
+    }
+
+    #userBackground tbody tr:nth-child(even) {
+        background-color: #f4f7fa;
+    }
+
+    #userBackground tbody tr:hover {
+        background-color: #e8f1f8;
+    }
+
     .paper {
       width: 210mm;
       min-height: auto; 
@@ -66,10 +90,11 @@
 
     .title {
       text-align: center;
-      font-size: 32px;
-      margin: 28px 0 18px 0;
+      font-size: 18px;
+      {{!-- margin: 28px 0 18px 0; --}}
       letter-spacing: 1px;
       font-weight: 600;
+      margin-top:20px
     }
 
     .form {
@@ -103,7 +128,7 @@
 
     .footer-note {
       margin-top: 18px;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .signature-area {
@@ -150,42 +175,56 @@
         <div style="margin-top:8px">☎ 0946-100-3260 &nbsp;&nbsp; | &nbsp;&nbsp; Mon to Sat 8:00am to 5:00pm</div>
       </div>
     </div>
-     <div class="title">
-        <span class="date-inline">Date: <span class=""><u>{{formatted}}</u></span></span>
-    </div>
-    <br>
-    <div class="title">MEDICAL CERTIFICATE </div>
+   
+    <div class="title">{{#ifCond type 1}} WEEKLY {{else}} MONTHLY {{/ifCond}} TRANSACTION REPORT </div>
    
 
-    <div class="form" style="margin-bottom:20px">
-      <div class="row"><strong>To Whom It May Concern:</strong></div>
+    <div class="form" style="margin-bottom:20px" width="100%">
+    <table id="userBackground"
+        style="
+            margin: 0 auto;
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            table-layout: fixed;
+        "
+        >
+        <thead>
+            <tr style="background-color:#0f79b1; color:#fff;">
+            <th>Name</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Qty</th>
+            <th>Stock Change</th>
+            <th>Supplier</th>
+            <th>Lot No.</th>
+            <th>Brand</th>
+            <th>Performed By</th>
+            <th>Notes</th>
+            </tr>
+        </thead>
 
-      <div class="row"><span class="label">THIS IS TO CERTIFY THAT</span> <span class="line handwritten">&nbsp;&nbsp;&nbsp;&nbsp;{{medicalCert.name}}</span></div>
+        <tbody>
+            {{#reportData}}
+            <tr>
+            <td>{{itemName}}</td>
+            <td>{{formatDate transaction_date}}</td>
+            <td>{{transactionType}}</td>
+            <td style="text-align:right">{{quantity}}</td>
+            <td style="text-align:center">
+                {{previousStock}} → {{newStock}}
+            </td>
+            <td>{{supplier}}</td>
+            <td>{{lotNumber}}</td>
+            <td>{{brand}}</td>
+            <td>{{performedBy}}</td>
+            <td>{{notes}}</td>
+            </tr>
+            {{/reportData}}
+        </tbody>
+        </table>
 
-      <div class="row"><span class="label">of</span> <span class="line handwritten" style="min-width:450px">&nbsp;{{medicalCert.address}}</span></div>
-
-      <div class="row">was examined and treated at my clinic on <span class="line handwritten" style="min-width:120px">&nbsp;{{ formatDate medicalCert.date}}</span> <span style="min-width:60px">&nbsp;</span> with the following diagnosis:</div>
-
-      <div class="big-blank handwritten" >&nbsp;<u> {{{medicalCert.diagnosis}}}</u>
-   
-      </div>
-
-      <div class="row"><strong>Recommendations:</strong></div>
-      <div class="recommend handwritten">
-        <div class="" style="min-width: 520px; height: 1.6em;"><u>{{{medicalCert.recommendations}}}</u></div>
-        {{!-- <div class="line" style="min-width: 520px; height: 1.6em; margin-top:8px"></div>
-        <div class="line" style="min-width: 520px; height: 1.6em; margin-top:8px"></div> --}}
-      </div>
-
-      <div class="footer-note">This certification is issued upon the request of the patient for whatever purpose it may serve except medicolegal purposes.</div>
-
-      <div class="signature-area">
-        <div class="sig-block">
-          <div class="sig-line"></div>
-          <div style="margin-top:6px; font-weight:600">Dr. <span style="text-transform: uppercase;">{{medicalCert.doctor_name}}</span>, M.D.</div>
-          <div style="font-size:12px">PRC No.: ________ &nbsp;&nbsp; PTR No.: ________</div>
-        </div>
-      </div>
     </div>
 
   </div>
