@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <!-- Top Info Bar -->
-    <v-app-bar height="36" flat color="primary" dark id="mainCover">
+    <!-- <v-app-bar height="36" flat color="primary" dark id="mainCover">
       <v-row class="px-6" align="center" no-gutters>
         <v-col cols="8" class="caption">
           ☎ (555) 123-4567 &nbsp; | &nbsp; Mon–Fri: 8:00 AM – 6:00 PM | Sat:
@@ -11,25 +11,10 @@
           Emergency Services Available
         </v-col>
       </v-row>
-    </v-app-bar>
+    </v-app-bar> -->
 
     <!-- Main Navbar -->
-    <v-app-bar flat height="72" class="px-8">
-      <!-- <v-toolbar-title class="font-weight-bold primary--text">
-        PARAGON
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <div class="d-flex jusctify-center">
-        <v-btn text>Services</v-btn>
-        <v-btn text>Specialties</v-btn>
-        <v-btn text>Why Paragon</v-btn>
-        <v-btn text>Contact</v-btn>
-      </div>
-
-      <v-btn color="primary" class="ml-4" rounded dark>
-        Book Appointment
-      </v-btn> -->
-
+    <!-- <v-app-bar flat height="72" class="px-8">
       <v-row>
         <v-col cols="4"
           ><div class="d-flex align-left justify-center">
@@ -70,7 +55,109 @@
           </div>
         </v-col>
       </v-row>
+    </v-app-bar> -->
+    <!-- Top Info Bar (hide on mobile) -->
+    <v-app-bar
+      height="36"
+      flat
+      color="primary"
+      dark
+      id="mainCover"
+      class="hidden-sm-and-down"
+    >
+      <v-row class="px-6" align="center" no-gutters>
+        <v-col cols="8" class="caption">
+          ☎ (555) 123-4567 &nbsp; | &nbsp; Mon–Fri: 8:00 AM – 6:00 PM | Sat:
+          9:00 AM – 2:00 PM
+        </v-col>
+        <v-col cols="4" class="caption text-right">
+          Emergency Services Available
+        </v-col>
+      </v-row>
     </v-app-bar>
+
+    <!-- Main Navbar -->
+    <v-app-bar
+      :fixed="$vuetify.breakpoint.smAndDown"
+      :app="$vuetify.breakpoint.smAndDown"
+      flat
+      height="72"
+      class="px-4 px-md-12"
+    >
+      <!-- Mobile Menu Button -->
+      <v-app-bar-nav-icon class="hidden-md-and-up" @click="drawer = true" />
+
+      <!-- Logo -->
+      <v-toolbar-title class="d-flex align-center">
+        <v-img
+          src="../../assets/img/paragon logo website.png"
+          max-width="36"
+          class="mr-2"
+        />
+        <div>
+          <div class="font-weight-bold">PARAGON</div>
+          <div class="caption hidden-sm-and-down">
+            Diagnostics & Multi-Specialty Clinic
+          </div>
+        </div>
+      </v-toolbar-title>
+
+      <v-spacer />
+
+      <!-- Desktop Navigation -->
+      <div class="hidden-sm-and-down">
+        <v-btn text @click="goToDiv(1)">Services</v-btn>
+        <v-btn text @click="goToDiv(2)">Specialties</v-btn>
+        <v-btn text @click="goToDiv(3)">Why Paragon</v-btn>
+        <v-btn text @click="goToDiv(4)">Contact</v-btn>
+      </div>
+
+      <!-- Desktop CTA -->
+      <v-btn
+        class="ml-4 hidden-sm-and-down"
+        color="primary"
+        dark
+        style="border-radius: 10px"
+        @click="addAppointment"
+      >
+        Book Appointment
+      </v-btn>
+    </v-app-bar>
+
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+      color="#1976d2"
+      dark
+      width="280"
+      height="100%"
+    >
+      <v-list dense>
+        <v-list-item @click="goToDiv(1)">
+          <v-list-item-title>Services</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item @click="goToDiv(2)">
+          <v-list-item-title>Specialties</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item @click="goToDiv(3)">
+          <v-list-item-title>Why Paragon</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item @click="goToDiv(4)">
+          <v-list-item-title>Contact</v-list-item-title>
+        </v-list-item>
+
+        <v-divider />
+
+        <v-list-item @click="addAppointment">
+          <v-list-item-title class="white--text font-weight-bold">
+            Book Appointment
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <v-main>
       <!-- HERO SECTION -->
@@ -94,17 +181,25 @@
             <v-btn
               color="primary"
               large
-              class="mr-4"
+              class="ma-2"
+              style="width: 300px"
               dark
               @click="addAppointment()"
             >
               Schedule Appointment
             </v-btn>
-            <v-btn outlined large color="primary" @click="goToDiv(1)">
+            <v-btn
+              outlined
+              large
+              class="ma-2"
+              color="primary"
+              @click="goToDiv(1)"
+              style="width: 300px"
+            >
               Our Services
             </v-btn>
 
-            <div class="mt-8">
+            <div class="mt-8 mb-4">
               <v-divider></v-divider>
               <v-row class="mt-5">
                 <v-col cols="4">
@@ -839,6 +934,7 @@ export default {
   data() {
     return {
       mainData: null,
+      drawer: false,
       action: "Appointment",
       services: [
         {
@@ -979,6 +1075,7 @@ export default {
   },
   methods: {
     goToDiv(num) {
+      this.drawer = false;
       if (num == 1) {
         document.getElementById("service").scrollIntoView({
           behavior: "smooth",
@@ -1015,5 +1112,8 @@ export default {
 }
 .opacity-80 {
   opacity: 0.8;
+}
+.mobile-drawer {
+  height: 100vh !important;
 }
 </style>
