@@ -215,7 +215,7 @@ export class DoctorsScheduleService {
     
   // }
 
-    async getAllDoctorsSched(data: string) {
+  async getAllDoctorsSched(data: string) {
 
       const today = new Date().toISOString().split('T')[0];
         const doctorList = JSON.parse(data);
@@ -272,6 +272,28 @@ export class DoctorsScheduleService {
   return grouped;
 }
 
+
+  async getSpecificDoctorData(id:number){
+      const today = new Date().toISOString().split('T')[0];
+      const schedules = await this.doctorsScheduleRepository
+        .createQueryBuilder('ds')
+        .select([
+          'ds.*',
+          // "IF (!ISNULL(ud.mname), concat(ud.fname, ' ',SUBSTRING(ud.mname, 1, 1) ,'. ',ud.lname), concat(ud.fname, ' ', ud.lname)) as name",
+          'ud.profile_img as profile', 
+          // 'JSON_ARRAY() as specialization'
+        ])
+        .leftJoin(UserDetail, 'ud', 'ud.id = :id', { id })
+        .leftJoin(Users, 'us', 'us.id = ud.userID')
+        .where('ds.doctorID = :id', { id })
+        .andWhere('ds.date >= :today', { today })
+        .andWhere('us.isAdminApproved = 1')
+        .andWhere('us.assignedModuleID = 5')
+        .orderBy('ds.date', 'ASC')
+        .getRawMany();
+        console.log(schedules)
+        return schedules
+  }
 
 
 async getAllDoctorsDashboard() {

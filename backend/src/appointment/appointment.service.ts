@@ -58,7 +58,7 @@ export class AppointmentService {
   }
 
  async addPatient(createPatientDto:CreatePatientDto){
-  console.log(createPatientDto)
+  // console.log(createPatientDto)
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -121,8 +121,6 @@ export class AppointmentService {
   }
 
   async bookAppointment(createAppointmentDto:CreateAppointmentDto){
-    
-  
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -144,12 +142,15 @@ export class AppointmentService {
         let patient = await queryRunner.manager.createQueryBuilder(Patient, 'pt')
         .where('pt.id = :id',{id:appointment.patientID})
         .getOne()
+        let doctor = await queryRunner.manager.createQueryBuilder(UserDetail, 'ud')
+        .where('ud.id = :id',{id:appointment.doctorID})
+        .getOne()
           let smsData = JSON.parse(createAppointmentDto.data)
           let sched_date = smsData.date
           let sched_time = smsData.time
           let patientName = smsData.f_name+' '+ smsData.l_name
-          let doctorName = smsData.doctor[0].name
-          let doctorSpecialization = smsData.doctor[0].specialization[0].specialty
+          let doctorName =  doctor.fname +' '+ doctor.mname + ' ' + doctor.lname
+          let doctorSpecialization = appointment.clinic
           let message = 'Subject: Submission of Appointment to PARAGON\n';
           message+='\nHi '+patientName+',\n';
           message+='\nThank you for booking with Paragon Diagnostics & Multi-Specialty Clinic! Here are your appointment details:\n';
@@ -1408,7 +1409,7 @@ async getAllMedtechAppointment(id: number) {
   async checkPatient(f_name: string, l_name:string) {
     // // console.log(f_name)
     const isExist = await this.patientRepository.findOneBy({ f_name, l_name});
-    // // console.log(isExist)
+    // console.log(isExist)
     return isExist;
   }
 

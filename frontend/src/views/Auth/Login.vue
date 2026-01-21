@@ -1,161 +1,122 @@
 <template>
-  <div>
-    <v-container fluid fill-height class="content">
-      <v-row align="center" justify="center">
-        <v-col align="center" cols="12" md="6">
-          <v-card
-            max-width="500"
-            class="rounded-card"
-            style=" border-left: #6ac5fe 1px solid; border-top: #6ac5fe 1px solid;"
-            :class="['fadeIn', { show: show }]"
-            align="start"
-          >
-            <!--background: rgba(0,0,0,0.2);-->
-            <v-form ref="Formref" class="pa-12">
-              <v-row class="mx-5 pt-6">
-                <v-col cols="12" class="pa-0 mb-2">
-                  <div
-                    color="#123E4D"
-                    align="center"
-                    :class="
-                      $vuetify.breakpoint.smAndDown ? 'text-h6' : 'text-h5'
-                    "
-                  >
-                    <b>Laboratory Information System</b>
-                  </div>
-                  <!-- <div
-                    color="#123E4D"
-                    align="center"
-                    :class="
-                      $vuetify.breakpoint.smAndDown ? 'text-h6' : 'text-h5'
-                    "
-                  >
-                    <b> Loading and Enrollment System</b>
-                  </div> -->
-                  <div style="margin:0 auto; width:45%" class="pa-2">
-                    <v-img
-                      src="../../assets/img/Paragon Logo.png"
-                      style="border-radius: 20%;"
-                    ></v-img>
-                  </div>
-                </v-col>
-                <v-col cols="12" class="pa-0 px-4 py-2">
-                  <label for=""
-                    ><b><h2>Login</h2></b></label
-                  >
-                </v-col>
-                <v-col cols="12" class="pa-0 px-4">
-                  <v-text-field
-                    color="green"
-                    class="font-size-14 rounded-lg"
-                    v-model="email"
-                    :rules="[formRules.required, formRules.email]"
-                    label="Email address"
-                    required
-                    dense
-                    outlined
-                    @keyup.enter="dologin()"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" class="pa-0 px-4 mt-n2">
-                  <v-text-field
-                    color="black"
-                    class="font-size-14 rounded-lg "
-                    v-model="password"
-                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                    :rules="[formRules.required]"
-                    :type="show1 ? 'text' : 'password'"
-                    name="input-10-1"
-                    dense
-                    label="Password"
-                    outlined
-                    @keyup.enter="dologin()"
-                    @click:append="show1 = !show1"
-                  ></v-text-field>
-                </v-col>
+  <v-container fluid fill-height class="login-page">
+    <!-- TOP BAR -->
+    <v-row class="top-bar px-6" align="center">
+      <v-col cols="4">
+        <v-btn text small color="primary" @click="doHome">
+          <v-icon left>mdi-arrow-left</v-icon>
+          Back to Home
+        </v-btn>
+      </v-col>
 
-                <v-col cols="12" class="pa-0 px-4 mt-n2">
-                  <div class="d-flex justify-center ">
-                    <v-btn
-                      block
-                      :color="$vuetify.theme.themes.light.submitBtns"
-                      class="white--text font-size-14 rounded-lg"
-                      :loading="isLoading"
-                      @click="dologin()"
-                      >Sign In</v-btn
-                    >
-                  </div>
-                </v-col>
+      <v-col cols="4" class="text-left" v-if="$vuetify.breakpoint.smAndUp">
+        <div class="d-flex align-left justify-center">
+          <v-img
+            src="../../assets/img/paragon logo website.png"
+            max-width="36"
+            class="mr-2"
+          />
+          <div>
+            <div class="font-weight-bold">PARAGON</div>
+            <div class="caption grey--text">
+              Diagnostics & Multi-Specialty Clinic
+            </div>
+          </div>
+        </div>
+      </v-col>
 
-                <!-- <v-col cols="12" md="6" sm="12" class="pa-0 px-4 mt-3">
-                  <div class="d-flex justify-space-between ">
-                    <v-btn
-                      color="blue"
-                      outlined
-                      block
-                      class="white--text font-size-14 rounded-lg"
-                      :loading="isLoading"
-                      @click="doAppointment()"
-                      >Appointment</v-btn
-                    >
-                  </div>
-                </v-col> -->
-                <v-col cols="12" md="12" sm="12" class="pa-0 px-4 mt-3">
-                  <div class="d-flex justify-space-between ">
-                    <v-btn
-                      color="green"
-                      outlined
-                      block
-                      class="white--text font-size-14 rounded-lg"
-                      :loading="isLoading"
-                      @click="doHome()"
-                      >Go to Home</v-btn
-                    >
-                  </div>
-                </v-col>
+      <v-col cols="4"></v-col>
+    </v-row>
 
-                <v-col cols="12" class="mt-5 ">
-                  <div
-                    style="font-size:14px; "
-                    class="d-flex justify-center  text-gray-100"
-                  >
-                    Don't have an account yet?
-                    <!-- <b
-                      style="color: #4597E8"
-                      @click="doRegister()"
-                      class="registerLink ml-2"
-                      >Register Now</b
-                    > -->
-                    <router-link class="pl-2" to="/register">
-                      Register Now!</router-link
-                    >
-                  </div>
-                </v-col>
-                <v-col cols="12">
-                  <div
-                    class="d-flex align-center justify-center"
-                    style="font-size:14px; "
-                  >
-                    <router-link class="pl-2" to="/forgot-pw">
-                      Forgot Password!</router-link
-                    >
-                  </div>
-                </v-col>
-              </v-row>
-            </v-form>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-    <fade-away-message-component
-      displayType="variation2"
-      v-model="fadeAwayMessage.show"
-      :message="fadeAwayMessage.message"
-      :header="fadeAwayMessage.header"
-      :top="fadeAwayMessage.top"
-      :type="fadeAwayMessage.type"
-    ></fade-away-message-component>
-  </div>
+    <!-- LOGIN CARD -->
+    <v-row align="center" justify="center" class="fill-height">
+      <v-col cols="12" sm="8" md="4">
+        <v-card class="pa-8 login-card" elevation="6">
+          <div class="text-center mb-6">
+            <h2 class="font-weight-bold">Sign in</h2>
+            <p class="caption grey--text">
+              Enter your credentials to access your account
+            </p>
+          </div>
+
+          <v-form ref="Formref">
+            <!-- USER TYPE -->
+            <!-- <v-select
+              v-model="userType"
+              :items="userTypes"
+              label="User Type"
+              outlined
+              dense
+              class="mb-3"
+              required
+            /> -->
+
+            <!-- EMAIL -->
+            <v-text-field
+              v-model="email"
+              label="Email address"
+              outlined
+              dense
+              @keyup.enter="dologin()"
+              :rules="[formRules.required, formRules.email]"
+              class="mb-3"
+            />
+
+            <!-- PASSWORD -->
+            <v-text-field
+              v-model="password"
+              :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="show1 ? 'text' : 'password'"
+              label="Password"
+              outlined
+              dense
+              @keyup.enter="dologin()"
+              :rules="[formRules.required]"
+              @click:append="show1 = !show1"
+              class="mb-2"
+            />
+
+            <!-- REMEMBER ME -->
+            <v-checkbox
+              v-model="rememberMe"
+              label="Remember me"
+              dense
+              class="mt-0"
+            />
+
+            <!-- SIGN IN -->
+            <v-btn
+              block
+              color="primary"
+              class="white--text mt-4"
+              height="44"
+              :loading="isLoading"
+              @click="dologin"
+            >
+              Sign In
+            </v-btn>
+
+            <!-- LINKS -->
+            <div class="text-center mt-6 caption">
+              Doesn’t have an account?
+              <router-link
+                to="/register"
+                class="primary--text font-weight-bold"
+              >
+                Register
+              </router-link>
+            </div>
+
+            <div class="text-center mt-2 caption">
+              <router-link to="/" class="primary--text">
+                Back to Home
+              </router-link>
+            </div>
+          </v-form>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -171,7 +132,7 @@ export default {
     if (this.$store.state.user) {
       if (!this.$store.state.user.usertype.id) {
         //this.deleteToken();
-        setTimeout(function() {
+        setTimeout(function () {
           location.reload();
         }, 0);
       }
@@ -224,9 +185,7 @@ export default {
     doRegister() {
       this.$router.push("/register");
     },
-    doEnroll() {
-      this.$router.push("/student-enroll");
-    },
+
     doForgotPassword() {
       this.$router.push("/forgot-pw");
     },
@@ -251,63 +210,22 @@ export default {
 </script>
 
 <style scoped>
-.registerLink:hover {
-  cursor: pointer;
-  text-decoration: underline;
+.login-page {
+  background: #f9fafc;
 }
-.content {
-  /* background-color: #2196F3; */
-  background: url("../../assets/img/laboratorybg.png");
-  background-position: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.title {
-  color: #fff;
-  font-size: 35px !important;
+
+.top-bar {
+  height: 64px;
+  border-bottom: 1px solid #eee;
+  background: white;
   position: relative;
-  font-weight: bold;
-  line-height: 40px;
 }
-.title .underline {
-  display: flex;
-  justify-content: center;
-  margin-top: 15px;
+
+.login-card {
+  border-radius: 14px;
 }
-.title .underline .u1 {
-  background: #fff;
-  width: 70%;
-  height: 5px;
-  margin: 0 5px;
-}
-.title .underline .u2 {
-  background: #fff;
-  width: 5%;
-  height: 5px;
-  margin: 0 5px;
-}
-.lp-img {
-  -webkit-filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.09));
-  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.09));
-  border-radius: 50%;
-  background: #fff;
-}
-.rounded-card {
-  border-radius: 20px;
-}
-.fadeIn {
-  opacity: 0;
-  transform: translate3d(100px, 0, 0);
-  transition: 0.5s all ease-in-out;
-}
-.fadeIn.show {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
+
+.v-input--selection-controls {
+  margin-top: 0;
 }
 </style>

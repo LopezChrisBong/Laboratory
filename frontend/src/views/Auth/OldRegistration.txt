@@ -1,174 +1,145 @@
 <template>
-  <v-container fluid fill-height class="login-page">
-    <v-row class="top-bar px-6" align="center">
-      <v-col
-        cols="4"
-        style="align-items: center; justify-content: center"
-        class="mt-2"
-      >
-        <v-btn text small color="primary" @click="doHome">
-          <v-icon left>mdi-arrow-left</v-icon>
-          Back to Home
-        </v-btn>
-      </v-col>
-
-      <v-col cols="4" class="text-left" v-if="$vuetify.breakpoint.smAndUp">
-        <div class="d-flex align-left justify-center">
-          <v-img
-            src="../../assets/img/paragon logo website.png"
-            max-width="36"
-            class="mr-2"
-          />
-          <div>
-            <div class="font-weight-bold">PARAGON</div>
-            <div class="caption grey--text">
-              Diagnostics & Multi-Specialty Clinic
+  <div>
+    <v-container fluid fill-height class="content">
+      <v-row align="center" justify="center">
+        <v-col align="center" cols="12" md="6">
+          <v-card
+            max-width="500"
+            class="rounded-card"
+            :class="['fadeIn', { showsFade: showsFade }]"
+          >
+            <div class="justify-center pa-4">
+              <h3 style="color: #0e2b62">
+                Create your <span style="color: #0e2b62">Account</span>
+              </h3>
             </div>
-          </div>
-        </div>
-      </v-col>
 
-      <v-col cols="4"></v-col>
-    </v-row>
-
-    <v-row align="center" justify="center" class="fill-height">
-      <v-col align="center" cols="12" sm="8" md="8">
-        <v-card
-          max-width="700"
-          class="rounded-card"
-          :class="['fadeIn', { showsFade: showsFade }]"
-        >
-          <div class="justify-center pa-4">
-            <h3 style="color: #0e2b62">
-              Create your <span style="color: #0e2b62">Account</span>
-            </h3>
-          </div>
-
-          <v-form ref="Step1Formref" v-show="step.id == 1">
-            <v-row class="mx-5 pt-4">
-              <v-col cols="12" md="6" class="pa-0 px-4">
-                <v-text-field
-                  outlined
-                  color="#93CB5B"
-                  dense
-                  class="font-size-14"
-                  v-model="firstname"
-                  :rules="[formRules.required]"
-                  label="Firstname"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4">
-                <v-text-field
-                  outlined
-                  color="#93CB5B"
-                  dense
-                  class="font-size-14"
-                  v-model="middlename"
-                  label="Middlename"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4">
-                <v-text-field
-                  class="font-size-14"
-                  color="#93CB5B"
-                  v-model="lastname"
-                  outlined
-                  dense
-                  :rules="[formRules.required]"
-                  label="Surname"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4">
-                <v-text-field
-                  outlined
-                  dense
-                  color="#93CB5B"
-                  class="font-size-14"
-                  v-model="suffix"
-                  label="Suffix"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4">
-                <v-text-field
-                  outlined
-                  dense
-                  color="#93CB5B"
-                  class="font-size-14"
-                  v-model="liscence"
-                  label="Liscence No."
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4 mt-2">
-                <v-text-field
-                  outlined
-                  dense
-                  class="font-size-14"
-                  v-model="email"
-                  :rules="[formRules.required, formRules.email]"
-                  label="Email address"
-                  color="#93CB5B"
-                  required
-                  @change="checkEmail()"
-                  :error-messages="emailError"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4 mt-2">
-                <v-text-field
-                  class="font-size-14"
-                  color="#93CB5B"
-                  outlined
-                  dense
-                  v-model="password"
-                  :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                  :rules="[formRules.required, formRules.password]"
-                  :type="show1 ? 'text' : 'password'"
-                  name="input-10-1"
-                  label="Password"
-                  @click:append="show1 = !show1"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4 mt-2">
-                <v-text-field
-                  class="font-size-14"
-                  outlined
-                  color="#93CB5B"
-                  dense
-                  v-model="confirmPassword"
-                  :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
-                  :rules="[
-                    formRules.required,
-                    formRules.confirmPassword(confirmPassword, password),
-                  ]"
-                  :type="show2 ? 'text' : 'password'"
-                  name="input-10-1"
-                  label="Confirm Password"
-                  @click:append="show2 = !show2"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" class="pa-0 px-4">
-                <v-btn
-                  :loading="isLoading"
-                  @click="register()"
-                  block
-                  depressed
-                  color="#1976d2"
-                  class="white--text py-5 font-size-14 rounded-lg"
-                  >Register</v-btn
-                >
-              </v-col>
-            </v-row>
-          </v-form>
-          <v-col cols="12" class="pa-0">
-            <div
-              class="d-flex justify-center pt-8 pb-3 text-caption text-gray-100"
-            >
-              Already have an account?
-              <router-link class="pl-2" to="/login"> Sign In</router-link>
-            </div>
-          </v-col>
-        </v-card>
-      </v-col>
-    </v-row>
+            <v-form ref="Step1Formref" v-show="step.id == 1">
+              <v-row class="mx-5 pt-4">
+                <v-col cols="12" class="pa-0 px-4">
+                  <v-text-field
+                    outlined
+                    color="#93CB5B"
+                    dense
+                    class="font-size-14"
+                    v-model="firstname"
+                    :rules="[formRules.required]"
+                    label="Firstname"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4">
+                  <v-text-field
+                    outlined
+                    color="#93CB5B"
+                    dense
+                    class="font-size-14"
+                    v-model="middlename"
+                    label="Middlename"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4">
+                  <v-text-field
+                    class="font-size-14"
+                    color="#93CB5B"
+                    v-model="lastname"
+                    outlined
+                    dense
+                    :rules="[formRules.required]"
+                    label="Surname"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4">
+                  <v-text-field
+                    outlined
+                    dense
+                    color="#93CB5B"
+                    class="font-size-14"
+                    v-model="suffix"
+                    label="Suffix"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4">
+                  <v-text-field
+                    outlined
+                    dense
+                    color="#93CB5B"
+                    class="font-size-14"
+                    v-model="liscence"
+                    label="Liscence No."
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4 mt-2">
+                  <v-text-field
+                    outlined
+                    dense
+                    class="font-size-14"
+                    v-model="email"
+                    :rules="[formRules.required, formRules.email]"
+                    label="Email address"
+                    color="#93CB5B"
+                    required
+                    @change="checkEmail()"
+                    :error-messages="emailError"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4 mt-2">
+                  <v-text-field
+                    class="font-size-14"
+                    color="#93CB5B"
+                    outlined
+                    dense
+                    v-model="password"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :rules="[formRules.required, formRules.password]"
+                    :type="show1 ? 'text' : 'password'"
+                    name="input-10-1"
+                    label="Password"
+                    @click:append="show1 = !show1"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4 mt-2">
+                  <v-text-field
+                    class="font-size-14"
+                    outlined
+                    color="#93CB5B"
+                    dense
+                    v-model="confirmPassword"
+                    :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :rules="[
+                      formRules.required,
+                      formRules.confirmPassword(confirmPassword, password),
+                    ]"
+                    :type="show2 ? 'text' : 'password'"
+                    name="input-10-1"
+                    label="Confirm Password"
+                    @click:append="show2 = !show2"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" class="pa-0 px-4">
+                  <v-btn
+                    :loading="isLoading"
+                    @click="register()"
+                    block
+                    depressed
+                    :color="$vuetify.theme.themes.light.submitBtns"
+                    class="white--text py-5 font-size-14 rounded-lg"
+                    >Register</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-form>
+            <v-col cols="12" class="pa-0">
+              <div
+                class="d-flex justify-center pt-8 pb-3 text-caption text-gray-100"
+              >
+                Already have an account?
+                <router-link class="pl-2" to="/login"> Sign In</router-link>
+              </div>
+            </v-col>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
 
     <fade-away-message-component
       displayType="variation2"
@@ -178,7 +149,7 @@
       :top="fadeAwayMessage.top"
       :type="fadeAwayMessage.type"
     ></fade-away-message-component>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -194,7 +165,7 @@ export default {
       this.$store.dispatch("setUser", null);
       this.$store.dispatch("setEmail", null);
       this.$store.dispatch("setIsAuthenticated", 0);
-      setTimeout(function () {
+      setTimeout(function() {
         location.reload();
       }, 0);
     }
@@ -285,7 +256,7 @@ export default {
             this.emailError = "";
           }
           this.emailChecking = false;
-        },
+        }
       );
     },
     register() {
@@ -347,26 +318,23 @@ export default {
         });
       }
     },
-    doHome() {
-      this.$router.push("/");
-    },
   },
 };
 </script>
 
 <style scoped>
 .content {
-  background-color: white;
-  /* background: url("../../assets/img/laboratorybg.png"); */
+  /* background-color: #2196F3; */
+  background: url("../../assets/img/laboratorybg.png");
   background-position: center;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  /* background-position: center;
-  background-repeat: no-repeat; */
-  /* background-size: 100vw 100vh; */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100vw 100vh;
 }
 .title {
   color: #fff;
@@ -426,11 +394,5 @@ export default {
 .fadeIn.showsFade {
   opacity: 1;
   transform: translate3d(0, 0, 0);
-}
-.top-bar {
-  height: 80px;
-  border-bottom: 1px solid #eee;
-  background: white;
-  position: relative;
 }
 </style>
