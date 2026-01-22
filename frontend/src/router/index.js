@@ -347,13 +347,13 @@ const routes = [
       {
         path: "supplier",
         component: Supplier,
-        meta: { title: "", authRequired: true },
+        meta: { title: "Supplier", authRequired: true },
       },
 
       {
         path: "cashiering",
         component: Cashiering,
-        meta: { title: "", authRequired: true },
+        meta: { title: "Cashiering", authRequired: true },
       },
     ],
   },
