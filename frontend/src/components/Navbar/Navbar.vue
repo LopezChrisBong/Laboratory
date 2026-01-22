@@ -504,11 +504,11 @@ export default {
         this.mini = false;
       },
     },
-    reloadImg: {
-      handler() {
-        this.loadImg();
-      },
-    },
+    // reloadImg: {
+    //   handler() {
+    //     // this.loadImg();
+    //   },
+    // },
   },
   data() {
     return {
@@ -590,7 +590,7 @@ export default {
       if (assignedModule == 3) {
         this.axiosCall(
           "/notification/getAllReceptionist/Notification",
-          "GET"
+          "GET",
         ).then((res) => {
           this.notifications = res.data;
         });
@@ -598,7 +598,7 @@ export default {
         let userID = this.$store.state.user.id;
         this.axiosCall(
           "/notification/getAllNotifications/" + userID,
-          "GET"
+          "GET",
         ).then((res) => {
           this.notifications = res.data;
         });
@@ -749,7 +749,7 @@ export default {
 
               break;
           }
-        }
+        },
       );
     },
   },

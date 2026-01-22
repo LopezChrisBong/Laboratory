@@ -116,6 +116,14 @@
         </v-card>
       </v-col>
     </v-row>
+    <fade-away-message-component
+      displayType="variation2"
+      v-model="fadeAwayMessage.show"
+      :message="fadeAwayMessage.message"
+      :header="fadeAwayMessage.header"
+      :top="fadeAwayMessage.top"
+      :type="fadeAwayMessage.type"
+    ></fade-away-message-component>
   </v-container>
 </template>
 
