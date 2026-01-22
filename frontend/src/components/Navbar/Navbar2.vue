@@ -32,7 +32,9 @@
         </div>
       </v-toolbar-title>
       <div style="color: #3979b7" v-if="$vuetify.breakpoint.smAndDown">
-        <div>{{ $store.state.user.fname }} {{ $store.state.user.lname }}</div>
+        <div>
+          {{ $store.state.user.fname.charAt(0) }}. {{ $store.state.user.lname }}
+        </div>
         <div style="font-size: 10px">
           {{ assignedModule.description }}
         </div>
