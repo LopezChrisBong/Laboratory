@@ -566,7 +566,9 @@
           <p class="grey--text text--darken-1 mb-4">
             Ready to begin your healthcare journey?
           </p>
-          <v-btn color="primary" large rounded dark> Get Started Today </v-btn>
+          <v-btn color="primary" large rounded dark @click="addAppointment">
+            Get Started Today
+          </v-btn>
         </div>
       </v-container>
 

@@ -93,19 +93,18 @@ export class AuthService {
 
   async login(loginUser: LoginDto) {
     const res_user = await this.findUser(loginUser.email.toString());
- 
-   
     if (res_user) {
-      // comparing hashed password in the database with the user's password
- 
       const isMatch = comparePassword(
         loginUser.password.toString(),
         res_user.password,
       );
+      
       if (isMatch) {
           
         const adminApproved = res_user.isAdminApproved
+        
         if(adminApproved != false){
+        
           const userdetail = await this.dataSource
           .getRepository(UserDetail)
           .createQueryBuilder('userdetail')
@@ -143,6 +142,7 @@ export class AuthService {
           token: this.jwtService.sign(payload),
         };
         }else{
+            console.log(adminApproved)
           return new HttpException(
             'Please contact admin for the approval of your account!.',
             HttpStatus.NOT_FOUND,

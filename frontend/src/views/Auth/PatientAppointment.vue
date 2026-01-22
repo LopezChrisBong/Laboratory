@@ -825,7 +825,6 @@
                     :disabled="loading"
                     :loading="loading"
                     fab
-                    small
                     @click="confirmBooking"
                   >
                     <v-icon>mdi-check</v-icon>
@@ -835,7 +834,6 @@
                     v-if="info != 3"
                     color="white"
                     fab
-                    small
                     @click="validateAndNext"
                   >
                     <v-icon>mdi-arrow-right</v-icon>
