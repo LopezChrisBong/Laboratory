@@ -88,7 +88,7 @@ constructor(
     return quantityStatus;
   }
 
-  async create(createInventoryDto: CreateInventoryDto) {
+  async create(createInventoryDto: CreateInventoryDto, curr_user:any) {
     // Initialize quantities to 0 if null or undefined for calculations
     createInventoryDto.starting_quantity = createInventoryDto.starting_quantity || 0;
     createInventoryDto.used_quantity = createInventoryDto.used_quantity || 0;
@@ -163,7 +163,7 @@ constructor(
         lotNumber: createInventoryDto.lotNumber,
         brand: createInventoryDto.brand,
         notes: `Initial ${createInventoryDto.transactionType} transaction`,
-        performedBy: 'System', // You can pass user info from request if needed
+        performedBy: curr_user.userdetail.fname + ' ' + curr_user.userdetail.mname + ' ' + curr_user.userdetail.lname, // You can pass user info from request if needed
         transaction_date: new Date(),
       });
     }
@@ -179,7 +179,7 @@ constructor(
     return this.inventoryRepository.findOne({where: {id: id}});
   }
 
-  async update(id: number, updateInventoryDto: UpdateInventoryDto) {
+  async update(id: number, updateInventoryDto: UpdateInventoryDto, curr_user:any) {
     const existingInventory = await this.inventoryRepository.findOne({where: {id: id}});
     if (!existingInventory) {
         throw new Error('Inventory item not found.');
@@ -281,7 +281,7 @@ constructor(
         lotNumber: updateInventoryDto.lotNumber ?? existingInventory.lotNumber,
         brand: updateInventoryDto.brand ?? existingInventory.brand,
         notes: `${transactionType} transaction - ${Math.abs(transactionQuantity)} units`,
-        performedBy: 'System', // You can pass user info from request if needed
+        performedBy: curr_user.userdetail.fname + ' ' + curr_user.userdetail.mname + ' ' + curr_user.userdetail.lname, // You can pass user info from request if needed
         transaction_date: new Date(),
       });
     }
