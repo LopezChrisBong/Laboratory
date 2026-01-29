@@ -341,14 +341,12 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer />
-
-          <v-btn
-            variant="outlined"
-            class="white--text"
-            color="red"
-            @click="resetForm()"
+          <v-btn outlined class="white--text" color="red" @click="resetForm()"
             >Cancel</v-btn
+          >
+          <v-spacer />
+          <v-btn class="white--text" color="red" @click="deleteSchedule()"
+            >Delete</v-btn
           >
 
           <v-btn
@@ -572,7 +570,7 @@ export default {
     disabledMonths: {
       handler() {
         this.selectedMonths = this.selectedMonths.filter(
-          (m) => !this.disabledMonths.includes(m)
+          (m) => !this.disabledMonths.includes(m),
         );
       },
       immediate: true,
@@ -585,7 +583,7 @@ export default {
     const nextMonth = new Date(
       nextMonthDate.getFullYear(),
       nextMonthDate.getMonth() + 1,
-      1
+      1,
     );
     const nmY = nextMonth.getFullYear();
     const nmM = String(nextMonth.getMonth() + 1).padStart(2, "0");
@@ -619,7 +617,7 @@ export default {
 
         const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
           2,
-          "0"
+          "0",
         )}`;
 
         if (this.disabledMonths.includes(value)) continue;
@@ -668,7 +666,7 @@ export default {
       let userRoleID = this.$store.state.user.id;
       this.axiosCall(
         "/doctors-schedule/getMySchedule/" + userRoleID,
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
           this.dataSchedule = res.data;
@@ -684,7 +682,7 @@ export default {
       let userRoleID = this.$store.state.user.id;
       this.axiosCall(
         "/doctor-specialization/getMyScpecialty/" + userRoleID,
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
           this.dataSpecialty = res.data;
@@ -817,7 +815,7 @@ export default {
           this.axiosCall(
             "/doctors-schedule/addMonthlySchedule",
             "POST",
-            data
+            data,
           ).then((res) => {
             if (res.data.status == 200) {
               this.fadeAwayMessage.show = true;
@@ -880,7 +878,7 @@ export default {
             this.fadeAwayMessage.type = "error";
             this.fadeAwayMessage.header = res.data.msg;
           }
-        }
+        },
       );
       // }
     },
@@ -896,7 +894,7 @@ export default {
         this.axiosCall(
           "/doctor-specialization/" + this.updateID,
           "PATCH",
-          data
+          data,
         ).then((res) => {
           if (res.data.status == 201) {
             this.fadeAwayMessage.show = true;
@@ -912,23 +910,26 @@ export default {
         });
       }
     },
-    deleteSchedule(item) {
+    deleteSchedule() {
       // // console.log(item);
-      this.axiosCall("/doctors-schedule/" + item.id, "DELETE").then((res) => {
-        if (res.data.status == 200) {
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "success";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-          this.initialize();
-        } else if (res.data.status == 400) {
-          this.confirmDialog = false;
-          this.fadeAwayMessage.show = true;
-          this.fadeAwayMessage.type = "error";
-          this.fadeAwayMessage.header = "System Message";
-          this.fadeAwayMessage.message = res.data.msg;
-        }
-      });
+      this.axiosCall("/doctors-schedule/" + this.updateID, "DELETE").then(
+        (res) => {
+          if (res.data.status == 200) {
+            this.scheduleDialog = false;
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "success";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+            this.initialize();
+          } else if (res.data.status == 400) {
+            this.confirmDialog = false;
+            this.fadeAwayMessage.show = true;
+            this.fadeAwayMessage.type = "error";
+            this.fadeAwayMessage.header = "System Message";
+            this.fadeAwayMessage.message = res.data.msg;
+          }
+        },
+      );
     },
     deleteExperty(item) {
       this.axiosCall("/doctor-specialization/" + item.id, "DELETE").then(
@@ -946,7 +947,7 @@ export default {
             this.fadeAwayMessage.header = "System Message";
             this.fadeAwayMessage.message = res.data.msg;
           }
-        }
+        },
       );
     },
     expDesc(experty) {

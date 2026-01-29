@@ -98,7 +98,7 @@
                   label="Liscence No."
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="6" class="pa-0 px-4 mt-2">
+              <v-col cols="12" md="6" class="pa-0 px-4">
                 <v-text-field
                   outlined
                   dense
