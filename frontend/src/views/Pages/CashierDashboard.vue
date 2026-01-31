@@ -511,7 +511,7 @@ export default {
       if (!this.selectedDiscount) return 0;
 
       const discount = this.discountList.find(
-        (d) => d.id === this.selectedDiscount
+        (d) => d.id === this.selectedDiscount,
       );
 
       if (!discount) return 0;
@@ -613,10 +613,19 @@ export default {
         date: this.selectedDate, // send selected date to backend
       };
 
+      // this.axiosCall("/payment/getDailyIncome", "GET", params).then((res) => {
+      //   if (res) {
+      //     console.log("daily", res.data);
+      //     this.dailyData = res.data;
+      //   }
+      // });
       this.axiosCall("/payment/getDailyIncome", "GET", params).then((res) => {
         if (res) {
-          console.log("daily", res.data);
           this.dailyData = res.data;
+
+          this.$nextTick(() => {
+            this.renderDailyChart();
+          });
         }
       });
     },
@@ -627,10 +636,19 @@ export default {
         year: this.selectedYear,
       };
 
+      // this.axiosCall("/payment/getMonthlyIncome", "GET", params).then((res) => {
+      //   if (res) {
+      //     console.log("month", res.data);
+      //     this.monthIncome = res.data;
+      //   }
+      // });
       this.axiosCall("/payment/getMonthlyIncome", "GET", params).then((res) => {
         if (res) {
-          console.log("month", res.data);
           this.monthIncome = res.data;
+
+          this.$nextTick(() => {
+            this.renderMonthlyChart(this.monthIncome);
+          });
         }
       });
     },
@@ -640,10 +658,19 @@ export default {
         year: this.selectedYear1,
       };
 
+      // this.axiosCall("/payment/getYearlyIncome", "GET", params).then((res) => {
+      //   if (res) {
+      //     console.log("month", res.data);
+      //     this.yearIncome = res.data;
+      //   }
+      // });
       this.axiosCall("/payment/getYearlyIncome", "GET", params).then((res) => {
         if (res) {
-          console.log("month", res.data);
           this.yearIncome = res.data;
+
+          this.$nextTick(() => {
+            this.renderYearlyChart(this.yearIncome);
+          });
         }
       });
     },
@@ -662,7 +689,7 @@ export default {
             this.renderMonthlyChart(res.data.monthlyData);
             this.renderYearlyChart(res.data.yearlyData);
           }
-        }
+        },
       );
     },
     renderDailyChart() {
@@ -832,7 +859,7 @@ export default {
       this.updateID = item.patientId;
       this.axiosCall(
         "/payment/findOnePatientPayment/" + item.patientId,
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
           this.payPatient = res.data[0];
@@ -865,7 +892,7 @@ export default {
             this.axiosCall(
               "/payment/" + this.payPatient.paymentIds[i],
               "PATCH",
-              newData
+              newData,
             ).then((res) => {
               if (res.data.status == 200) {
                 this.fadeAwayMessage.show = true;
