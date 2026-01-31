@@ -136,7 +136,6 @@ export default {
     setTimeout(() => {
       this.show = true;
     }, 100);
-    this.getSchoolYear();
     if (this.$store.state.user) {
       if (!this.$store.state.user.usertype.id) {
         //this.deleteToken();
@@ -202,6 +201,7 @@ export default {
     isLoading: false,
     email: "",
     password: "",
+    rememberMe: null,
     show1: false,
     show: false,
     laboratory: null,

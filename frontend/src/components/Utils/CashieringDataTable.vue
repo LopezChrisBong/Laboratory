@@ -414,7 +414,12 @@ export default {
       search: "",
       date: null,
       payPatient: [],
-      options: null,
+      options: {
+        page: 1,
+        itemsPerPage: 10,
+        sortBy: [],
+        sortDesc: [],
+      },
       reference_number: null,
       amount_paid: null,
       fadeAwayMessage: {
@@ -431,7 +436,7 @@ export default {
       if (!this.selectedDiscount) return 0;
 
       const discount = this.discountList.find(
-        (d) => d.id === this.selectedDiscount
+        (d) => d.id === this.selectedDiscount,
       );
 
       if (!discount) return 0;
@@ -451,24 +456,56 @@ export default {
     totalAmount() {
       return this.payPatient.total_amount - this.discountAmount;
     },
+    // filteredPatients() {
+    //   if (this.dateFilter === "All") return this.patients;
+
+    //   const now = new Date();
+
+    //   return this.patients.filter((patient) => {
+    //     const created = new Date(patient.created_at);
+
+    //     if (this.dateFilter === "Weekly") {
+    //       const weekAgo = new Date();
+    //       weekAgo.setDate(now.getDate() - 7);
+    //       return created >= weekAgo;
+    //     } else if (this.dateFilter === "Monthly") {
+    //       return (
+    //         created.getMonth() === now.getMonth() &&
+    //         created.getFullYear() === now.getFullYear()
+    //       );
+    //     } else if (this.dateFilter === "Yearly") {
+    //       return created.getFullYear() === now.getFullYear();
+    //     }
+
+    //     return true;
+    //   });
+    // },
     filteredPatients() {
+      if (!Array.isArray(this.patients)) return [];
+
       if (this.dateFilter === "All") return this.patients;
 
       const now = new Date();
 
       return this.patients.filter((patient) => {
+        if (!patient.created_at) return false;
+
         const created = new Date(patient.created_at);
 
         if (this.dateFilter === "Weekly") {
           const weekAgo = new Date();
           weekAgo.setDate(now.getDate() - 7);
           return created >= weekAgo;
-        } else if (this.dateFilter === "Monthly") {
+        }
+
+        if (this.dateFilter === "Monthly") {
           return (
             created.getMonth() === now.getMonth() &&
             created.getFullYear() === now.getFullYear()
           );
-        } else if (this.dateFilter === "Yearly") {
+        }
+
+        if (this.dateFilter === "Yearly") {
           return created.getFullYear() === now.getFullYear();
         }
 
@@ -490,8 +527,7 @@ export default {
         this.loading = true;
         this.axiosCall("/payment/findAllPendingPayment/", "GET").then((res) => {
           if (res) {
-            console.log("PAT", res.data);
-            this.patients = res.data;
+            this.patients = Array.isArray(res.data) ? res.data : [];
             this.loading = false;
           }
         });
@@ -499,8 +535,7 @@ export default {
         this.loading = true;
         this.axiosCall("/payment/fullyPaid/", "GET").then((res) => {
           if (res) {
-            console.log("PAT1", res.data);
-            this.patients = res.data;
+            this.patients = Array.isArray(res.data) ? res.data : [];
             this.loading = false;
           }
         });
@@ -517,7 +552,7 @@ export default {
       this.updateID = item.patientId;
       this.axiosCall(
         "/payment/findOnePatientPayment/" + item.patientId,
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
           this.payPatient = res.data[0];
@@ -561,7 +596,7 @@ export default {
                   this.axiosCall(
                     "/payment/" + this.payPatient.paymentIds[i],
                     "PATCH",
-                    newData
+                    newData,
                   ).then((res) => {
                     if (res.data.status == 200) {
                       let notif_data = {
@@ -581,7 +616,7 @@ export default {
                             this.initialize();
                             this.dialogConfirmDone = false;
                           }
-                        }
+                        },
                       );
                     } else if (res.data.status == 400) {
                       this.fadeAwayMessage.show = true;

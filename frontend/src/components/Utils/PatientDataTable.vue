@@ -630,7 +630,7 @@ export default {
     highlight: function (value, query) {
       return value.replace(
         new RegExp(query, ""),
-        "<span class='blue'>" + query + "</span>"
+        "<span class='blue'>" + query + "</span>",
       );
     },
   },
@@ -736,10 +736,21 @@ export default {
     userRoleID: null,
     assignedModuleID: null,
     loading: false,
-    options: {},
+    options: {
+      page: 1,
+      itemsPerPage: 10,
+      sortBy: [],
+      sortDesc: [],
+    },
     action: null,
     tar_toID: null,
-    paginationData: {},
+    paginationData: {
+      pageStart: 0,
+      pageStop: 0,
+      itemsLength: 0,
+      pageCount: 1,
+    },
+
     dialogConfirmDone: false,
     allTimes: [
       "07:00 AM",
@@ -900,7 +911,6 @@ export default {
     options: {
       handler() {
         this.initialize();
-        this.tab = 1;
       },
       deep: true,
     },
@@ -942,7 +952,7 @@ export default {
         this.axiosCall(
           "/appointment/doneCheckup/" + this.checkupData.appointmentID,
           "PATCH",
-          data
+          data,
         ).then((res) => {
           if (res.data.status == 200) {
             if (this.addInvoice == true) {
@@ -1009,7 +1019,7 @@ export default {
         this.axiosCall(
           "/appointment/confirmAppointment/" + this.canceledData.appointmentID,
           "PATCH",
-          data
+          data,
         ).then((res) => {
           if (res.data.status == 200) {
             this.initialize();
@@ -1051,10 +1061,10 @@ export default {
         ) {
           this.axiosCall(
             "/appointment/getAllPatientByRole/" + this.$store.state.user.id,
-            "GET"
+            "GET",
           ).then((res) => {
             if (res) {
-              this.data = res.data;
+              this.data = Array.isArray(res.data) ? res.data : [];
               this.loading = false;
             }
           });
@@ -1063,10 +1073,10 @@ export default {
           this.axiosCall("/appointment/getAllPatient/" + this.tab, "GET").then(
             (res) => {
               if (res) {
-                this.data = res.data;
+                this.data = Array.isArray(res.data) ? res.data : [];
                 this.loading = false;
               }
-            }
+            },
           );
         }
       } else if (this.tab == 2) {
@@ -1075,7 +1085,7 @@ export default {
             this.$store.state.user.id +
             "?tab=" +
             this.tab,
-          "GET"
+          "GET",
         ).then((res) => {
           if (res) {
             this.data = res.data;
@@ -1086,10 +1096,10 @@ export default {
         this.axiosCall("/appointment/getAllPatient/" + this.tab, "GET").then(
           (res) => {
             if (res) {
-              this.data = res.data;
+              this.data = Array.isArray(res.data) ? res.data : [];
               this.loading = false;
             }
-          }
+          },
         );
       }
     },
@@ -1097,17 +1107,17 @@ export default {
     getAllServices() {
       this.axiosCall(
         "/services/getAllServicesForBooking/" + this.tab,
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
-          this.dataServices = res.data;
+          this.dataServices = Array.isArray(res.data) ? res.data : [];
         }
       });
     },
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
-          this.dataPackages = res.data;
+          this.dataPackages = Array.isArray(res.data) ? res.data : [];
         }
       });
     },

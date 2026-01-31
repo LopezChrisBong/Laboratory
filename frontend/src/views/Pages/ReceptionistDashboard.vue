@@ -54,7 +54,7 @@
                 v-model="selectedDate"
                 :min="minDate"
                 color="primary"
-                style="height: auto;"
+                style="height: auto"
               ></v-date-picker>
             </v-card-text>
           </v-card>
@@ -199,7 +199,7 @@ export default {
       this.loading = true;
       this.axiosCall("/appointment/getAllPatient/" + 1, "GET").then((res) => {
         if (res) {
-          this.patients = res.data;
+          this.patients = Array.isArray(res.data) ? res.data : [];
           this.loading = false;
         }
       });
@@ -207,7 +207,7 @@ export default {
     getTotalPatient() {
       this.axiosCall(
         "/appointment/getAllAppointmentDashboard/DashboardData",
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
           //   console.log("lslsl", res.data);
@@ -222,7 +222,7 @@ export default {
     async getTotalOverview() {
       this.axiosCall(
         "/appointment/getAllOverview/patientOverview/" + this.selectedYear,
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
           this.totalAppointment = res.data.totalAppointment.map(Number);
