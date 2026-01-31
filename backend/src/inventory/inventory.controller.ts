@@ -1,15 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
+import { currentUser } from 'src/shared/jwtDecode';
 
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Post()
-  create(@Body() createInventoryDto: CreateInventoryDto) {
-    return this.inventoryService.create(createInventoryDto);
+  create(@Body() createInventoryDto: CreateInventoryDto, @Headers() headers) {
+    var head_str = headers.authorization;
+    const curr_user = currentUser(head_str);
+    return this.inventoryService.create(createInventoryDto, curr_user);
   }
 
   @Get()
@@ -23,8 +26,10 @@ export class InventoryController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInventoryDto: UpdateInventoryDto) {
-    return this.inventoryService.update(+id, updateInventoryDto);
+  update(@Param('id') id: string, @Body() updateInventoryDto: UpdateInventoryDto, @Headers() headers) {
+    var head_str = headers.authorization;
+    const curr_user = currentUser(head_str);
+    return this.inventoryService.update(+id, updateInventoryDto, curr_user);
   }
 
   @Delete(':id')
