@@ -385,14 +385,14 @@
       </div>
     </v-card>
 
-    <v-row>
+    <!-- <v-row>
       <v-col :cols="assignModule == 1 ? '6' : '12'">
         <canvas id="monthlyChart"></canvas>
       </v-col>
       <v-col v-if="assignModule == 1" :cols="assignModule == 1 ? '6' : '12'">
         <canvas id="yearlyChart"></canvas>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <fade-away-message-component
       displayType="variation2"
@@ -613,19 +613,10 @@ export default {
         date: this.selectedDate, // send selected date to backend
       };
 
-      // this.axiosCall("/payment/getDailyIncome", "GET", params).then((res) => {
-      //   if (res) {
-      //     console.log("daily", res.data);
-      //     this.dailyData = res.data;
-      //   }
-      // });
       this.axiosCall("/payment/getDailyIncome", "GET", params).then((res) => {
         if (res) {
+          console.log("daily", res.data);
           this.dailyData = res.data;
-
-          this.$nextTick(() => {
-            this.renderDailyChart();
-          });
         }
       });
     },
@@ -636,19 +627,10 @@ export default {
         year: this.selectedYear,
       };
 
-      // this.axiosCall("/payment/getMonthlyIncome", "GET", params).then((res) => {
-      //   if (res) {
-      //     console.log("month", res.data);
-      //     this.monthIncome = res.data;
-      //   }
-      // });
       this.axiosCall("/payment/getMonthlyIncome", "GET", params).then((res) => {
         if (res) {
+          console.log("month", res.data);
           this.monthIncome = res.data;
-
-          this.$nextTick(() => {
-            this.renderMonthlyChart(this.monthIncome);
-          });
         }
       });
     },
@@ -658,19 +640,10 @@ export default {
         year: this.selectedYear1,
       };
 
-      // this.axiosCall("/payment/getYearlyIncome", "GET", params).then((res) => {
-      //   if (res) {
-      //     console.log("month", res.data);
-      //     this.yearIncome = res.data;
-      //   }
-      // });
       this.axiosCall("/payment/getYearlyIncome", "GET", params).then((res) => {
         if (res) {
+          console.log("month", res.data);
           this.yearIncome = res.data;
-
-          this.$nextTick(() => {
-            this.renderYearlyChart(this.yearIncome);
-          });
         }
       });
     },
