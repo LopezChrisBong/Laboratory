@@ -1064,7 +1064,11 @@ export default {
             "GET",
           ).then((res) => {
             if (res) {
-              this.data = Array.isArray(res.data) ? res.data : [];
+              this.data = Array.isArray(res.data)
+                ? res.data
+                : Array.isArray(res.data.data)
+                ? res.data.data
+                : [];
               this.loading = false;
             }
           });
@@ -1073,7 +1077,11 @@ export default {
           this.axiosCall("/appointment/getAllPatient/" + this.tab, "GET").then(
             (res) => {
               if (res) {
-                this.data = Array.isArray(res.data) ? res.data : [];
+                this.data = Array.isArray(res.data)
+                  ? res.data
+                  : Array.isArray(res.data.data)
+                  ? res.data.data
+                  : [];
                 this.loading = false;
               }
             },
@@ -1096,7 +1104,11 @@ export default {
         this.axiosCall("/appointment/getAllPatient/" + this.tab, "GET").then(
           (res) => {
             if (res) {
-              this.data = Array.isArray(res.data) ? res.data : [];
+              this.data = Array.isArray(res.data)
+                ? res.data
+                : Array.isArray(res.data.data)
+                ? res.data.data
+                : [];
               this.loading = false;
             }
           },
@@ -1110,14 +1122,22 @@ export default {
         "GET",
       ).then((res) => {
         if (res) {
-          this.dataServices = Array.isArray(res.data) ? res.data : [];
+          this.dataServices = Array.isArray(res.data)
+            ? res.data
+            : Array.isArray(res.data.data)
+            ? res.data.data
+            : [];
         }
       });
     },
     getAllPackages() {
       this.axiosCall("/services", "GET").then((res) => {
         if (res) {
-          this.dataPackages = Array.isArray(res.data) ? res.data : [];
+          this.dataPackages = Array.isArray(res.data)
+            ? res.data
+            : Array.isArray(res.data.data)
+            ? res.data.data
+            : [];
         }
       });
     },

@@ -527,7 +527,11 @@ export default {
         this.loading = true;
         this.axiosCall("/payment/findAllPendingPayment/", "GET").then((res) => {
           if (res) {
-            this.patients = Array.isArray(res.data) ? res.data : [];
+            this.patients = Array.isArray(res.data)
+              ? res.data
+              : Array.isArray(res.data.data)
+              ? res.data.data
+              : [];
             this.loading = false;
           }
         });
@@ -535,7 +539,11 @@ export default {
         this.loading = true;
         this.axiosCall("/payment/fullyPaid/", "GET").then((res) => {
           if (res) {
-            this.patients = Array.isArray(res.data) ? res.data : [];
+            this.patients = Array.isArray(res.data)
+              ? res.data
+              : Array.isArray(res.data.data)
+              ? res.data.data
+              : [];
             this.loading = false;
           }
         });
