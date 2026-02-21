@@ -65,15 +65,33 @@
           {{ formatDate(item.date) }} {{ item.time }}
         </template>
         <template v-slot:[`item.services`]="{ item }">
-          <v-chip v-for="element in filteredServices(item)" :key="element.id">
-            {{ element.description }}
-          </v-chip>
+          <span
+            v-for="(element, index) in filteredServices(item).slice(0, 5)"
+            :key="element.id"
+          >
+            {{ element.description
+            }}<span
+              v-if="index < 4 && index < filteredServices(item).length - 1"
+              >,
+            </span>
+          </span>
+
+          <span v-if="filteredServices(item).length > 5">...</span>
         </template>
 
         <template v-slot:[`item.packages`]="{ item }">
-          <v-chip v-for="element in filteredPackages(item)" :key="element.id">
-            {{ element.description }}
-          </v-chip>
+          <span
+            v-for="(element, index) in filteredPackages(item).slice(0, 5)"
+            :key="element.id"
+          >
+            {{ element.description
+            }}<span
+              v-if="index < 4 && index < filteredPackages(item).length - 1"
+              >,
+            </span>
+          </span>
+
+          <span v-if="filteredPackages(item).length > 5">...</span>
         </template>
 
         <template v-slot:[`item.status`]="{ item }">

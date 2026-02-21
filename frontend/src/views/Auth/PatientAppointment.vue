@@ -363,7 +363,6 @@
                           outlined
                           filled
                           dense
-                          clearable
                           @change="onClinicChange"
                         />
                       </v-col>
@@ -373,7 +372,6 @@
                           outlined
                           filled
                           dense
-                          clearable
                           :rules="[(v) => !!v || 'required']"
                           label="Select Doctor"
                           item-value="id"

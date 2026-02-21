@@ -305,7 +305,7 @@ export default {
       this.$store.dispatch("setEmail", null);
       this.$store.dispatch("setEmp", null);
       this.$store.dispatch("setIsAuthenticated", 0);
-      this.$router.replace("/");
+      this.$router.replace("/login");
     },
     logout: function() {
       this.deleteToken();
@@ -343,7 +343,7 @@ export default {
           // console.log(error);
           this.deleteToken();
           this.logout();
-          this.$router.push("/");
+          this.$router.push("/login");
         } else {
           return error.response;
         }

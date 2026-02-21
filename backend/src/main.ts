@@ -9,7 +9,8 @@ import * as express from 'express';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 async function bootstrap() {
   var whitelist = [
     'http://localhost:8080',

@@ -56,15 +56,33 @@
         </template>
 
         <template v-slot:[`item.services`]="{ item }">
-          <v-chip v-for="element in filteredServices(item)" :key="element.id">
-            {{ element.description }}
-          </v-chip>
+          <span
+            v-for="(element, index) in filteredServices(item).slice(0, 5)"
+            :key="element.id"
+          >
+            {{ element.description
+            }}<span
+              v-if="index < 4 && index < filteredServices(item).length - 1"
+              >,
+            </span>
+          </span>
+
+          <span v-if="filteredServices(item).length > 5">...</span>
         </template>
 
         <template v-slot:[`item.packages`]="{ item }">
-          <v-chip v-for="element in filteredPackages(item)" :key="element.id">
-            {{ element.description }}
-          </v-chip>
+          <span
+            v-for="(element, index) in filteredPackages(item).slice(0, 5)"
+            :key="element.id"
+          >
+            {{ element.description
+            }}<span
+              v-if="index < 4 && index < filteredPackages(item).length - 1"
+              >,
+            </span>
+          </span>
+
+          <span v-if="filteredPackages(item).length > 5">...</span>
         </template>
 
         <template v-slot:[`item.status`]="{ item }">
@@ -509,7 +527,7 @@ export default {
     highlight: function (value, query) {
       return value.replace(
         new RegExp(query, ""),
-        "<span class='blue'>" + query + "</span>"
+        "<span class='blue'>" + query + "</span>",
       );
     },
   },
@@ -760,7 +778,7 @@ export default {
       if (this.assignedModuleID == 5) {
         this.axiosCall(
           "/appointment/getAllPatientForDoctor/" + this.$store.state.user.id,
-          "GET"
+          "GET",
         ).then((res) => {
           if (res) {
             this.data = res.data;
@@ -770,7 +788,7 @@ export default {
       } else if (this.assignedModuleID == 2) {
         this.axiosCall(
           "/appointment/getAllPatientForMedtech/" + this.$store.state.user.id,
-          "GET"
+          "GET",
         ).then((res) => {
           if (res) {
             this.data = res.data;

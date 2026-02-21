@@ -49,22 +49,45 @@
                   </template>
                   <template v-slot:[`item.services`]="{ item }">
                     <div>
-                      <v-chip
-                        v-for="element in item.services_availed"
+                      <span
+                        v-for="(element, index) in item.services_availed.slice(
+                          0,
+                          5,
+                        )"
                         :key="element.id"
                       >
-                        {{ element.service_description }}
-                      </v-chip>
+                        {{ element.service_description
+                        }}<span
+                          v-if="
+                            index < 4 &&
+                            index < item.services_availed.length - 1
+                          "
+                          >,
+                        </span>
+                      </span>
+
+                      <span v-if="item.services_availed.length > 5">...</span>
                     </div>
                   </template>
 
                   <template v-slot:[`item.packages`]="{ item }">
-                    <v-chip
-                      v-for="element in item.packages_availed"
+                    <span
+                      v-for="(element, index) in item.packages_availed.slice(
+                        0,
+                        5,
+                      )"
                       :key="element.id"
                     >
-                      {{ element.description }}
-                    </v-chip>
+                      {{ element.description
+                      }}<span
+                        v-if="
+                          index < 4 && index < item.packages_availed.length - 1
+                        "
+                        >,
+                      </span>
+                    </span>
+
+                    <span v-if="item.packages_availed.length > 5">...</span>
                   </template>
                   <template v-slot:[`item.status`]="{ item }">
                     <v-chip
@@ -654,7 +677,7 @@ export default {
             userID +
             "/" +
             this.data.patientID,
-          "GET"
+          "GET",
         ).then((res) => {
           if (res) {
             // console.log(res.data);
@@ -668,7 +691,7 @@ export default {
             userID +
             "/" +
             this.data.patientID,
-          "GET"
+          "GET",
         ).then((res) => {
           if (res) {
             // console.log(res.data);
@@ -681,7 +704,7 @@ export default {
     getAllServices() {
       this.axiosCall(
         "/services/getAllServicesForBooking/" + this.tab,
-        "GET"
+        "GET",
       ).then((res) => {
         if (res) {
           this.dataServices = res.data;
@@ -706,7 +729,7 @@ export default {
       this.axiosCall(
         "/appointment/updatePatientStatus/" + this.id,
         "PATCH",
-        data
+        data,
       ).then((res) => {
         if (res.data.status == 201) {
           this.initialize();
@@ -816,7 +839,7 @@ export default {
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },
-          }
+          },
         );
         this.$emit("notify", "File uploaded successfully!");
         this.currentFileUrl =
