@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Sms {
@@ -13,4 +19,19 @@ export class Sms {
 
   @Column({ type: 'tinyint', nullable: false })
   is_sent: boolean;
+
+  @CreateDateColumn({
+    nullable: false,
+    type: 'datetime',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    name: 'updated_at',
+    type: 'datetime',
+  })
+  updatedAt: Date;
 }

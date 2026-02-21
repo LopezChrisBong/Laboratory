@@ -18,6 +18,25 @@ export class SmsController {
     return this.smsService.sendSms(dto);
   }
 
+  @Post('sendSmsTwilio')
+  async sendSmsTwilio(
+    // @Body('to') to: string,
+    // @Body('message') message: string,
+    @Body() dto: SendSMSDTO,
+  ) {
+    return await this.smsService.sendSmsTwilio(dto);
+  }
+
+  @Post('sendTXT')
+  async send(@Body() dto: SendSMSDTO) {
+    return this.smsService.sendSMS(dto);
+  }
+
+  @Post('sendSmsSemaphore')
+  async sendSmsSemaphore(@Body() dto: SendSMSDTO) {
+    return this.smsService.sendSmsSemaphore(dto);
+  }
+
   // @Post('send-mms')
   // async sendMms(@Body() dto: SendMmsDto) {
   //   return this.smsService.sendMms(dto);
