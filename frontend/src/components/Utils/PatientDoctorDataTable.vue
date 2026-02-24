@@ -472,7 +472,7 @@
                       {{ element.description }}
                     </v-chip>
                   </template>
-                  <template #item.created_at="{ item }">
+                  <template v-slot:[`item.created_at`]="{ item }">
                     {{ formatDate(item.created_at) }}
                   </template>
                 </v-data-table>

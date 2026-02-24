@@ -688,13 +688,30 @@ export default {
       this.getAllNotifications();
       this.getAssignedModules();
     },
+    // openNotification(notif) {
+    //   // Example handler – you can route or open a dialog
+    //   notif.read = true;
+    //   // console.log("Open notification:", notif);
+    //   if (notif.route) {
+    //     this.$router.push(notif.route);
+    //   }
+    // },
     openNotification(notif) {
-      // Example handler – you can route or open a dialog
       notif.read = true;
-      // console.log("Open notification:", notif);
-      if (notif.route) {
-        this.$router.push(notif.route);
-      }
+      let data = {
+        read: true,
+      };
+      this.axiosCall("/notification/" + notif.id, "PATCH", data).then((res) => {
+        console.log(res);
+        if (notif.route) {
+          // this.$router.push(notif.route);
+          this.showAllNotifDialog = false;
+          this.$router.push("/" + this.userType + notif.route);
+        }
+      });
+      // Example handler – you can route or open a dialog
+
+      //   // console.log("Open notification:", notif);
     },
     getMyRole(id) {
       var role;
