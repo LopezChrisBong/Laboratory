@@ -152,15 +152,23 @@ export default {
     },
     getAllAppointment() {
       let userID = this.$store.state.user.id;
-      this.axiosCall(
-        "/appointment/getAllDoctorsAppointment/" + userID,
-        "GET"
-      ).then((res) => {
-        if (res) {
-          console.log("Schedule", res.data);
-          this.events = res.data;
-        }
-      });
+
+      this.axiosCall("/appointment/getAllDoctorsAppointment/" + userID, "GET")
+        .then((res) => {
+          if (res) {
+            console.log("Schedule", res.data);
+
+            this.events = res.data.map((e) => ({
+              name: e.name,
+              start: e.start,
+              end: e.end,
+              color: e.color || "blue",
+            }));
+          }
+        })
+        .catch((err) => {
+          console.error("Calendar Error:", err);
+        });
     },
     next() {
       this.$refs.calendar.next();
@@ -186,8 +194,22 @@ export default {
     },
     saveEvent() {
       if (this.newEvent.name && this.newEvent.start && this.newEvent.end) {
-        this.events.push({ ...this.newEvent });
-        this.newEvent = { name: "", start: "", end: "", color: "blue" };
+        const event = {
+          name: this.newEvent.name,
+          start: this.newEvent.start,
+          end: this.newEvent.end,
+          color: this.newEvent.color || "blue",
+        };
+
+        this.events = [...this.events, event];
+
+        this.newEvent = {
+          name: "",
+          start: "",
+          end: "",
+          color: "blue",
+        };
+
         this.dialog = false;
       }
     },
