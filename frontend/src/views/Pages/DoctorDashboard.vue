@@ -158,12 +158,20 @@ export default {
           if (res) {
             console.log("Schedule", res.data);
 
-            this.events = res.data.map((e) => ({
-              name: e.name,
-              start: e.start,
-              end: e.end,
-              color: e.color || "blue",
-            }));
+            this.events = res.data
+              .filter(
+                (e) =>
+                  e.start &&
+                  e.end &&
+                  e.start !== "Invalid Date" &&
+                  e.end !== "Invalid Date",
+              )
+              .map((e) => ({
+                name: e.name,
+                start: e.start,
+                end: e.end,
+                color: e.color || "blue",
+              }));
           }
         })
         .catch((err) => {
