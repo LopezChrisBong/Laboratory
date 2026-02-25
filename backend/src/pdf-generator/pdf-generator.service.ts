@@ -409,20 +409,21 @@ export class PdfGeneratorService {
     return moment(value).format('MMM DD,YYYY');
   }
 
-  async prescription(id: number, name:string) {
+  async prescription(id: number, name: string) {
     let prescription = await this.dataSource.manager
       .createQueryBuilder(Prescription, 'p')
-      .select(['p.*',
-              `IF (
+      .select([
+        'p.*',
+        `IF (
                     !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
                     CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
                     CONCAT(ud.fname, ' ', ud.lname)
                 ) AS doctor_name`,
-          ])
+      ])
       .leftJoin(UserDetail, 'ud', 'ud.id = p.doctorID')
       .where('p.id = :id', { id })
       .getRawOne();
-      console.log(prescription)
+    console.log(prescription);
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
@@ -485,7 +486,10 @@ export class PdfGeneratorService {
       timeStyle: 'short',
     }).format(now);
 
-    const headerImgPath = join(process.cwd(), '/../static/img/Paragon Logo.png');
+    const headerImgPath = join(
+      process.cwd(),
+      '/../static/img/Paragon Logo.png',
+    );
     // const headerImgPath = join(process.cwd(), '/static/img/Paragon Logo.png');
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
 
@@ -619,7 +623,7 @@ export class PdfGeneratorService {
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
-             `IF (
+        `IF (
           !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
           CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
           CONCAT(ud.fname, ' ', ud.lname)
@@ -636,7 +640,7 @@ export class PdfGeneratorService {
       .leftJoin(UserDetail, 'ud', 'mid.doctorID = ud.id')
       .where('mid.id = :id', { id })
       .getRawOne();
-      console.log(patientData)
+    console.log(patientData);
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
@@ -687,19 +691,20 @@ export class PdfGeneratorService {
     }
   }
 
-  async patientNormalMedication(id: number, name:string) {
-      const patientData = await this.dataSource.manager
+  async patientNormalMedication(id: number, name: string) {
+    const patientData = await this.dataSource.manager
       .createQueryBuilder(Patient, 'p')
-      .select(['p.*',
-              `IF (
+      .select([
+        'p.*',
+        `IF (
                     !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
                     CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
                     CONCAT(p.f_name, ' ', p.l_name)
                 ) AS name`,
-          ])
+      ])
       .where('p.id = :id', { id })
-      .getRawOne()
-    
+      .getRawOne();
+
     const medicalData = await this.dataSource.manager
       .createQueryBuilder(MedicalInfo, 'mid')
       .select([
@@ -708,7 +713,7 @@ export class PdfGeneratorService {
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
-             `IF (
+        `IF (
           !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
           CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
           CONCAT(ud.fname, ' ', ud.lname)
@@ -726,8 +731,7 @@ export class PdfGeneratorService {
       .where('mid.patientID = :id', { id })
       .andWhere('mid.pregnant = 0')
       .getRawMany();
-      console.log(medicalData)
-   
+    console.log(medicalData);
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
@@ -743,12 +747,14 @@ export class PdfGeneratorService {
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
     // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
 
-    const data = [{
-      patientData: patientData,
-      headerImg: headerImg,
-      medicalData:medicalData,
-      formatted
-    }];
+    const data = [
+      {
+        patientData: patientData,
+        headerImg: headerImg,
+        medicalData: medicalData,
+        formatted,
+      },
+    ];
 
     try {
       const browser = await puppeteer.launch({
@@ -780,19 +786,20 @@ export class PdfGeneratorService {
     }
   }
 
-  async patientPregnantMedication(id: number, name:string) {
-      const patientData = await this.dataSource.manager
+  async patientPregnantMedication(id: number, name: string) {
+    const patientData = await this.dataSource.manager
       .createQueryBuilder(Patient, 'p')
-      .select(['p.*',
-              `IF (
+      .select([
+        'p.*',
+        `IF (
                     !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
                     CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
                     CONCAT(p.f_name, ' ', p.l_name)
                 ) AS name`,
-          ])
+      ])
       .where('p.id = :id', { id })
-      .getRawOne()
-    
+      .getRawOne();
+
     const medicalData = await this.dataSource.manager
       .createQueryBuilder(MedicalInfo, 'mid')
       .select([
@@ -801,7 +808,7 @@ export class PdfGeneratorService {
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
-             `IF (
+        `IF (
           !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
           CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
           CONCAT(ud.fname, ' ', ud.lname)
@@ -821,12 +828,15 @@ export class PdfGeneratorService {
       .orderBy('mid.created_at', 'DESC')
       .getRawMany();
 
-      // console.log(medicalData[0].created_at)
-      // console.log(patientData.b_date)
+    // console.log(medicalData[0].created_at)
+    // console.log(patientData.b_date)
 
-      let newAge = this.calculateAge(patientData.b_date, medicalData[0].created_at)
-      
-      console.log(newAge)
+    let newAge = this.calculateAge(
+      patientData.b_date,
+      medicalData[0].created_at,
+    );
+
+    console.log(newAge);
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
@@ -842,14 +852,16 @@ export class PdfGeneratorService {
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
     // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
 
-    const data = [{
-      patientData: patientData,
-      headerImg: headerImg,
-      medicalData:medicalData,
-      medicalDataInfo:medicalData[0],
-      formatted,
-      newAge
-    }];
+    const data = [
+      {
+        patientData: patientData,
+        headerImg: headerImg,
+        medicalData: medicalData,
+        medicalDataInfo: medicalData[0],
+        formatted,
+        newAge,
+      },
+    ];
 
     try {
       const browser = await puppeteer.launch({
@@ -881,22 +893,22 @@ export class PdfGeneratorService {
     }
   }
 
-  async patientAllMedication(id: number, name:string) {
-      const patientData = await this.dataSource.manager
+  async patientAllMedication(id: number, name: string) {
+    const patientData = await this.dataSource.manager
       .createQueryBuilder(Patient, 'p')
-      .select(['p.*',
-              `IF (
+      .select([
+        'p.*',
+        `IF (
                     !ISNULL(p.m_name) AND LOWER(p.m_name) != 'n/a',
                     CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
                     CONCAT(p.f_name, ' ', p.l_name)
                 ) AS name`,
-          ])
+      ])
       .leftJoin(MedicalInfo, 'mid', 'mid.patientId = p.id')
       .where('p.id = :id', { id })
-      .getRawOne()
-      console.log(patientData)
+      .getRawOne();
+    console.log(patientData);
 
-    
     const medicalDataNormal = await this.dataSource.manager
       .createQueryBuilder(MedicalInfo, 'mid')
       .select([
@@ -905,7 +917,7 @@ export class PdfGeneratorService {
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
-             `IF (
+        `IF (
           !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
           CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
           CONCAT(ud.fname, ' ', ud.lname)
@@ -924,9 +936,9 @@ export class PdfGeneratorService {
       .andWhere('mid.pregnant = 0')
       .orderBy('mid.created_at', 'DESC')
       .getRawMany();
-      // console.log(medicalDataNormal)
+    // console.log(medicalDataNormal)
 
-      const medicalDataPregnant = await this.dataSource.manager
+    const medicalDataPregnant = await this.dataSource.manager
       .createQueryBuilder(MedicalInfo, 'mid')
       .select([
         `IF (
@@ -934,7 +946,7 @@ export class PdfGeneratorService {
           CONCAT(p.f_name, ' ', SUBSTRING(p.m_name, 1, 1), '. ', p.l_name),
           CONCAT(p.f_name, ' ', p.l_name)
       ) AS name`,
-             `IF (
+        `IF (
           !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
           CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
           CONCAT(ud.fname, ' ', ud.lname)
@@ -953,7 +965,6 @@ export class PdfGeneratorService {
       .andWhere('mid.pregnant = 1')
       .orderBy('mid.created_at', 'DESC')
       .getRawMany();
-   
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
@@ -969,14 +980,16 @@ export class PdfGeneratorService {
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
     // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
 
-    const data = [{
-      patientData: patientData,
-      headerImg: headerImg,
-      medicalDataNormal:medicalDataNormal,
-      medicalDataPregnant:medicalDataPregnant,
-      pregnantInfo:medicalDataPregnant[0],
-      formatted
-    }];
+    const data = [
+      {
+        patientData: patientData,
+        headerImg: headerImg,
+        medicalDataNormal: medicalDataNormal,
+        medicalDataPregnant: medicalDataPregnant,
+        pregnantInfo: medicalDataPregnant[0],
+        formatted,
+      },
+    ];
 
     try {
       const browser = await puppeteer.launch({
@@ -1009,50 +1022,49 @@ export class PdfGeneratorService {
   }
 
   calculateAge(birthDate, referenceDate) {
-  const b = new Date(birthDate);
-  const r = new Date(referenceDate);
+    const b = new Date(birthDate);
+    const r = new Date(referenceDate);
 
-  let age = r.getFullYear() - b.getFullYear();
-  const m = r.getMonth() - b.getMonth();
+    let age = r.getFullYear() - b.getFullYear();
+    const m = r.getMonth() - b.getMonth();
 
-  if (m < 0 || (m === 0 && r.getDate() < b.getDate())) {
-    age--;
-  }
-
-  return age;
-  }
-
-   getDateCondition(filter: string) {
-      const now = new Date();
-
-      let start: Date | null = null;
-      let end: Date = now;
-
-      switch (filter) {
-        case 'Weekly':
-          start = new Date();
-          start.setDate(now.getDate() - 7);
-          break;
-
-        case 'Monthly':
-          start = new Date(now.getFullYear(), now.getMonth(), 1);
-          break;
-
-        case 'Yearly':
-          start = new Date(now.getFullYear(), 0, 1);
-          break;
-
-        default:
-          return null;
-      }
-
-      return { start, end };
+    if (m < 0 || (m === 0 && r.getDate() < b.getDate())) {
+      age--;
     }
 
+    return age;
+  }
 
-  async getInvoiceFiltered(filter:string) {
-    console.log(filter)
-  const dateFilter = this.getDateCondition(filter);
+  getDateCondition(filter: string) {
+    const now = new Date();
+
+    let start: Date | null = null;
+    let end: Date = now;
+
+    switch (filter) {
+      case 'Weekly':
+        start = new Date();
+        start.setDate(now.getDate() - 7);
+        break;
+
+      case 'Monthly':
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+
+      case 'Yearly':
+        start = new Date(now.getFullYear(), 0, 1);
+        break;
+
+      default:
+        return null;
+    }
+
+    return { start, end };
+  }
+
+  async getInvoiceFiltered(filter: string) {
+    console.log(filter);
+    const dateFilter = this.getDateCondition(filter);
 
     const query = this.dataSource.manager
       .createQueryBuilder(Invoice, 'inv')
@@ -1068,18 +1080,20 @@ export class PdfGeneratorService {
       .orderBy('inv.created_at', 'DESC');
 
     if (dateFilter) {
-      query.andWhere(
-        'inv.created_at BETWEEN :start AND :end',
-        {
-          start: dateFilter.start,
-          end: dateFilter.end
-        }
-      );
+      query.andWhere('inv.created_at BETWEEN :start AND :end', {
+        start: dateFilter.start,
+        end: dateFilter.end,
+      });
     }
 
     const paidData = await query.getRawMany();
+    let grandTotal = 0;
 
-    // console.log(data);
+    for (let i = 0; i < paidData.length; i++) {
+      grandTotal += Number(paidData[i].total_amount);
+    }
+
+    // console.log(grandTotal);
     for (let i = 0; i < paidData.length; i++) {
       let paymentIDs = JSON.parse(paidData[i].payedId);
 
@@ -1112,7 +1126,7 @@ export class PdfGeneratorService {
       }
       Object.assign(paidData[i], { services_availed: services_arr });
     }
-    
+
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
       dateStyle: 'medium',
@@ -1125,17 +1139,22 @@ export class PdfGeneratorService {
       process.cwd(),
       '/../static/img/Paragon Logo.png',
     );
-    // const headerImgPath = join(process.cwd(), '/static/img/paragon logo website.png');
+    // const headerImgPath = join(
+    //   process.cwd(),
+    //   '/static/img/paragon logo website.png',
+    // );
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
     // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
 
-    const data = [{
-      headerImg: headerImg,
-      paidData,
-      formatted,
-      filter
- 
-    }];
+    const data = [
+      {
+        headerImg: headerImg,
+        paidData,
+        formatted,
+        grandTotal,
+        filter,
+      },
+    ];
 
     try {
       const browser = await puppeteer.launch({
@@ -1167,34 +1186,35 @@ export class PdfGeneratorService {
     }
   }
 
-  async medicalCertificate(id: number, name:string) {
+  async medicalCertificate(id: number, name: string) {
     let medicalCert = await this.dataSource.manager
       .createQueryBuilder(MedicalCertificate, 'mc')
-      .select(['mc.*',
-              `IF (
+      .select([
+        'mc.*',
+        `IF (
                     !ISNULL(pt.m_name) AND LOWER(pt.m_name) != 'n/a',
                     CONCAT(pt.f_name, ' ', SUBSTRING(pt.m_name, 1, 1), '. ', pt.l_name),
                     CONCAT(pt.f_name, ' ', pt.l_name)
                 ) AS name`,
-              `IF (
+        `IF (
                     !ISNULL(ud.mname) AND LOWER(ud.mname) != 'n/a',
                     CONCAT(ud.fname, ' ', SUBSTRING(ud.mname, 1, 1), '. ', ud.lname),
                     CONCAT(ud.fname, ' ', ud.lname)
                 ) AS doctor_name`,
-                'pt.address as address'
-          ])
+        'pt.address as address',
+      ])
       .leftJoin(UserDetail, 'ud', 'ud.id = mc.doctorID')
       .leftJoin(Patient, 'pt', 'pt.id = mc.patientID')
       .where('mc.id = :id', { id })
       .getRawOne();
-      console.log(medicalCert)
+    console.log(medicalCert);
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(now);
-      const headerImgPath = join(
+    const headerImgPath = join(
       process.cwd(),
       '/../static/img/Paragon Logo.png',
     );
@@ -1202,11 +1222,13 @@ export class PdfGeneratorService {
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
     // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
 
-    const data = [{
+    const data = [
+      {
         medicalCert: medicalCert,
         headerImg,
-        formatted
-      }];
+        formatted,
+      },
+    ];
     try {
       const browser = await puppeteer.launch({
         headless: 'new',
@@ -1242,14 +1264,13 @@ export class PdfGeneratorService {
       .where('it.inventoryItemId = :id', { id })
       .orderBy('it.transaction_date', 'DESC')
       .getRawMany();
-      console.log(itemTransaction)
+    console.log(itemTransaction);
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(now);
-
 
     const headerImgPath = join(
       process.cwd(),
@@ -1259,12 +1280,14 @@ export class PdfGeneratorService {
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
     // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
 
-    const data = [{
+    const data = [
+      {
         itemTransaction: itemTransaction,
         itemTransactionName: itemTransaction[0].itemName,
         headerImg,
-        formatted
-      }];
+        formatted,
+      },
+    ];
     try {
       const browser = await puppeteer.launch({
         headless: 'new',
@@ -1332,11 +1355,11 @@ export class PdfGeneratorService {
     }
   }
 
-  async printAllItemReport( type:number, dates:string) {
-    console.log(type,dates)
-    let reportData
-     let datesData = type == 1 ? dates : JSON.parse(dates)
-    if(type == 1){
+  async printAllItemReport(type: number, dates: string) {
+    console.log(type, dates);
+    let reportData;
+    let datesData = type == 1 ? dates : JSON.parse(dates);
+    if (type == 1) {
       const inputDate = new Date(datesData);
 
       // clone date
@@ -1353,40 +1376,29 @@ export class PdfGeneratorService {
       endOfWeek.setDate(startOfWeek.getDate() + 6);
       endOfWeek.setHours(23, 59, 59, 999);
 
-
       reportData = await this.dataSource.manager
-      .createQueryBuilder(InventoryTransaction, 'it')
-      .select([
-        'it.*',
-        'inv.itemName as itemName',
-      ])
-      .leftJoin(Inventory, 'inv', 'inv.id = it.inventoryItemId')
-      .where('it.transaction_date BETWEEN :start AND :end', {
-        start: startOfWeek,
-        end: endOfWeek,
+        .createQueryBuilder(InventoryTransaction, 'it')
+        .select(['it.*', 'inv.itemName as itemName'])
+        .leftJoin(Inventory, 'inv', 'inv.id = it.inventoryItemId')
+        .where('it.transaction_date BETWEEN :start AND :end', {
+          start: startOfWeek,
+          end: endOfWeek,
         })
-      .orderBy('it.transaction_date', 'DESC')
-      .getRawMany();
-      console.log(reportData)
+        .orderBy('it.transaction_date', 'DESC')
+        .getRawMany();
+      console.log(reportData);
+    } else if (type == 2) {
+      reportData = await this.dataSource.manager
+        .createQueryBuilder(InventoryTransaction, 'it')
+        .select(['it.*', 'inv.itemName as itemName'])
+        .leftJoin(Inventory, 'inv', 'inv.id = it.inventoryItemId')
+        .where("DATE_FORMAT(it.transaction_date, '%Y-%m') IN (:...datesData)", {
+          datesData,
+        })
+        .orderBy('it.transaction_date', 'DESC')
+        .getRawMany();
+      console.log(reportData);
     }
-    else if(type == 2){
-   
-       reportData = await this.dataSource.manager
-      .createQueryBuilder(InventoryTransaction, 'it')
-      .select([
-        'it.*',
-        'inv.itemName as itemName',
-      ])
-      .leftJoin(Inventory, 'inv', 'inv.id = it.inventoryItemId')
-      .where("DATE_FORMAT(it.transaction_date, '%Y-%m') IN (:...datesData)", {
-        datesData,
-      })
-      .orderBy('it.transaction_date', 'DESC')
-      .getRawMany();
-      console.log(reportData)
-    }
-
-   
 
     const now = new Date();
     const formatted = new Intl.DateTimeFormat('en-PH', {
@@ -1402,12 +1414,14 @@ export class PdfGeneratorService {
     const headerImg = this.base64_encode(headerImgPath, 'headerfooter');
     // let headerImg = join(process.cwd(), '/static/img/Paragon Logo.png');
 
-    const data = [{
-      reportData:reportData,
-      headerImg: headerImg,
-      type: type,
-      formatted
-    }];
+    const data = [
+      {
+        reportData: reportData,
+        headerImg: headerImg,
+        type: type,
+        formatted,
+      },
+    ];
 
     try {
       const browser = await puppeteer.launch({
